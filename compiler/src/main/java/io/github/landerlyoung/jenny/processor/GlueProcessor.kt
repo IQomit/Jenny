@@ -16,15 +16,13 @@
 
 package io.github.landerlyoung.jenny.processor
 
-import io.github.landerlyoung.jenny.CppClass
 import io.github.landerlyoung.jenny.generator.NativeGenerator
-import kotlin.reflect.KClass
 
-internal class GlueProcessor : Processor<KClass<*>, CppClass> {
+class GlueProcessor : Processor<Any, Unit> {
 
     private val nativeGenerator = NativeGenerator()
 
-    override fun process(clazz: KClass<*>): CppClass {
-        TODO("Not yet implemented")
+    override fun process(clazz: Any) {
+        nativeGenerator.generate(clazz)
     }
 }

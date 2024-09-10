@@ -1,18 +1,19 @@
 buildscript {
+    ext.kotlin_version = '1.9.10'
     repositories {
         mavenLocal()
         jcenter()
     }
     dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
 
 compileJava {
     options.compilerArgs += [
@@ -23,5 +24,12 @@ compileJava {
 
 dependencies {
     implementation project(':annotation')
-    annotationProcessor project(':compiler')
+    implementation project(':compiler')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+repositories {
+    mavenCentral()
+}
+kotlin {
+    jvmToolchain(8)
 }

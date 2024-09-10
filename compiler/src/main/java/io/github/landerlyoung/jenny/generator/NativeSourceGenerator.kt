@@ -20,6 +20,6 @@ import kotlin.reflect.KFunction
 
 internal class NativeSourceGenerator : Generator<Pair<ClassInfo, Sequence<KFunction<*>>>, String> {
     override fun generate(input: Pair<ClassInfo, Sequence<KFunction<*>>>): String {
-        TODO()
+        return "Empty"
     }
 }

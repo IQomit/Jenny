@@ -21,7 +21,7 @@ import io.github.landerlyoung.jenny.extractor.NativeMethodsExtractor
 import io.github.landerlyoung.jenny.utils.stripNonASCII
 import kotlin.reflect.KClass
 
-internal class NativeGenerator : Generator<KClass<*>, Unit> {
+internal class NativeGenerator : Generator<Any, Unit> {
 
     // Generators
     private val nativeHeaderGenerator = NativeHeaderGenerator()
@@ -31,13 +31,25 @@ internal class NativeGenerator : Generator<KClass<*>, Unit> {
     private val nativeMethodsExtractor = NativeMethodsExtractor()
     private val constantsExtractor = ConstantsExtractor()
 
-    override fun generate(input: KClass<*>) {
-        val classInfo = extractClassInfo(input)
-        val nativeMethods = nativeMethodsExtractor.extract(input)
-        val constants = constantsExtractor.extract(input)
+    override fun generate(input: Any) {
+        val classInfo = extractClassInfo(getClazz(input))
+        val nativeMethods = nativeMethodsExtractor.extract(getClazz(input))
+        val constants = constantsExtractor.extract(getClazz(input))
         // TODO: save the output content in a file (ioObject is going to be introduced to handle file creation/closing/saving)
         val headerContent = nativeHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
+        // TODO: remove print
+        println(headerContent)
         val sourceContent = nativeSourceGenerator.generate(classInfo to nativeMethods)
+        // TODO: remove print
+        println(sourceContent)
+    }
+
+    private fun getClazz(input: Any): KClass<*> {
+        return when (input) {
+            is KClass<*> -> input
+            is Class<*> -> input.kotlin
+            else -> throw IllegalArgumentException("Input must be a KClass or Class")
+        }
     }
 
     private fun extractClassInfo(input: KClass<*>): ClassInfo {

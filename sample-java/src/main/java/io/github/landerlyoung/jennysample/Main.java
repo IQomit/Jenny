@@ -15,6 +15,8 @@
  */
 package io.github.landerlyoung.jennysample;
 
+import io.github.landerlyoung.jenny.processor.GlueProcessor;
+
 import java.util.HashMap;
 
 /**
@@ -24,14 +26,11 @@ import java.util.HashMap;
  * Life with Passion, Code with Creativity.
  */
 
+
+
 public class Main {
     public static void main(String[] args) {
-        ComputeInNative engine = new ComputeInNative();
-        engine.init();
-        engine.setParam(new HashMap<>());
-        engine.request("{req:0}", ((success, rsp) -> {
-            System.out.println("success=" + success + ", rsp=" + rsp);
-        }));
-        engine.release();
+        GlueProcessor glueProcessor = new GlueProcessor();
+        glueProcessor.process(ComputeInNative.class);
     }
 }
