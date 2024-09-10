@@ -26,9 +26,8 @@ internal fun KType.toJniTypeString(): String {
     val classifier = this.classifier as KClass<*>
 
     // Check if the type is a subclass of Throwable
-    if (classifier.isSubclassOf(Throwable::class)) {
+    if (classifier.isSubclassOf(Throwable::class))
         return "jthrowable"
-    }
 
     return when (classifier) {
         Boolean::class -> "jboolean"
@@ -59,7 +58,6 @@ internal fun KType.toJniTypeString(): String {
                 }
             }
         }
-
         else -> "jobject"
     }
 }
