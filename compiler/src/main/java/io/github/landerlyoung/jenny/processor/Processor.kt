@@ -16,6 +16,6 @@
 
 package io.github.landerlyoung.jenny.processor
 
-interface Processor<in Type, out Output> {
+internal interface Processor<in Type, out Output> {
     fun process(clazz: Type): Output
 }
