@@ -18,10 +18,12 @@
 package io.github.landerlyoung.jenny.utils
 
 import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.stripNonASCII
 import java.lang.reflect.Modifier
 import java.util.*
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.javaType
@@ -76,7 +78,11 @@ internal object NativeHeaderDefinitions {
         return outputString.toString()
     }
 
-    fun getMethodsDefinitions(methods: Sequence<KFunction<*>>, isSource: Boolean = false): String {
+    fun getMethodsDefinitions(
+        classInfo: ClassInfo,
+        methods: Sequence<KFunction<*>>,
+        isSource: Boolean = false
+    ): String {
         val outputString = StringBuilder()
         if (!isSource) {
             outputString.append(
@@ -99,9 +105,94 @@ internal object NativeHeaderDefinitions {
             val export = if (isSource) "" else "JNIEXPORT "
             val jniCall = if (isSource) "" else "JNICALL "
             val jniReturnType = method.returnType.toJniTypeString()
+            val nativeMethodName =
+                if (isSource)
+                    classInfo.className + "::" + getMethodName(classInfo.jniClassName, method)
+                else
+                    getMethodName(classInfo.jniClassName, method)
+            val nativeParameters = getNativeMethodParam(method)
 
+            outputString.append(
+                """
+                    |/*
+                    | * Class:     ${classInfo.className}
+                    | * Method:    $javaModifiers $javaReturnType ${javaMethodName}(${javaParameters})
+                    | * Signature: $javaMethodSignature
+                    | */
+                    |${export}${jniReturnType} ${jniCall}${nativeMethodName}(${nativeParameters})""".trimMargin()
+            )
+
+            if (isSource) {
+                outputString.append(buildMethodBodyWithReturnStatement(method))
+            } else {
+                outputString.append(';')
+            }
+            outputString.append("\n\n")
         }
         return outputString.toString()
+    }
+
+    private fun buildMethodBodyWithReturnStatement(method: KFunction<*>): String {
+        val outputString = StringBuilder()
+
+        outputString.append(
+            """
+                |    // TODO(jenny): generated method stub.
+                |
+            """.trimMargin()
+        )
+        outputString.append("    ")
+        outputString.append(getReturnStatement(method))
+        outputString.append('\n')
+        return outputString.toString()
+    }
+
+    private fun getReturnStatement(function: KFunction<*>): String {
+        val returnType = function.returnType.javaType
+        return buildString {
+            if (returnType == Void.TYPE) {
+                return@buildString // No return statement needed for void
+            }
+
+            append("return ")
+
+            when (returnType) {
+                java.lang.Boolean.TYPE -> append("JNI_FALSE") // Handle boolean
+                Integer.TYPE, java.lang.Long.TYPE,
+                java.lang.Short.TYPE, java.lang.Byte.TYPE,
+                java.lang.Float.TYPE, java.lang.Double.TYPE,
+                Character.TYPE -> append("0") // Handle numeric primitive types
+                String::class.java -> append("env->NewStringUTF(\"Hello From Jenny\")") // Handle string return
+                else -> append("nullptr") // Handle other objects
+            }
+            append(";")
+        }
+    }
+
+    private fun getNativeMethodParam(method: KFunction<*>): String {
+        val sb = StringBuilder()
+        sb.append("JNIEnv* env")
+
+        // Check if the method is static
+        val isStatic = method.instanceParameter == null
+
+        if (isStatic) {
+            sb.append(", jclass clazz")
+        } else {
+            sb.append(", jobject thiz")
+        }
+        // Add parameters from the function
+        method.parameters.drop(1).forEach { param ->
+            sb.append(", ")
+            sb.append(param.type.toJniTypeString())
+            sb.append(' ')
+            sb.append(param.name ?: "param")
+        }
+        return sb.toString()
+    }
+
+    private fun getMethodName(jniClassName: String, method: KFunction<*>): String {
+        return "Java_" + jniClassName + "_" + method.name.replace("_", "_1").stripNonASCII()
     }
 
     private fun getBinaryMethodSignature(function: KFunction<*>): String {
