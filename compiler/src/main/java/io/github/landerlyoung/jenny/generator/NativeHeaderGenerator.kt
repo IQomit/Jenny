@@ -32,7 +32,7 @@ internal class NativeHeaderGenerator : Generator<HeaderData, String> {
             append(NativeHeaderDefinitions.getHeaderInit(classInfo))
             append(NativeHeaderDefinitions.getConstantsDefinitions(input.constants))
             append(NativeHeaderDefinitions.getEndNameSpace(classInfo.simpleClassName))
-            append(NativeHeaderDefinitions.getMethodsDefinitions(input.methods))
+            append(NativeHeaderDefinitions.getMethodsDefinitions(classInfo, input.methods))
         }
     }
 }
