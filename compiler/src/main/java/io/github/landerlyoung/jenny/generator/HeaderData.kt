@@ -16,11 +16,11 @@
 
 package io.github.landerlyoung.jenny.generator
 
-data class ClassInfo(
-    val simpleClassName: String,
-    // package.simpleClassName
-    val className: String,
-    // package/simpleClassName
-    val slashClassName: String,
-    val jniClassName: String
+import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty1
+
+internal data class HeaderData(
+    val classInfo: ClassInfo,
+    val methods: Sequence<KFunction<*>>,
+    val constants: Sequence<KProperty1<out Any, *>>
 )
