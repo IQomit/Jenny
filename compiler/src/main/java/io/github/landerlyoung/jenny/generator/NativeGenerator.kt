@@ -16,47 +16,43 @@
 
 package io.github.landerlyoung.jenny.generator
 
-import java.lang.reflect.Modifier
+import io.github.landerlyoung.jenny.extractor.ConstantsExtractor
+import io.github.landerlyoung.jenny.extractor.NativeMethodsExtractor
+import io.github.landerlyoung.jenny.utils.stripNonASCII
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.javaField
-import kotlin.reflect.jvm.javaMethod
 
 internal class NativeGenerator : Generator<KClass<*>, Unit> {
 
+    // Generators
     private val nativeHeaderGenerator = NativeHeaderGenerator()
     private val nativeSourceGenerator = NativeSourceGenerator()
 
+    // Extractors
+    private val nativeMethodsExtractor = NativeMethodsExtractor()
+    private val constantsExtractor = ConstantsExtractor()
+
     override fun generate(input: KClass<*>) {
         val classInfo = extractClassInfo(input)
-        val nativeMethods = extractNativeMethods(input)
-        val constants = extractConstants(input)
+        val nativeMethods = nativeMethodsExtractor.extract(input)
+        val constants = constantsExtractor.extract(input)
+        // TODO: save the output content in a file (ioObject is going to be introduced to handle file creation/closing/saving)
         val headerContent = nativeHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
         val sourceContent = nativeSourceGenerator.generate(classInfo to nativeMethods)
     }
 
     private fun extractClassInfo(input: KClass<*>): ClassInfo {
-        TODO("Not yet implemented")
+        val className = input.qualifiedName ?: throw IllegalArgumentException("Class must have a qualified name")
+        val simpleClassName = input.simpleName ?: throw IllegalArgumentException("Class must have a simple name")
+        val slashClassName = className.replace('.', '/')
+        val jniClassName = className.replace("_", "_1")
+            .replace(".", "_")
+            .stripNonASCII()
+        return ClassInfo(
+            simpleClassName = simpleClassName,
+            className = className,
+            slashClassName = slashClassName,
+            jniClassName = jniClassName
+        )
     }
 
-    private fun extractNativeMethods(clazz: KClass<*>): Sequence<KFunction<*>> {
-        return clazz.declaredFunctions.asSequence()
-            .filter { function ->
-                val javaMethod = function.javaMethod
-                javaMethod != null && Modifier.isNative(javaMethod.modifiers) || function.isExternal
-            }.map { it }
-    }
-
-    private fun extractConstants(clazz: KClass<*>): Sequence<KProperty1<out Any, *>> {
-        return clazz.memberProperties.asSequence()
-            .filter { property ->
-                val javaField = property.javaField
-                javaField != null &&
-                        Modifier.isStatic(javaField.modifiers) &&
-                        Modifier.isFinal(javaField.modifiers)
-            }
-    }
 }
