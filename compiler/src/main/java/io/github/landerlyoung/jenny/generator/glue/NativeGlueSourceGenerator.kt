@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.generator
+package io.github.landerlyoung.jenny.generator.glue
 
+import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.generator.Generator
 import kotlin.reflect.KFunction
 
-internal class NativeSourceGenerator : Generator<Pair<ClassInfo, Sequence<KFunction<*>>>, String> {
+internal class NativeGlueSourceGenerator : Generator<Pair<ClassInfo, Sequence<KFunction<*>>>, String> {
     override fun generate(input: Pair<ClassInfo, Sequence<KFunction<*>>>): String {
         return "Empty"
     }

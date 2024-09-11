@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.generator
+package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.extractor.ConstantsExtractor
 import io.github.landerlyoung.jenny.extractor.NativeMethodsExtractor
+import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.generator.Generator
+import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.utils.stripNonASCII
 import kotlin.reflect.KClass
 
-internal class NativeGenerator : Generator<Any, Unit> {
+internal class NativeGlueGenerator : Generator<Any, Unit> {
 
     // Generators
-    private val nativeHeaderGenerator = NativeHeaderGenerator()
-    private val nativeSourceGenerator = NativeSourceGenerator()
+    private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator()
+    private val nativeSourceGenerator = NativeGlueSourceGenerator()
 
     // Extractors
     private val nativeMethodsExtractor = NativeMethodsExtractor()
@@ -36,7 +39,7 @@ internal class NativeGenerator : Generator<Any, Unit> {
         val nativeMethods = nativeMethodsExtractor.extract(getClazz(input))
         val constants = constantsExtractor.extract(getClazz(input))
         // TODO: save the output content in a file (ioObject is going to be introduced to handle file creation/closing/saving)
-        val headerContent = nativeHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
+        val headerContent = nativeGlueHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
         // TODO: remove print
         println(headerContent)
         val sourceContent = nativeSourceGenerator.generate(classInfo to nativeMethods)

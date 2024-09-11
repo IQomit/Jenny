@@ -31,6 +31,6 @@ import java.util.HashMap;
 public class Main {
     public static void main(String[] args) {
         GlueProcessor glueProcessor = new GlueProcessor();
-        glueProcessor.process(ComputeInNative.class);
+        glueProcessor.process(ComputeClass.class);
     }
 }

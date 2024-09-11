@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.generator
+package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.generator.Generator
+import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.utils.NativeHeaderDefinitions
 
-internal class NativeHeaderGenerator : Generator<HeaderData, String> {
+internal class NativeGlueHeaderGenerator : Generator<HeaderData, String> {
     //TODO: Use template instead of NativeHeaderDefinitions predefined Strings
 
     override fun generate(input: HeaderData) = createHeader(input)

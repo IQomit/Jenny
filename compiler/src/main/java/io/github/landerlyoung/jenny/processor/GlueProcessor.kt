@@ -16,13 +16,13 @@
 
 package io.github.landerlyoung.jenny.processor
 
-import io.github.landerlyoung.jenny.generator.NativeGenerator
+import io.github.landerlyoung.jenny.generator.glue.NativeGlueGenerator
 
 class GlueProcessor : Processor<Any, Unit> {
 
-    private val nativeGenerator = NativeGenerator()
+    private val nativeGlueGenerator = NativeGlueGenerator()
 
     override fun process(clazz: Any) {
-        nativeGenerator.generate(clazz)
+        nativeGlueGenerator.generate(clazz)
     }
 }
