@@ -16,25 +16,18 @@
 
 package io.github.landerlyoung.jenny.generator.glue
 
-import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.ClassInfo
-import io.github.landerlyoung.jenny.generator.Generator
-import io.github.landerlyoung.jenny.utils.NativeHeaderDefinitions
 import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty1
 
-internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
-    override fun generate(input: SourceData) = createSource(input)
+internal data class HeaderData(
+    val classInfo: ClassInfo,
+    val methods: Sequence<KFunction<*>>,
+    val constants: Sequence<KProperty1<out Any, *>>
+)
 
-    private fun createSource(input: SourceData): String {
-        return buildString {
-            append(Constants.AUTO_GENERATE_SOURCE_NOTICE)
-            append(
-                """
-                    |#include ${input.headerFileName}"
-                    |
-                    |""".trimMargin()
-            )
-            append(NativeHeaderDefinitions.getMethodsDefinitions(input.classInfo, input.methods, true))
-        }
-    }
-}
+internal data class SourceData(
+    val headerFileName : String,
+    val classInfo: ClassInfo,
+    val methods: Sequence<KFunction<*>>,
+)

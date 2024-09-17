@@ -21,8 +21,11 @@ import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.stripNonASCII
 import java.lang.reflect.Modifier
 import java.util.*
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.javaMethod
@@ -132,19 +135,18 @@ internal object NativeHeaderDefinitions {
         return outputString.toString()
     }
 
-    private fun buildMethodBodyWithReturnStatement(method: KFunction<*>): String {
-        val outputString = StringBuilder()
-
-        outputString.append(
+    private fun buildMethodBodyWithReturnStatement(method: KFunction<*>) = buildString {
+        append(" {\n")
+        append(
             """
                 |    // TODO(jenny): generated method stub.
                 |
             """.trimMargin()
         )
-        outputString.append("    ")
-        outputString.append(getReturnStatement(method))
-        outputString.append('\n')
-        return outputString.toString()
+        append("    ")
+        append(getReturnStatement(method))
+        append('\n')
+        append("}")
     }
 
     private fun getReturnStatement(function: KFunction<*>): String {
@@ -200,45 +202,47 @@ internal object NativeHeaderDefinitions {
     }
 
     private class Signature(
-        private val function: KFunction<*>?
+        private val function: KFunction<*>
     ) {
 
-        private fun StringBuilder.getSignatureClassName(type: kotlin.reflect.KType) {
-            var t = type
-            while (t.classifier is kotlin.reflect.KClass<*> && t.classifier == Array::class) {
-                append('[')
-                t = (t.arguments.firstOrNull()?.type ?: error("Array type missing"))
+        private fun getSignatureClassName(type: KType): String {
+            val output = StringBuilder()
+            var kType = type
+
+            while (kType.classifier == Array::class) {
+                output.append('[')
+                kType = (kType.arguments.firstOrNull()?.type ?: error("Array type missing"))
             }
-            val jvmName = t.classifier?.javaClass?.name
-            if (jvmName != null) {
-                when (jvmName) {
-                    "java.lang.Boolean" -> append('Z')
-                    "java.lang.Byte" -> append('B')
-                    "java.lang.Character" -> append('C')
-                    "java.lang.Short" -> append('S')
-                    "java.lang.Integer" -> append('I')
-                    "java.lang.Long" -> append('J')
-                    "java.lang.Float" -> append('F')
-                    "java.lang.Double" -> append('D')
-                    "java.lang.Void" -> append('V')
-                    else -> append('L').append(jvmName.replace('.', '/')).append(';')
-                }
-            } else {
-                append("unknown")
+
+            when (kType.classifier) {
+                Boolean::class -> output.append('Z')
+                Byte::class -> output.append('B')
+                Char::class -> output.append('C')
+                Short::class -> output.append('S')
+                Int::class -> output.append('I')
+                Long::class -> output.append('J')
+                Float::class -> output.append('F')
+                Double::class -> output.append('D')
+                Void::class, Unit::class -> output.append('V')
+                else -> output.append('L' + type.javaType.toString().replace('.', '/')).append(';')
             }
+            return output.toString()
         }
 
         override fun toString(): String = buildString {
-            if (function != null) {
-                append('(')
-                for (param in function.valueParameters) {
-                    getSignatureClassName(param.type)
+            append('(')
+
+            if (function.name.contentEquals("<init>")) {
+                val clazz = function.returnType.classifier!! as KClass<*>
+                if (clazz.isNestedClass()) {
+                    append(getSignatureClassName(clazz.createType()))
                 }
-                append(')')
-                getSignatureClassName(function.returnType)
-            } else {
-                append("unknown")
             }
+            for (param in function.valueParameters) {
+                append(getSignatureClassName(param.type))
+            }
+            append(')')
+            append(getSignatureClassName(function.returnType))
         }
     }
 
@@ -246,7 +250,7 @@ internal object NativeHeaderDefinitions {
         return method.parameters
             .drop(1) // Drop the first parameter which is the receiver (for member functions)
             .joinToString(", ") { param ->
-                val paramType = param.type.toString() // Get the type of the parameter
+                val paramType = param.type.javaType.toString() // Get the type of the parameter
                 val paramName = param.name ?: "unknown" // Get the name of the parameter
                 "$paramType $paramName"
             }

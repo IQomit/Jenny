@@ -20,7 +20,8 @@ import io.github.landerlyoung.jenny.extractor.ConstantsExtractor
 import io.github.landerlyoung.jenny.extractor.NativeMethodsExtractor
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.Generator
-import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.utils.CppFileNameGenerator
+import io.github.landerlyoung.jenny.utils.FileHandler
 import io.github.landerlyoung.jenny.utils.stripNonASCII
 import kotlin.reflect.KClass
 
@@ -34,17 +35,24 @@ internal class NativeGlueGenerator : Generator<Any, Unit> {
     private val nativeMethodsExtractor = NativeMethodsExtractor()
     private val constantsExtractor = ConstantsExtractor()
 
+    private val cppFileNameGenerator = CppFileNameGenerator()
+
     override fun generate(input: Any) {
         val classInfo = extractClassInfo(getClazz(input))
         val nativeMethods = nativeMethodsExtractor.extract(getClazz(input))
         val constants = constantsExtractor.extract(getClazz(input))
-        // TODO: save the output content in a file (ioObject is going to be introduced to handle file creation/closing/saving)
+
         val headerContent = nativeGlueHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
-        // TODO: remove print
-        println(headerContent)
-        val sourceContent = nativeSourceGenerator.generate(classInfo to nativeMethods)
-        // TODO: remove print
-        println(sourceContent)
+        val headerFile = cppFileNameGenerator.generateHeaderFile(className = classInfo.simpleClassName)
+        FileHandler.createOutputFile("", headerFile).use {
+            it.write(headerContent.toByteArray(Charsets.UTF_8))
+        }
+
+        val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, classInfo, nativeMethods))
+        val sourceFile = cppFileNameGenerator.generateSourceFile(className = classInfo.simpleClassName)
+        FileHandler.createOutputFile("", sourceFile).use {
+            it.write(sourceContent.toByteArray(Charsets.UTF_8))
+        }
     }
 
     private fun getClazz(input: Any): KClass<*> {

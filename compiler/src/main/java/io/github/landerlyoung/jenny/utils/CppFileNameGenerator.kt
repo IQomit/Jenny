@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.generator
+package io.github.landerlyoung.jenny.utils
 
-import kotlin.reflect.KFunction
-import kotlin.reflect.KProperty1
-
-internal data class HeaderData(
-    val classInfo: ClassInfo,
-    val methods: Sequence<KFunction<*>>,
-    val constants: Sequence<KProperty1<out Any, *>>
-)
+internal class CppFileNameGenerator {
+    fun generateHeaderFile(prefix: String = "", className: String) = "$prefix$className.h"
+    fun generateSourceFile(prefix: String = "", className: String) = "$prefix$className.cpp"
+}

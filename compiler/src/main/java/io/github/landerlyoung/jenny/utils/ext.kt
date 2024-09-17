@@ -58,6 +58,7 @@ internal fun KType.toJniTypeString(): String {
                 }
             }
         }
+
         else -> "jobject"
     }
 }
@@ -65,3 +66,9 @@ internal fun KType.toJniTypeString(): String {
 fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toRegex()) {
     String.format(Locale.US, "_%05x", it.value.codePointAt(0))
 }
+
+fun KClass<*>.isNestedClass(): Boolean {
+    return this.java.enclosingClass != null && !this.java.isMemberClass
+}
+
+

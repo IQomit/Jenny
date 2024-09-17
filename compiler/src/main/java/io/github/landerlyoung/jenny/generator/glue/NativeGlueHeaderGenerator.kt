@@ -1,6 +1,5 @@
 /**
  * Copyright (C) 2024 The Qt Company Ltd.
- * Copyright 2016 landerlyoung@gmail.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +18,6 @@ package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
-import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.utils.NativeHeaderDefinitions
 
 internal class NativeGlueHeaderGenerator : Generator<HeaderData, String> {
