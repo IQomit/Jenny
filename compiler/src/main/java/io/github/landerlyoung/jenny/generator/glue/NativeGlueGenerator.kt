@@ -44,12 +44,14 @@ internal class NativeGlueGenerator : Generator<Any, Unit> {
 
         val headerContent = nativeGlueHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
         val headerFile = cppFileNameGenerator.generateHeaderFile(className = classInfo.simpleClassName)
+        //TODO: Fix me parent is missing
         FileHandler.createOutputFile("", headerFile).use {
             it.write(headerContent.toByteArray(Charsets.UTF_8))
         }
 
         val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, classInfo, nativeMethods))
         val sourceFile = cppFileNameGenerator.generateSourceFile(className = classInfo.simpleClassName)
+        //TODO: Fix me parent is missing
         FileHandler.createOutputFile("", sourceFile).use {
             it.write(sourceContent.toByteArray(Charsets.UTF_8))
         }

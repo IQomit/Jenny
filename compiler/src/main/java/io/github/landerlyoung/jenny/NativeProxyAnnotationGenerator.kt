@@ -24,7 +24,6 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
-import javax.lang.model.type.NoType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import kotlin.collections.LinkedHashSet
@@ -34,11 +33,8 @@ import java.nio.file.*;
 
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
-import gg.jte.CodeResolver;
 import gg.jte.resolve.DirectoryCodeResolver;
-import gg.jte.TemplateOutput;
 import gg.jte.output.StringOutput;
-import gg.jte.html.*;
 import java.io.File
 
 /**
@@ -47,7 +43,7 @@ import java.io.File
  * Time:   00:30
  * Life with Passion, Code with Creativity.
  */
-class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: NativeProxyConfig) :
+class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativeProxy: NativeProxyConfig) :
     AbsCodeGenerator(env, clazz) {
 
     data class NativeProxyConfig(
@@ -115,7 +111,7 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
                     codeResolver,
                     Path.of(path),
                     ContentType.Plain,
-                    NativeProxyGenerator::class.java.classLoader
+                    NativeProxyAnnotationGenerator::class.java.classLoader
                 )
                 templateEngine.precompileAll()
             }
