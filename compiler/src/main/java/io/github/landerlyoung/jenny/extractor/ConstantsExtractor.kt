@@ -22,9 +22,9 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
-internal class ConstantsExtractor : Extractor<KClass<*>, Sequence<KProperty1<out Any, *>>> {
-    override fun extract(input: KClass<*>): Sequence<KProperty1<out Any, *>> {
-        return input.memberProperties.asSequence()
+internal class ConstantsExtractor : Extractor<KClass<*>, Collection<KProperty1<out Any, *>>> {
+    override fun extract(input: KClass<*>): Collection<KProperty1<out Any, *>> {
+        return input.memberProperties
             .filter { property ->
                 val javaField = property.javaField
                 javaField != null &&

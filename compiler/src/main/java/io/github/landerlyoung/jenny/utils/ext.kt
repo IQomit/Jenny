@@ -17,7 +17,12 @@
 
 package io.github.landerlyoung.jenny.utils
 
+import java.lang.reflect.Proxy
 import java.util.*
+import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeMirror
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
@@ -70,5 +75,39 @@ fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toRegex()) {
 fun KClass<*>.isNestedClass(): Boolean {
     return this.java.enclosingClass != null && !this.java.isMemberClass
 }
-
+//fun KClass<*>.toTypeElement(): TypeElement {
+//    return createTypeElement(this.java)
+//}
+//
+//private fun createTypeElement(javaClass: Class<*>): TypeElement {
+//    return Proxy.newProxyInstance(
+//        TypeElement::class.java.classLoader,
+//        arrayOf(TypeElement::class.java)
+//    ) { _, method, args ->
+//        when (method.name) {
+//            "getQualifiedName" -> javaClass.canonicalName
+//            "getSimpleName" -> javaClass.simpleName
+//            "getKind" -> ElementKind.CLASS
+//            "getModifiers" -> javaClass.modifiers.toSet()
+//            "getEnclosingElement" -> null // You might want to implement this if needed
+//            "getEnclosedElements" -> emptyList<Element>() // You might want to implement this if needed
+//            "asType" -> createTypeMirror(javaClass)
+//            // Implement other methods as needed
+//            else -> throw UnsupportedOperationException("Method ${method.name} is not implemented")
+//        }
+//    } as TypeElement
+//}
+//private fun createTypeMirror(javaClass: Class<*>): TypeMirror {
+//    // This is a simplified implementation. You might need to create a more comprehensive one.
+//    return Proxy.newProxyInstance(
+//        TypeMirror::class.java.classLoader,
+//        arrayOf(TypeMirror::class.java)
+//    ) { _, method, _ ->
+//        when (method.name) {
+//            "toString" -> javaClass.typeName
+//            else -> throw UnsupportedOperationException("Method ${method.name} is not implemented")
+//        }
+//    } as TypeMirror
+//}
+//
 

@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.extractor
+package io.github.landerlyoung.jenny.generator.proxy
 
-import java.lang.reflect.Modifier
+import io.github.landerlyoung.jenny.generator.Generator
+import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.jvm.javaMethod
 
-internal class NativeMethodsExtractor : Extractor<KClass<*>, Collection<KFunction<*>>> {
+class NativeProxyHeaderGenerator : Generator<KClass<*>, String> {
 
-    override fun extract(input: KClass<*>): Collection<KFunction<*>> {
-        return input.declaredFunctions
-            .filter { function ->
-                val javaMethod = function.javaMethod
-                javaMethod != null && Modifier.isNative(javaMethod.modifiers) || function.isExternal
-            }
+    override fun generate(input: KClass<*>): String {
+        TODO("Not yet implemented")
     }
 }

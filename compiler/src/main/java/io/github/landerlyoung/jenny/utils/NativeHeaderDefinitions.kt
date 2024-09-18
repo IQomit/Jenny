@@ -48,7 +48,7 @@ internal object NativeHeaderDefinitions {
                 |""".trimMargin()
     }
 
-    fun getConstantsDefinitions(constants: Sequence<KProperty1<out Any, *>>): String {
+    fun getConstantsDefinitions(constants: Collection<KProperty1<out Any, *>>): String {
         val outputString = StringBuilder()
         constants.forEach {
             outputString.append(getConstexprStatement(it))
@@ -83,7 +83,7 @@ internal object NativeHeaderDefinitions {
 
     fun getMethodsDefinitions(
         classInfo: ClassInfo,
-        methods: Sequence<KFunction<*>>,
+        methods: Collection<KFunction<*>>,
         isSource: Boolean = false
     ): String {
         val outputString = StringBuilder()
