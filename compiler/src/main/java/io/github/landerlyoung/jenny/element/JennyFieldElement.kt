@@ -30,9 +30,9 @@ internal class JennyFieldElement(private val reflectField: Field) : JennyElement
     override val declaringClass: String?
         get() = reflectField.declaringClass.name
 
-    override fun call(): Any {
+    override fun call(instance: Any?): Any {
         reflectField.isAccessible = true
-        return reflectField.get(this)
+        return reflectField.get(instance)
     }
 
     override fun describe(): String {
