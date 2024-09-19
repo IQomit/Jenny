@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.extractor
+package io.github.landerlyoung.jenny.model
 
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.memberProperties
+import java.lang.reflect.Type
 
-class FieldsExtractor : Extractor<KClass<*>, Collection<KProperty1<out Any, *>>> {
-    override fun extract(input: KClass<*>) = input.memberProperties
-}
+internal data class JennyParameter(
+    val name: String,
+    val type: Type,
+)

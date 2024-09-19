@@ -16,10 +16,13 @@
 
 package io.github.landerlyoung.jenny.element
 
+import io.github.landerlyoung.jenny.model.JennyModifier
+import java.lang.reflect.Type
+
 
 internal interface JennyElement {
     val name: String
-    val type: String
+    val type: Type
     val annotations: List<String>
     val modifiers: Set<JennyModifier>
     val declaringClass: String?

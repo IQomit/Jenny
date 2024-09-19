@@ -14,27 +14,35 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.element
+package io.github.landerlyoung.jenny.element.field
 
-internal interface JennyMethodElement : JennyElement {
-    val parameters: List<JennyParameter>
-    val exceptionsTypes: List<String>
+import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.model.JennyModifier
+import java.lang.reflect.Field
+import java.lang.reflect.Type
+
+internal class JennyFieldElement(private val reflectField: Field) : JennyElement {
+    override val name: String
+        get() = reflectField.name
+    override val type: Type
+        get() = reflectField.type
+    override val annotations: List<String>
+        get() = reflectField.annotations.map { it.annotationClass.simpleName ?: "Unknown" }
+    override val modifiers: Set<JennyModifier>
+        get() = JennyModifier.fromReflectionModifiers(reflectField.modifiers)
+    override val declaringClass: String?
+        get() = reflectField.declaringClass.name
 
     override fun call(instance: Any?, vararg args: Any?): Any? {
-        val clazz =
-            instance?.javaClass ?: throw IllegalArgumentException("Instance must not be null for non-static methods")
-        val method = clazz.getDeclaredMethod(name, *args.map { it!!::class.java }.toTypedArray())
-        method.isAccessible = true
-        return method.invoke(instance, *args)
+        reflectField.isAccessible = true
+        return reflectField.get(instance)
     }
 
     override fun describe(): String {
         return """
-            Method Name: $name
-            Return Type: $type
+            Field Name: $name
+            Type: $type
             Declaring Class: $declaringClass
-            Parameters: ${parameters.joinToString(", ") { "${it.name}: ${it.type}" }}
-            Exceptions: ${exceptionsTypes.joinToString(", ")}
             Modifiers: ${modifiers.joinToString(", ")}
             Annotations: ${annotations.joinToString(", ")}
         """.trimIndent()

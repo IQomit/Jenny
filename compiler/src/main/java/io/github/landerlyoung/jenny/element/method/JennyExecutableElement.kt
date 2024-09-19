@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.extractor
+package io.github.landerlyoung.jenny.element.method
 
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
+import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.model.JennyParameter
 
-class ConstructorsExtractor : Extractor<KClass<*>, Collection<KFunction<*>>> {
-    override fun extract(input: KClass<*>) = input.constructors
+internal interface JennyExecutableElement : JennyElement {
+    val parameters: List<JennyParameter>
+    val exceptionsTypes: List<String>
 }

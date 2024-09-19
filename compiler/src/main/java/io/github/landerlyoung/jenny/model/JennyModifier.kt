@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.element
+package io.github.landerlyoung.jenny.model
 
 internal enum class JennyModifier {
     PUBLIC,
@@ -31,7 +31,7 @@ internal enum class JennyModifier {
     SYNCHRONIZED;
 
     companion object {
-        fun fromFieldModifiers(modifiers: Int): Set<JennyModifier> {
+        fun fromReflectionModifiers(modifiers: Int): Set<JennyModifier> {
             return mutableSetOf<JennyModifier>().apply {
                 if (java.lang.reflect.Modifier.isPublic(modifiers)) add(PUBLIC)
                 if (java.lang.reflect.Modifier.isPrivate(modifiers)) add(PRIVATE)

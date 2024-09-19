@@ -14,32 +14,34 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.element
+package io.github.landerlyoung.jenny.element.field
 
-import java.lang.reflect.Field
+import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.model.JennyModifier
+import java.lang.reflect.Type
+import javax.lang.model.element.VariableElement
 
-internal class JennyFieldElement(private val reflectField: Field) : JennyElement {
+internal class JennyVariableElement(private val variableElement: VariableElement) : JennyElement {
     override val name: String
-        get() = reflectField.name
-    override val type: String
-        get() = reflectField.type.name
-    override val annotations: List<String>
-        get() = reflectField.annotations.map { it.annotationClass.simpleName ?: "Unknown" }
-    override val modifiers: Set<JennyModifier>
-        get() = JennyModifier.fromFieldModifiers(reflectField.modifiers)
-    override val declaringClass: String?
-        get() = reflectField.declaringClass.name
+        get() = variableElement.simpleName.toString()
+    override val type: Type
+        get() = object : Type {
+            override fun getTypeName(): String = variableElement.asType().toString()
+        }
 
-    override fun call(instance: Any?, vararg args: Any?): Any? {
-        reflectField.isAccessible = true
-        return reflectField.get(instance)
-    }
+    override val annotations: List<String>
+        get() = variableElement.annotationMirrors.map { it.annotationType.toString() }
+    override val modifiers: Set<JennyModifier>
+        get() = JennyModifier.fromElementModifiers(variableElement.modifiers)
+    override val declaringClass: String?
+        get() = null
+
+    override fun call(instance: Any?, vararg args: Any?): Any? = variableElement.constantValue
 
     override fun describe(): String {
         return """
-            Field Name: $name
+            Variable Name: $name
             Type: $type
-            Declaring Class: $declaringClass
             Modifiers: ${modifiers.joinToString(", ")}
             Annotations: ${annotations.joinToString(", ")}
         """.trimIndent()
