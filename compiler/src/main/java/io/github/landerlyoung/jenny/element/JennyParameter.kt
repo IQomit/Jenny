@@ -16,7 +16,8 @@
 
 package io.github.landerlyoung.jenny.element
 
-internal interface JennyMethodElement : JennyElement {
-    val parameters: List<JennyParameter>
-    val exceptionsTypes: List<String>
-}
+internal data class JennyParameter(
+    val name: String,
+    // type can be introduced here
+    val type: String,
+)
