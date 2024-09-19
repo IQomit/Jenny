@@ -30,7 +30,7 @@ internal class JennyVariableElement(private val variableElement: VariableElement
     override val declaringClass: String?
         get() = null
 
-    override fun call(instance: Any?): Any = variableElement.constantValue
+    override fun call(instance: Any?, vararg args: Any?): Any? = variableElement.constantValue
 
     override fun describe(): String {
         return """

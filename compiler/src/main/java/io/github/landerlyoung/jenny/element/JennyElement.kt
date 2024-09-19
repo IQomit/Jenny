@@ -23,6 +23,6 @@ internal interface JennyElement {
     val annotations: List<String>
     val modifiers: Set<JennyModifier>
     val declaringClass: String?
-    fun call(instance:Any?): Any
+    fun call(instance: Any?, vararg args: Any?): Any?
     fun describe(): String
 }

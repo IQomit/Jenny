@@ -19,4 +19,12 @@ package io.github.landerlyoung.jenny.element
 internal interface JennyMethodElement : JennyElement {
     val parameters: List<JennyParameter>
     val exceptionsTypes: List<String>
+
+    override fun call(instance: Any?, vararg args: Any?): Any? {
+        val clazz =
+            instance?.javaClass ?: throw IllegalArgumentException("Instance must not be null for non-static methods")
+        val method = clazz.getDeclaredMethod(name, *args.map { it!!::class.java }.toTypedArray())
+        method.isAccessible = true
+        return method.invoke(instance, *args)
+    }
 }
