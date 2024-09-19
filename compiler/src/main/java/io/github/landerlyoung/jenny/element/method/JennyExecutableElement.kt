@@ -18,8 +18,10 @@ package io.github.landerlyoung.jenny.element.method
 
 import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.model.JennyParameter
+import java.lang.reflect.Type
 
 internal interface JennyExecutableElement : JennyElement {
     val parameters: List<JennyParameter>
     val exceptionsTypes: List<String>
+    val returnType: Type
 }

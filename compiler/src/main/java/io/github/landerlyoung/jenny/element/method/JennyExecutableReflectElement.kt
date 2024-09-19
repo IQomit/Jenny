@@ -27,19 +27,28 @@ import java.lang.reflect.Type
 internal class JennyExecutableReflectElement(private val executable: Executable) : JennyExecutableElement {
     override val name: String
         get() = if (executable is Constructor<*>) "<init>" else executable.name
+
     override val type: Type
         get() = when (executable) {
             is Method -> executable.genericReturnType
             else -> executable.declaringClass.componentType
         }
+
+    override val returnType: Type
+        get() = type
+
     override val annotations: List<String>
         get() = executable.annotations.map { it.annotationClass.simpleName ?: "Unknown" }
+
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromReflectionModifiers(executable.modifiers)
+
     override val declaringClass: String?
         get() = executable.declaringClass.name
+
     override val parameters: List<JennyParameter>
         get() = executable.parameters.map { JennyParameter(it.name,it.type) }
+
     override val exceptionsTypes: List<String>
         get() = executable.exceptionTypes.map { it.name }
 
