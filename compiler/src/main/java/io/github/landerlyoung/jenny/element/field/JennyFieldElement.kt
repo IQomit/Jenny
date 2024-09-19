@@ -24,12 +24,16 @@ import java.lang.reflect.Type
 internal class JennyFieldElement(private val reflectField: Field) : JennyElement {
     override val name: String
         get() = reflectField.name
+
     override val type: Type
         get() = reflectField.type
+
     override val annotations: List<String>
         get() = reflectField.annotations.map { it.annotationClass.simpleName ?: "Unknown" }
+
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromReflectionModifiers(reflectField.modifiers)
+
     override val declaringClass: String?
         get() = reflectField.declaringClass.name
 

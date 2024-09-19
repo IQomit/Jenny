@@ -24,6 +24,7 @@ import javax.lang.model.element.VariableElement
 internal class JennyVariableElement(private val variableElement: VariableElement) : JennyElement {
     override val name: String
         get() = variableElement.simpleName.toString()
+
     override val type: Type
         get() = object : Type {
             override fun getTypeName(): String = variableElement.asType().toString()
@@ -31,8 +32,10 @@ internal class JennyVariableElement(private val variableElement: VariableElement
 
     override val annotations: List<String>
         get() = variableElement.annotationMirrors.map { it.annotationType.toString() }
+
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromElementModifiers(variableElement.modifiers)
+
     override val declaringClass: String?
         get() = null
 
