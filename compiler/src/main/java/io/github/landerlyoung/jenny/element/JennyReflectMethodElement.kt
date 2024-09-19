@@ -33,8 +33,4 @@ internal class JennyReflectMethodElement(private val method: Method) : JennyMeth
         get() = method.parameters.map { JennyParameter(it.name, it.type.name) }
     override val exceptionsTypes: List<String>
         get() = method.exceptionTypes.map { it.name }
-
-    override fun describe(): String {
-        TODO("Not yet implemented")
-    }
 }

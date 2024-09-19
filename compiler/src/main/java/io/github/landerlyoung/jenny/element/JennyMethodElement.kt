@@ -27,4 +27,16 @@ internal interface JennyMethodElement : JennyElement {
         method.isAccessible = true
         return method.invoke(instance, *args)
     }
+
+    override fun describe(): String {
+        return """
+            Method Name: $name
+            Return Type: $type
+            Declaring Class: $declaringClass
+            Parameters: ${parameters.joinToString(", ") { "${it.name}: ${it.type}" }}
+            Exceptions: ${exceptionsTypes.joinToString(", ")}
+            Modifiers: ${modifiers.joinToString(", ")}
+            Annotations: ${annotations.joinToString(", ")}
+        """.trimIndent()
+    }
 }
