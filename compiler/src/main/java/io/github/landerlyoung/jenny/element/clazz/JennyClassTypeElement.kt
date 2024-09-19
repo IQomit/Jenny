@@ -30,18 +30,27 @@ import javax.lang.model.element.VariableElement
 internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClazzElement {
     override val name: String
         get() = clazz.simpleName.toString()
+
     override val fullClassName: String
         get() = clazz.qualifiedName.toString()
+
     override val type: Type
         get() = object : Type {
             override fun getTypeName(): String = clazz.asType().toString()
         }
+
+    override val isNestedClass: Boolean
+        get() = clazz.javaClass.enclosingClass != null && !clazz.javaClass.isMemberClass
+
     override val annotations: List<String>
         get() = clazz.annotationMirrors.map { it.annotationType.toString() }
+
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromElementModifiers(clazz.modifiers)
+
     override val declaringClass: String?
         get() = null
+
     override val constructors: List<JennyExecutableElement>
         get() = clazz.enclosedElements
             .filterIsInstance<ExecutableElement>()

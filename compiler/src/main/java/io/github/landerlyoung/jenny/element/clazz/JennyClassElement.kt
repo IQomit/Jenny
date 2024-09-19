@@ -26,23 +26,33 @@ import java.lang.reflect.Type
 internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElement {
     override val name: String
         get() = clazz.simpleName
+
     override val fullClassName: String
         get() = clazz.canonicalName
+
     override val type: Type
         get() = object : Type {
             override fun getTypeName(): String = clazz.name
         }
+
+    override val isNestedClass: Boolean
+        get() = clazz.enclosingClass!=null && !clazz.isMemberClass
+
     override val annotations: List<String>
         get() = clazz.annotations.map { it.annotationClass.simpleName ?: "Unknown" }
+
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromReflectionModifiers(clazz.modifiers)
+
     override val declaringClass: String?
         get() = clazz.declaringClass?.name
 
     override val constructors: List<JennyExecutableElement>
         get() = clazz.constructors.map { JennyExecutableReflectElement(it) }
+
     override val methods: List<JennyExecutableElement>
         get() = clazz.methods.map { JennyExecutableReflectElement(it) }
+
     override val fields: List<JennyElement>
         get() = clazz.fields.map { JennyFieldElement(it) }
 

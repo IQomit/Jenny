@@ -24,6 +24,7 @@ internal interface JennyClazzElement : JennyElement {
     val constructors: List<JennyExecutableElement>
     val methods: List<JennyExecutableElement>
     val fields: List<JennyElement>
+    val isNestedClass: Boolean
 
     override fun describe(): String {
         return buildString {
