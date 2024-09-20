@@ -16,15 +16,15 @@
 
 package io.github.landerlyoung.jenny.element.field
 
-import io.github.landerlyoung.jenny.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Field
-import java.lang.reflect.Type
 
 internal class JennyFieldElement(private val reflectField: Field) : JennyVarElement {
     override val name: String
         get() = reflectField.name
 
-    override val type: Type
+    override val type: JennyType
         get() = reflectField.type
 
     override val annotations: List<String>

@@ -16,9 +16,9 @@
 
 package io.github.landerlyoung.jenny.element.method
 
-import io.github.landerlyoung.jenny.model.JennyModifier
-import io.github.landerlyoung.jenny.model.JennyParameter
-import java.lang.reflect.Constructor
+import io.github.landerlyoung.jenny.element.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.JennyParameter
+import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Type
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -27,12 +27,12 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
     override val name: String
         get() = method.simpleName.toString()
 
-    override val type: Type
+    override val type: JennyType
         get() = object : Type {
             override fun getTypeName(): String = method.asType().toString()
         }
 
-    override val returnType: Type
+    override val returnType: JennyType
         get() = object : Type {
             override fun getTypeName(): String = method.returnType.toString()
         }
@@ -48,7 +48,7 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
 
     override val parameters: List<JennyParameter>
         get() = method.parameters.map {
-            JennyParameter(it.simpleName.toString(), object : Type {
+            JennyParameter(it.simpleName.toString(), object : JennyType {
                 override fun getTypeName(): String = it.asType().toString()
             })
         }
