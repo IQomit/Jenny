@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.model
+package io.github.landerlyoung.jenny.element.model
 
-import java.lang.reflect.Type
+import io.github.landerlyoung.jenny.element.model.type.JennyType
+
 
 internal data class JennyParameter(
     val name: String,
-    val type: Type,
+    val type: JennyType,
 ) {
     override fun toString(): String {
-        return "$name: $type"
+        return "$name: ${type.typeName}"
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.model
+package io.github.landerlyoung.jenny.element.model
 
 internal enum class JennyModifier {
     PUBLIC,

@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.element
+package io.github.landerlyoung.jenny.element.model.type
 
-import io.github.landerlyoung.jenny.element.model.JennyModifier
-import io.github.landerlyoung.jenny.element.model.type.JennyType
-
-
-internal interface JennyElement : JennyDescribableElement<String> {
-    val name: String
-    val type: JennyType
-    val annotations: List<String>
-    val modifiers: Set<JennyModifier>
-    val declaringClass: String?
+//todo finish this
+internal interface JennyType {
+    val typeName: String
+    val jennyKind: JennyKind
+    fun getComponentType(): JennyType? // in case of an array
 }

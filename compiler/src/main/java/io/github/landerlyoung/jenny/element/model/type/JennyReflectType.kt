@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.element
+package io.github.landerlyoung.jenny.element.model.type
 
-import io.github.landerlyoung.jenny.element.model.JennyModifier
-import io.github.landerlyoung.jenny.element.model.type.JennyType
+import java.lang.reflect.Type
 
+internal class JennyReflectType(private val type: Type) : JennyType {
 
-internal interface JennyElement : JennyDescribableElement<String> {
-    val name: String
-    val type: JennyType
-    val annotations: List<String>
-    val modifiers: Set<JennyModifier>
-    val declaringClass: String?
+    override val typeName: String
+        get() = type.typeName
+
+    override val jennyKind: JennyKind
+        get() = JennyKind.fromReflectionType(type)
+
+    override fun getComponentType(): JennyType? {
+        val clazz = type as? Class<*>
+        return clazz?.componentType?.let { JennyReflectType(it) }
+    }
 }

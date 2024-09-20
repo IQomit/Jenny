@@ -19,7 +19,7 @@ package io.github.landerlyoung.jenny.element.clazz
 import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.field.JennyFieldElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.method.JennyExecutableReflectElement
 import java.lang.reflect.Type
 

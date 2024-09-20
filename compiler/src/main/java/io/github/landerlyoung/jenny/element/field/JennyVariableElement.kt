@@ -16,7 +16,7 @@
 
 package io.github.landerlyoung.jenny.element.field
 
-import io.github.landerlyoung.jenny.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.JennyModifier
 import java.lang.reflect.Type
 import javax.lang.model.element.VariableElement
 
