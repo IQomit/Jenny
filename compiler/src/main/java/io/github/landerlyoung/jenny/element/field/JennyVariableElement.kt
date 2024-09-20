@@ -16,12 +16,11 @@
 
 package io.github.landerlyoung.jenny.element.field
 
-import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.model.JennyModifier
 import java.lang.reflect.Type
 import javax.lang.model.element.VariableElement
 
-internal class JennyVariableElement(private val variableElement: VariableElement) : JennyElement {
+internal class JennyVariableElement(private val variableElement: VariableElement) : JennyVarElement {
     override val name: String
         get() = variableElement.simpleName.toString()
 

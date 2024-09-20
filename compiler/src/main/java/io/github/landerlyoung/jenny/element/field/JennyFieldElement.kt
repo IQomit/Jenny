@@ -16,12 +16,11 @@
 
 package io.github.landerlyoung.jenny.element.field
 
-import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.model.JennyModifier
 import java.lang.reflect.Field
 import java.lang.reflect.Type
 
-internal class JennyFieldElement(private val reflectField: Field) : JennyElement {
+internal class JennyFieldElement(private val reflectField: Field) : JennyVarElement {
     override val name: String
         get() = reflectField.name
 

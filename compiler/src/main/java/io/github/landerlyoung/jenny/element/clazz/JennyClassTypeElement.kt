@@ -67,8 +67,4 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
         get() = clazz.enclosedElements
             .filterIsInstance<VariableElement>()
             .map { JennyVariableElement(it) }
-
-    override fun call(instance: Any?, vararg args: Any?): Any? {
-        TODO("Not yet implemented")
-    }
 }

@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.element
+package io.github.landerlyoung.jenny.element.field
 
-import io.github.landerlyoung.jenny.model.JennyModifier
-import java.lang.reflect.Type
+import io.github.landerlyoung.jenny.element.JennyCallableElement
+import io.github.landerlyoung.jenny.element.JennyElement
 
-
-internal interface JennyElement : JennyDescribableElement<String> {
-    val name: String
-    val type: Type
-    val annotations: List<String>
-    val modifiers: Set<JennyModifier>
-    val declaringClass: String?
-}
+internal interface JennyVarElement : JennyElement, JennyCallableElement

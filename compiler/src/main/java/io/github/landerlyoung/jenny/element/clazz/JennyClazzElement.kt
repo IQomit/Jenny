@@ -31,8 +31,8 @@ internal interface JennyClazzElement : JennyElement {
             append("Class: $name\n")
             append("Modifiers: ${modifiers.joinToString()}\n")
             append("Constructors: ${constructors.joinToString { it.describe() }}\n")
-            append("Methods: ${methods.joinToString { it.describe() }}\n")
             append("Fields: ${fields.joinToString { it.describe() }}\n")
+            append("Methods: ${methods.joinToString { it.describe() }}\n")
         }
     }
 }

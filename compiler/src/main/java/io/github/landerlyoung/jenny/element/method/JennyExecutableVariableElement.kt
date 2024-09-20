@@ -18,7 +18,9 @@ package io.github.landerlyoung.jenny.element.method
 
 import io.github.landerlyoung.jenny.model.JennyModifier
 import io.github.landerlyoung.jenny.model.JennyParameter
+import java.lang.reflect.Constructor
 import java.lang.reflect.Type
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 
 internal class JennyExecutableVariableElement(private val method: ExecutableElement) : JennyExecutableElement {
@@ -42,7 +44,7 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
         get() = JennyModifier.fromElementModifiers(method.modifiers)
 
     override val declaringClass: String
-        get() = method.enclosedElements.toString()
+        get() = method.enclosingElement.toString()
 
     override val parameters: List<JennyParameter>
         get() = method.parameters.map {
@@ -55,10 +57,48 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
         get() = method.thrownTypes.map { it.toString() }
 
     override fun call(instance: Any?, vararg args: Any?): Any? {
-        TODO("Not yet implemented")
+        return try {
+            val clazz = (instance?.javaClass ?: method.enclosingElement.asType().toString().let { Class.forName(it) })
+            if (method.kind == ElementKind.CONSTRUCTOR) {
+                val constructor = clazz.getConstructor(*args.map { it?.javaClass }.toTypedArray())
+                constructor.isAccessible = true
+                constructor.newInstance(*args) // Create a new instance
+            } else {
+                val runtimeMethod = clazz.getDeclaredMethod(name, *args.map { it?.javaClass }.toTypedArray())
+                runtimeMethod.isAccessible = true
+                if (modifiers.contains(JennyModifier.STATIC)) {
+                    runtimeMethod.invoke(null, *args)
+                } else {
+                    runtimeMethod.invoke(instance, *args)
+                }
+            }
+        } catch (e: Exception) {
+            throw RuntimeException(
+                "Failed to invoke ${if (method.kind == ElementKind.CONSTRUCTOR) "constructor" else "method"}: $name",
+                e
+            )
+        }
     }
 
     override fun describe(): String {
-        TODO("Not yet implemented")
+        return if (method.kind == ElementKind.CONSTRUCTOR) {
+            """
+                Constructor for: $declaringClass
+                Modifiers: ${modifiers.joinToString(", ")}
+                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
+                Exception Types: ${exceptionsTypes.joinToString(", ")}
+                Annotations: ${annotations.joinToString(", ")}
+            """.trimIndent()
+        } else {
+            """
+                Method Name: $name
+                Return Type: $type
+                Declaring Class: $declaringClass
+                Modifiers: ${modifiers.joinToString(", ")}
+                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
+                Exception Types: ${exceptionsTypes.joinToString(", ")}
+                Annotations: ${annotations.joinToString(", ")}
+            """.trimIndent()
+        }
     }
 }

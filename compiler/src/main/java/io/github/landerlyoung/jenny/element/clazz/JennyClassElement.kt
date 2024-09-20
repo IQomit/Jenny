@@ -55,8 +55,4 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
 
     override val fields: List<JennyElement>
         get() = clazz.fields.map { JennyFieldElement(it) }
-
-    override fun call(instance: Any?, vararg args: Any?): Any? {
-        TODO("Not yet implemented")
-    }
 }
