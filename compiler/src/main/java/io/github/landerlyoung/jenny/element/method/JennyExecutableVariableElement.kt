@@ -95,7 +95,7 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
                 Return Type: $type
                 Declaring Class: $declaringClass
                 Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
+                Parameters: ${parameters.joinToString { it.toString() }}
                 Exception Types: ${exceptionsTypes.joinToString(", ")}
                 Annotations: ${annotations.joinToString(", ")}
             """.trimIndent()

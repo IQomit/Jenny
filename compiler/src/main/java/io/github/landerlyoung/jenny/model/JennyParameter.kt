@@ -21,4 +21,8 @@ import java.lang.reflect.Type
 internal data class JennyParameter(
     val name: String,
     val type: Type,
-)
+) {
+    override fun toString(): String {
+        return "$name: $type"
+    }
+}

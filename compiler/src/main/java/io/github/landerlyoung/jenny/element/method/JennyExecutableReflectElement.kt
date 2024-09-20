@@ -80,7 +80,7 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
             """
                 Constructor for: $declaringClass
                 Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
+                Parameters: ${parameters.joinToString { it.toString() }}
                 Exception Types: ${exceptionsTypes.joinToString(", ")}
                 Annotations: ${annotations.joinToString(", ")}
             """.trimIndent()
@@ -90,7 +90,7 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
                 Return Type: $type
                 Declaring Class: $declaringClass
                 Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
+                Parameters: ${parameters.joinToString { it.toString() }}
                 Exception Types: ${exceptionsTypes.joinToString(", ")}
                 Annotations: ${annotations.joinToString(", ")}
             """.trimIndent()
