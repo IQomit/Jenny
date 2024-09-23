@@ -16,22 +16,22 @@
 
 package io.github.landerlyoung.jenny.element.model.type
 
-import java.lang.reflect.GenericArrayType
-import java.lang.reflect.Type
+import javax.lang.model.type.ArrayType
+import javax.lang.model.type.TypeKind
+import javax.lang.model.type.TypeMirror
 
-internal class JennyReflectType(private val type: Type) : JennyType {
-
+internal class JennyMirrorType(private val mirrorType: TypeMirror) : JennyType {
     override val typeName: String
-        get() = type.typeName
+        get() = mirrorType.toString()
 
     override val jennyKind: JennyKind
-        get() = JennyKind.fromReflectionType(type)
+        get() = JennyKind.fromMirrorType(mirrorType)
 
     override fun getComponentType(): JennyType? {
-        return when (type) {
-            is Class<*> -> type.componentType?.let { JennyReflectType(it) }
-            is GenericArrayType -> JennyReflectType(type.genericComponentType)
-            else -> null
+        return if (mirrorType.kind == TypeKind.ARRAY) {
+            (mirrorType as? ArrayType)?.componentType?.let { JennyMirrorType(it) }
+        } else {
+            null
         }
     }
 }

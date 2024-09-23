@@ -16,7 +16,6 @@
 
 package io.github.landerlyoung.jenny.element.model.type
 
-//todo finish this
 internal interface JennyType {
     val typeName: String
     val jennyKind: JennyKind

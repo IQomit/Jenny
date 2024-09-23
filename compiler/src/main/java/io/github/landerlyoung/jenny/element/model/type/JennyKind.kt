@@ -16,14 +16,11 @@
 
 package io.github.landerlyoung.jenny.element.model.type
 
+import java.lang.reflect.*
 import java.lang.reflect.Array
-import java.lang.reflect.GenericArrayType
-import java.lang.reflect.Type
-import java.lang.reflect.WildcardType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
-//todo: Finish this
 internal enum class JennyKind {
     VOID,
     BOOLEAN,
@@ -36,29 +33,31 @@ internal enum class JennyKind {
     DOUBLE,
     ARRAY,
     NULL,
-    DECLARED;
+    DECLARED,
+    UNKNOWN;
 
     companion object {
         fun fromReflectionType(type: Type): JennyKind {
             return when (type) {
                 is Class<*> -> {
                     when (type) {
-                        Boolean::class.javaObjectType -> BOOLEAN
-                        Byte::class.javaObjectType -> BYTE
-                        Short::class.javaObjectType -> SHORT
-                        Int::class.javaObjectType -> INT
-                        Long::class.javaObjectType -> LONG
-                        Float::class.javaObjectType -> FLOAT
-                        Double::class.javaObjectType -> DOUBLE
-                        Char::class.javaObjectType -> CHAR
-                        Array::class.javaObjectType -> ARRAY
-                        else -> VOID
+                        Boolean::class.javaPrimitiveType, Boolean::class.javaObjectType -> BOOLEAN
+                        Byte::class.javaPrimitiveType, Byte::class.javaObjectType -> BYTE
+                        Short::class.javaPrimitiveType, Short::class.javaObjectType -> SHORT
+                        Int::class.javaPrimitiveType, Int::class.javaObjectType -> INT
+                        Long::class.javaPrimitiveType, Long::class.javaObjectType -> LONG
+                        Float::class.javaPrimitiveType, Float::class.javaObjectType -> FLOAT
+                        Double::class.javaPrimitiveType, Double::class.javaObjectType -> DOUBLE
+                        Char::class.javaPrimitiveType, Char::class.javaObjectType -> CHAR
+                        Array::class.java -> ARRAY
+                        Void.TYPE -> VOID
+                        else -> DECLARED
                     }
                 }
 
-                is WildcardType -> DECLARED
                 is GenericArrayType -> ARRAY
-                else -> VOID
+                is WildcardType, is ParameterizedType -> DECLARED
+                else -> UNKNOWN
             }
         }
 
@@ -75,7 +74,7 @@ internal enum class JennyKind {
                 TypeKind.ARRAY -> ARRAY
                 TypeKind.NULL -> NULL
                 TypeKind.DECLARED -> DECLARED
-                else -> DECLARED
+                else -> UNKNOWN
             }
         }
     }
