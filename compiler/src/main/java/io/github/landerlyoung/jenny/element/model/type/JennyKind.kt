@@ -17,7 +17,6 @@
 package io.github.landerlyoung.jenny.element.model.type
 
 import java.lang.reflect.*
-import java.lang.reflect.Array
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
@@ -34,23 +33,25 @@ internal enum class JennyKind {
     ARRAY,
     NULL,
     DECLARED,
+    EXECUTABLE,
     UNKNOWN;
 
     companion object {
         fun fromReflectionType(type: Type): JennyKind {
             return when (type) {
                 is Class<*> -> {
-                    when (type) {
-                        Boolean::class.javaPrimitiveType, Boolean::class.javaObjectType -> BOOLEAN
-                        Byte::class.javaPrimitiveType, Byte::class.javaObjectType -> BYTE
-                        Short::class.javaPrimitiveType, Short::class.javaObjectType -> SHORT
-                        Int::class.javaPrimitiveType, Int::class.javaObjectType -> INT
-                        Long::class.javaPrimitiveType, Long::class.javaObjectType -> LONG
-                        Float::class.javaPrimitiveType, Float::class.javaObjectType -> FLOAT
-                        Double::class.javaPrimitiveType, Double::class.javaObjectType -> DOUBLE
-                        Char::class.javaPrimitiveType, Char::class.javaObjectType -> CHAR
-                        Array::class.java -> ARRAY
-                        Void.TYPE -> VOID
+                    when {
+                        type.isArray -> ARRAY  // Handle array types (including primitive arrays)
+                        Boolean::class.javaObjectType.isAssignableFrom(type) -> BOOLEAN
+                        Byte::class.javaObjectType.isAssignableFrom(type) -> BYTE
+                        Short::class.javaObjectType.isAssignableFrom(type) -> SHORT
+                        Int::class.javaObjectType.isAssignableFrom(type) -> INT
+                        Long::class.javaObjectType.isAssignableFrom(type) -> LONG
+                        Float::class.javaObjectType.isAssignableFrom(type) -> FLOAT
+                        Double::class.javaObjectType.isAssignableFrom(type) -> DOUBLE
+                        Char::class.javaObjectType.isAssignableFrom(type) -> CHAR
+                        Void.TYPE.isAssignableFrom(type) -> VOID
+                        Executable::class.java.isAssignableFrom(type) -> EXECUTABLE
                         else -> DECLARED
                     }
                 }
@@ -74,6 +75,7 @@ internal enum class JennyKind {
                 TypeKind.ARRAY -> ARRAY
                 TypeKind.NULL -> NULL
                 TypeKind.DECLARED -> DECLARED
+                TypeKind.EXECUTABLE -> EXECUTABLE
                 else -> UNKNOWN
             }
         }
