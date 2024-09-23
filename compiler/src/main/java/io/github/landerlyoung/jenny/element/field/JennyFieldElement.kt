@@ -17,6 +17,7 @@
 package io.github.landerlyoung.jenny.element.field
 
 import io.github.landerlyoung.jenny.element.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.type.JennyReflectType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Field
 
@@ -25,7 +26,7 @@ internal class JennyFieldElement(private val reflectField: Field) : JennyVarElem
         get() = reflectField.name
 
     override val type: JennyType
-        get() = reflectField.type
+        get() = JennyReflectType(reflectField.type)
 
     override val annotations: List<String>
         get() = reflectField.annotations.map { it.annotationClass.simpleName ?: "Unknown" }

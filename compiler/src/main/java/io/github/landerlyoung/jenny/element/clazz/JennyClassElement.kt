@@ -21,6 +21,8 @@ import io.github.landerlyoung.jenny.element.field.JennyFieldElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.method.JennyExecutableReflectElement
+import io.github.landerlyoung.jenny.element.model.type.JennyReflectType
+import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Type
 
 internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElement {
@@ -30,13 +32,11 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
     override val fullClassName: String
         get() = clazz.canonicalName
 
-    override val type: Type
-        get() = object : Type {
-            override fun getTypeName(): String = clazz.name
-        }
+    override val type: JennyType
+        get() = JennyReflectType(clazz)
 
     override val isNestedClass: Boolean
-        get() = clazz.enclosingClass!=null && !clazz.isMemberClass
+        get() = clazz.enclosingClass != null && !clazz.isMemberClass
 
     override val annotations: List<String>
         get() = clazz.annotations.map { it.annotationClass.simpleName ?: "Unknown" }

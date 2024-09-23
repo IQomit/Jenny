@@ -18,6 +18,7 @@ package io.github.landerlyoung.jenny.element.method
 
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.JennyParameter
+import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Type
 import javax.lang.model.element.ElementKind
@@ -28,14 +29,10 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
         get() = method.simpleName.toString()
 
     override val type: JennyType
-        get() = object : Type {
-            override fun getTypeName(): String = method.asType().toString()
-        }
+        get() = JennyMirrorType(method.asType())
 
     override val returnType: JennyType
-        get() = object : Type {
-            override fun getTypeName(): String = method.returnType.toString()
-        }
+        get() = JennyMirrorType(method.returnType)
 
     override val annotations: List<String>
         get() = method.annotationMirrors.map { it.annotationType.toString() }
@@ -48,9 +45,7 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
 
     override val parameters: List<JennyParameter>
         get() = method.parameters.map {
-            JennyParameter(it.simpleName.toString(), object : JennyType {
-                override fun getTypeName(): String = it.asType().toString()
-            })
+            JennyParameter(it.simpleName.toString(), JennyMirrorType(it.asType()))
         }
 
     override val exceptionsTypes: List<String>

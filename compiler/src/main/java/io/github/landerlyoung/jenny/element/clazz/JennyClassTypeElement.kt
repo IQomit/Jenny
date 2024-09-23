@@ -21,6 +21,7 @@ import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableVariableElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.field.JennyVariableElement
+import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -35,9 +36,7 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
         get() = clazz.qualifiedName.toString()
 
     override val type: JennyType
-        get() = object : JennyType {
-            override fun getTypeName(): String = clazz.asType().toString()
-        }
+        get() = JennyMirrorType(clazz.asType())
 
     override val isNestedClass: Boolean
         get() = clazz.javaClass.enclosingClass != null && !clazz.javaClass.isMemberClass

@@ -17,17 +17,16 @@
 package io.github.landerlyoung.jenny.element.field
 
 import io.github.landerlyoung.jenny.element.model.JennyModifier
-import java.lang.reflect.Type
+import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
+import io.github.landerlyoung.jenny.element.model.type.JennyType
 import javax.lang.model.element.VariableElement
 
 internal class JennyVariableElement(private val variableElement: VariableElement) : JennyVarElement {
     override val name: String
         get() = variableElement.simpleName.toString()
 
-    override val type: Type
-        get() = object : Type {
-            override fun getTypeName(): String = variableElement.asType().toString()
-        }
+    override val type: JennyType
+        get() = JennyMirrorType(variableElement.asType())
 
     override val annotations: List<String>
         get() = variableElement.annotationMirrors.map { it.annotationType.toString() }
@@ -36,7 +35,7 @@ internal class JennyVariableElement(private val variableElement: VariableElement
         get() = JennyModifier.fromElementModifiers(variableElement.modifiers)
 
     override val declaringClass: String?
-        get() = null
+        get() = variableElement.enclosingElement.toString()
 
     override fun call(instance: Any?, vararg args: Any?): Any? = variableElement.constantValue
 

@@ -18,24 +18,28 @@ package io.github.landerlyoung.jenny.element.method
 
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.JennyParameter
+import io.github.landerlyoung.jenny.element.model.type.JennyKind
+import io.github.landerlyoung.jenny.element.model.type.JennyReflectType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Constructor
 import java.lang.reflect.Executable
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.lang.reflect.Type
 
 internal class JennyExecutableReflectElement(private val executable: Executable) : JennyExecutableElement {
     override val name: String
         get() = if (executable is Constructor<*>) "<init>" else executable.name
 
     override val type: JennyType
-        get() = when (executable) {
-            is Method -> executable.genericReturnType
-            else -> executable.declaringClass.componentType
-        }
+        get() = returnType
 
     override val returnType: JennyType
-        get() = type
+        get() = if (executable is Method) {
+            JennyReflectType(executable.genericReturnType)
+        } else {
+            JennyReflectType(Void.TYPE)
+        }
 
     override val annotations: List<String>
         get() = executable.annotations.map { it.annotationClass.simpleName ?: "Unknown" }
@@ -47,7 +51,7 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
         get() = executable.declaringClass.name
 
     override val parameters: List<JennyParameter>
-        get() = executable.parameters.map { JennyParameter(it.name,it.type) }
+        get() = executable.parameters.map { JennyParameter(it.name, JennyReflectType(it.type)) }
 
     override val exceptionsTypes: List<String>
         get() = executable.exceptionTypes.map { it.name }
@@ -63,6 +67,7 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
                         executable.invoke(instance, *args)
                     }
                 }
+
                 is Constructor<*> -> executable.newInstance(*args) // For constructor calls
                 else -> throw UnsupportedOperationException("Unsupported executable type")
             }
