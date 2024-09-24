@@ -16,18 +16,18 @@
 
 package io.github.landerlyoung.jenny.generator.glue
 
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
+import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.ClassInfo
-import kotlin.reflect.KFunction
-import kotlin.reflect.KProperty1
 
 internal data class HeaderData(
     val classInfo: ClassInfo,
-    val methods: Collection<KFunction<*>>,
-    val constants: Collection<KProperty1<out Any, *>>
+    val methods: Collection<JennyExecutableElement>,
+    val constants: Collection<JennyVarElement>
 )
 
 internal data class SourceData(
-    val headerFileName : String,
+    val headerFileName: String,
     val classInfo: ClassInfo,
-    val methods: Collection<KFunction<*>>,
+    val methods: Collection<JennyExecutableElement>,
 )

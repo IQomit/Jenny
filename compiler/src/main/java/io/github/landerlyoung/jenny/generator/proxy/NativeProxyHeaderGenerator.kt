@@ -17,7 +17,6 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.generator.Generator
-import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
 class NativeProxyHeaderGenerator : Generator<KClass<*>, String> {

@@ -17,19 +17,14 @@
 
 package io.github.landerlyoung.jenny.utils
 
+import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
+import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
+import io.github.landerlyoung.jenny.element.model.JennyModifier
+import io.github.landerlyoung.jenny.element.model.type.JennyKind
+import io.github.landerlyoung.jenny.element.model.type.JennyType
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.stripNonASCII
-import java.lang.reflect.Modifier
-import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.instanceParameter
-import kotlin.reflect.full.valueParameters
-import kotlin.reflect.jvm.javaMethod
-import kotlin.reflect.jvm.javaType
 
 internal object NativeHeaderDefinitions {
     fun getHeaderInit(classInfo: ClassInfo): String {
@@ -48,7 +43,7 @@ internal object NativeHeaderDefinitions {
                 |""".trimMargin()
     }
 
-    fun getConstantsDefinitions(constants: Collection<KProperty1<out Any, *>>): String {
+    fun getConstantsDefinitions(constants: Collection<JennyVarElement>): String {
         val outputString = StringBuilder()
         constants.forEach {
             outputString.append(getConstexprStatement(it))
@@ -56,9 +51,9 @@ internal object NativeHeaderDefinitions {
         return outputString.toString()
     }
 
-    private fun getConstexprStatement(property: KProperty1<out Any, *>): String {
-        val constValue = property.call() ?: throw IllegalArgumentException("Property has no constant value")
-        val jniType = property.returnType.toJniTypeString()
+    private fun getConstexprStatement(property: JennyVarElement): String {
+        val constValue = property.call()
+        val jniType = property.type.toJniTypeString()
         val nativeType = if (jniType == "jstring") "auto" else jniType
 
         val value = when (constValue) {
@@ -66,7 +61,7 @@ internal object NativeHeaderDefinitions {
             is Number -> constValue.toString()
             is Char -> "'${constValue}'"
             is String -> "u8\"$constValue\""
-            else -> throw IllegalArgumentException("Unknown type: $constValue (${constValue.javaClass})")
+            else -> throw IllegalArgumentException("Unknown type: $constValue (${constValue?.javaClass})")
         }
 
         return "static constexpr $nativeType ${property.name} = $value;"
@@ -83,7 +78,7 @@ internal object NativeHeaderDefinitions {
 
     fun getMethodsDefinitions(
         classInfo: ClassInfo,
-        methods: Collection<KFunction<*>>,
+        methods: Collection<JennyExecutableElement>,
         isSource: Boolean = false
     ): String {
         val outputString = StringBuilder()
@@ -100,14 +95,14 @@ internal object NativeHeaderDefinitions {
         }
 
         methods.forEach { method ->
-            val javaModifiers = getModifiers(method)
-            val javaReturnType = method.returnType.javaType.toString()
-            val javaMethodName = method.javaMethod?.name ?: ""
+            val javaModifiers = method.modifiers
+            val javaReturnType = method.type
+            val javaMethodName = method.name
             val javaParameters = getMethodParameters(method)
             val javaMethodSignature = getBinaryMethodSignature(method)
             val export = if (isSource) "" else "JNIEXPORT "
             val jniCall = if (isSource) "" else "JNICALL "
-            val jniReturnType = method.returnType.toJniTypeString()
+            val jniReturnType = method.type.toJniTypeString()
             val nativeMethodName =
                 if (isSource)
                     classInfo.className + "::" + getMethodName(classInfo.jniClassName, method)
@@ -135,7 +130,7 @@ internal object NativeHeaderDefinitions {
         return outputString.toString()
     }
 
-    private fun buildMethodBodyWithReturnStatement(method: KFunction<*>) = buildString {
+    private fun buildMethodBodyWithReturnStatement(method: JennyExecutableElement) = buildString {
         append(" {\n")
         append(
             """
@@ -149,8 +144,8 @@ internal object NativeHeaderDefinitions {
         append("}")
     }
 
-    private fun getReturnStatement(function: KFunction<*>): String {
-        val returnType = function.returnType.javaType
+    private fun getReturnStatement(function: JennyExecutableElement): String {
+        val returnType = function.type
         return buildString {
             if (returnType == Void.TYPE) {
                 return@buildString // No return statement needed for void
@@ -158,25 +153,23 @@ internal object NativeHeaderDefinitions {
 
             append("return ")
 
-            when (returnType) {
-                java.lang.Boolean.TYPE -> append("JNI_FALSE") // Handle boolean
-                Integer.TYPE, java.lang.Long.TYPE,
-                java.lang.Short.TYPE, java.lang.Byte.TYPE,
-                java.lang.Float.TYPE, java.lang.Double.TYPE,
-                Character.TYPE -> append("0") // Handle numeric primitive types
-                String::class.java -> append("env->NewStringUTF(\"Hello From Jenny\")") // Handle string return
-                else -> append("nullptr") // Handle other objects
+            when (returnType.jennyKind) {
+                JennyKind.BOOLEAN -> append("JNI_FALSE")
+                JennyKind.INT, JennyKind.LONG,
+                JennyKind.SHORT, JennyKind.BYTE,
+                JennyKind.FLOAT, JennyKind.DOUBLE,
+                JennyKind.CHAR -> append("0")
+                else -> append("nullptr")
             }
             append(";")
         }
     }
 
-    private fun getNativeMethodParam(method: KFunction<*>): String {
+    private fun getNativeMethodParam(method: JennyExecutableElement): String {
         val sb = StringBuilder()
         sb.append("JNIEnv* env")
 
-        // Check if the method is static
-        val isStatic = method.instanceParameter == null
+        val isStatic = JennyModifier.STATIC in method.modifiers
 
         if (isStatic) {
             sb.append(", jclass clazz")
@@ -193,38 +186,38 @@ internal object NativeHeaderDefinitions {
         return sb.toString()
     }
 
-    private fun getMethodName(jniClassName: String, method: KFunction<*>): String {
+    private fun getMethodName(jniClassName: String, method: JennyExecutableElement): String {
         return "Java_" + jniClassName + "_" + method.name.replace("_", "_1").stripNonASCII()
     }
 
-    private fun getBinaryMethodSignature(function: KFunction<*>): String {
+    private fun getBinaryMethodSignature(function: JennyExecutableElement): String {
         return Signature(function).toString()
     }
 
     private class Signature(
-        private val function: KFunction<*>
+        private val function: JennyExecutableElement
     ) {
 
-        private fun getSignatureClassName(type: KType): String {
+        private fun getSignatureClassName(type: JennyType): String {
             val output = StringBuilder()
             var kType = type
 
-            while (kType.classifier == Array::class) {
+            while (kType.isArray()) {
                 output.append('[')
-                kType = (kType.arguments.firstOrNull()?.type ?: error("Array type missing"))
+                kType = (kType.componentType ?: error("Array type missing"))
             }
 
-            when (kType.classifier) {
-                Boolean::class -> output.append('Z')
-                Byte::class -> output.append('B')
-                Char::class -> output.append('C')
-                Short::class -> output.append('S')
-                Int::class -> output.append('I')
-                Long::class -> output.append('J')
-                Float::class -> output.append('F')
-                Double::class -> output.append('D')
-                Void::class, Unit::class -> output.append('V')
-                else -> output.append('L' + type.javaType.toString().replace('.', '/')).append(';')
+            when (kType.jennyKind) {
+                JennyKind.BOOLEAN-> output.append('Z')
+                JennyKind.BYTE -> output.append('B')
+                JennyKind.CHAR -> output.append('C')
+                JennyKind.SHORT -> output.append('S')
+                JennyKind.INT -> output.append('I')
+                JennyKind.LONG -> output.append('J')
+                JennyKind.FLOAT -> output.append('F')
+                JennyKind.DOUBLE -> output.append('D')
+                JennyKind.VOID -> output.append('V')
+                else -> output.append('L' + type.toString().replace('.', '/')).append(';')
             }
             return output.toString()
         }
@@ -233,12 +226,12 @@ internal object NativeHeaderDefinitions {
             append('(')
 
             if (function.name.contentEquals("<init>")) {
-                val clazz = function.returnType.classifier!! as KClass<*>
-                if (clazz.isNestedClass()) {
-                    append(getSignatureClassName(clazz.createType()))
+                val clazz = function.declaringClass
+                if ((clazz?.declaringClass as JennyClazzElement).isNestedClass) {
+                    append(getSignatureClassName(clazz.type))
                 }
             }
-            for (param in function.valueParameters) {
+            for (param in function.parameters) {
                 append(getSignatureClassName(param.type))
             }
             append(')')
@@ -246,30 +239,10 @@ internal object NativeHeaderDefinitions {
         }
     }
 
-    private fun getMethodParameters(method: KFunction<*>): String {
+    private fun getMethodParameters(method: JennyExecutableElement): String {
         return method.parameters
-            .drop(1) // Drop the first parameter which is the receiver (for member functions)
             .joinToString(", ") { param ->
-                val paramType = param.type.javaType.toString() // Get the type of the parameter
-                val paramName = param.name ?: "unknown" // Get the name of the parameter
-                "$paramType $paramName"
+                "${param.type} ${param.name}"
             }
-    }
-
-    private fun getModifiers(method: KFunction<*>): String {
-        val javaMethod = method.javaMethod ?: return ""
-
-        return sequenceOf(
-            Modifier.isPublic(javaMethod.modifiers) to "public",
-            Modifier.isProtected(javaMethod.modifiers) to "protected",
-            Modifier.isPrivate(javaMethod.modifiers) to "private",
-            Modifier.isFinal(javaMethod.modifiers) to "final",
-            Modifier.isStatic(javaMethod.modifiers) to "static",
-            Modifier.isAbstract(javaMethod.modifiers) to "abstract",
-            Modifier.isSynchronized(javaMethod.modifiers) to "synchronized"
-        ).filter { it.first }
-            .map { it.second }
-            .sorted()
-            .joinToString(" ") { it.lowercase(Locale.US) }
     }
 }

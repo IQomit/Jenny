@@ -17,10 +17,8 @@
 package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.Constants
-import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.utils.NativeHeaderDefinitions
-import kotlin.reflect.KFunction
 
 internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
     override fun generate(input: SourceData) = createSource(input)

@@ -16,58 +16,50 @@
 
 package io.github.landerlyoung.jenny.generator.glue
 
-import io.github.landerlyoung.jenny.extractor.ConstantsExtractor
-import io.github.landerlyoung.jenny.extractor.NativeMethodsExtractor
+import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
+import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
+import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.utils.CppFileNameGenerator
-import io.github.landerlyoung.jenny.utils.FileHandler
 import io.github.landerlyoung.jenny.utils.stripNonASCII
-import kotlin.reflect.KClass
 
-internal class NativeGlueGenerator : Generator<Any, Unit> {
+internal class NativeGlueGenerator : Generator<JennyClazzElement, Unit> {
 
     // Generators
     private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator()
     private val nativeSourceGenerator = NativeGlueSourceGenerator()
-
-    // Extractors
-    private val nativeMethodsExtractor = NativeMethodsExtractor()
-    private val constantsExtractor = ConstantsExtractor()
-
     private val cppFileNameGenerator = CppFileNameGenerator()
 
-    override fun generate(input: Any) {
-        val classInfo = extractClassInfo(getClazz(input))
-        val nativeMethods = nativeMethodsExtractor.extract(getClazz(input))
-        val constants = constantsExtractor.extract(getClazz(input))
+    override fun generate(input: JennyClazzElement) {
+        val classInfo = extractClassInfo(input)
+
+        val nativeMethods = extractNativeMethods(input.methods)
+        val constants = extractConstants(input.fields)
 
         val headerContent = nativeGlueHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
         val headerFile = cppFileNameGenerator.generateHeaderFile(className = classInfo.simpleClassName)
-        //TODO: Fix me parent is missing
-        FileHandler.createOutputFile("", headerFile).use {
-            it.write(headerContent.toByteArray(Charsets.UTF_8))
-        }
 
         val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, classInfo, nativeMethods))
         val sourceFile = cppFileNameGenerator.generateSourceFile(className = classInfo.simpleClassName)
-        //TODO: Fix me parent is missing
-        FileHandler.createOutputFile("", sourceFile).use {
-            it.write(sourceContent.toByteArray(Charsets.UTF_8))
+    }
+
+    private fun extractConstants(fields: List<JennyVarElement>): List<JennyVarElement> {
+        return fields.filter { field ->
+            JennyModifier.STATIC in field.modifiers && JennyModifier.FINAL in field.modifiers
         }
     }
 
-    private fun getClazz(input: Any): KClass<*> {
-        return when (input) {
-            is KClass<*> -> input
-            is Class<*> -> input.kotlin
-            else -> throw IllegalArgumentException("Input must be a KClass or Class")
+    private fun extractNativeMethods(methods: List<JennyExecutableElement>): List<JennyExecutableElement> {
+        return methods.filter { method ->
+            JennyModifier.NATIVE in method.modifiers
         }
     }
 
-    private fun extractClassInfo(input: KClass<*>): ClassInfo {
-        val className = input.qualifiedName ?: throw IllegalArgumentException("Class must have a qualified name")
-        val simpleClassName = input.simpleName ?: throw IllegalArgumentException("Class must have a simple name")
+    private fun extractClassInfo(input: JennyClazzElement): ClassInfo {
+        val className = input.fullClassName
+        val simpleClassName = input.name
         val slashClassName = className.replace('.', '/')
         val jniClassName = className.replace("_", "_1")
             .replace(".", "_")
