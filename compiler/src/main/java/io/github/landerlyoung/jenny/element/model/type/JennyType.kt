@@ -19,5 +19,9 @@ package io.github.landerlyoung.jenny.element.model.type
 internal interface JennyType {
     val typeName: String
     val jennyKind: JennyKind
-    fun getComponentType(): JennyType? // in case of an array
+
+    fun isPrimitive(): Boolean
+    fun isArray(): Boolean
+
+    val componentType: JennyType? // in case of an array
 }

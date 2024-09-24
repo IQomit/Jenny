@@ -27,11 +27,15 @@ internal class JennyMirrorType(private val mirrorType: TypeMirror) : JennyType {
     override val jennyKind: JennyKind
         get() = JennyKind.fromMirrorType(mirrorType)
 
-    override fun getComponentType(): JennyType? {
-        return if (mirrorType.kind == TypeKind.ARRAY) {
-            (mirrorType as? ArrayType)?.componentType?.let { JennyMirrorType(it) }
+    override fun isPrimitive() = mirrorType.kind.isPrimitive
+
+    override fun isArray() = mirrorType.kind == TypeKind.ARRAY
+
+    override val componentType: JennyType?
+        get() = if (mirrorType is ArrayType) {
+            JennyMirrorType(mirrorType.componentType)
         } else {
             null
         }
-    }
+
 }
