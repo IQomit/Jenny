@@ -44,8 +44,8 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromReflectionModifiers(clazz.modifiers)
 
-    override val declaringClass: String?
-        get() = clazz.declaringClass?.name
+    override val declaringClass: JennyElement?
+        get() = clazz.declaringClass?.let { JennyClassElement(it) }
 
     override val constructors: List<JennyExecutableElement>
         get() = clazz.constructors.map { JennyExecutableReflectElement(it) }

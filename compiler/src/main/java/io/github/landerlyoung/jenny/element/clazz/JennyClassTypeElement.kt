@@ -47,8 +47,8 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromElementModifiers(clazz.modifiers)
 
-    override val declaringClass: String?
-        get() = null
+    override val declaringClass: JennyElement?
+        get() = if (isNestedClass) JennyClassTypeElement(clazz.enclosingElement as TypeElement) else null
 
     override val constructors: List<JennyExecutableElement>
         get() = clazz.enclosedElements

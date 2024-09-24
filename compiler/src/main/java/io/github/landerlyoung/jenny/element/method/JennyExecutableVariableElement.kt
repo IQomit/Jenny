@@ -16,6 +16,8 @@
 
 package io.github.landerlyoung.jenny.element.method
 
+import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.JennyParameter
 import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
@@ -23,6 +25,7 @@ import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Type
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.TypeElement
 
 internal class JennyExecutableVariableElement(private val method: ExecutableElement) : JennyExecutableElement {
     override val name: String
@@ -40,8 +43,8 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromElementModifiers(method.modifiers)
 
-    override val declaringClass: String
-        get() = method.enclosingElement.toString()
+    override val declaringClass: JennyElement
+        get() = JennyClassTypeElement(method.enclosingElement as TypeElement)
 
     override val parameters: List<JennyParameter>
         get() = method.parameters.map {

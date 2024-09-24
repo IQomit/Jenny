@@ -25,5 +25,5 @@ internal interface JennyElement : JennyDescribableElement<String> {
     val type: JennyType
     val annotations: List<String>
     val modifiers: Set<JennyModifier>
-    val declaringClass: String?
+    val declaringClass: JennyElement?
 }

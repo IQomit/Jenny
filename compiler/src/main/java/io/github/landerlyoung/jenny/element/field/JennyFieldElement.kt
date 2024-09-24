@@ -16,6 +16,8 @@
 
 package io.github.landerlyoung.jenny.element.field
 
+import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.element.clazz.JennyClassElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyReflectType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
@@ -34,8 +36,8 @@ internal class JennyFieldElement(private val reflectField: Field) : JennyVarElem
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromReflectionModifiers(reflectField.modifiers)
 
-    override val declaringClass: String?
-        get() = reflectField.declaringClass.name
+    override val declaringClass: JennyElement
+        get() = JennyClassElement(reflectField.declaringClass)
 
     override fun call(instance: Any?, vararg args: Any?): Any? {
         reflectField.isAccessible = true
