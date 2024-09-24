@@ -22,12 +22,14 @@ import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.JennyParameter
 import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
-import java.lang.reflect.Type
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 
 internal class JennyExecutableVariableElement(private val method: ExecutableElement) : JennyExecutableElement {
+
+    override fun isConstructor() = method.kind == ElementKind.CONSTRUCTOR
+
     override val name: String
         get() = method.simpleName.toString()
 
@@ -75,28 +77,6 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
                 "Failed to invoke ${if (method.kind == ElementKind.CONSTRUCTOR) "constructor" else "method"}: $name",
                 e
             )
-        }
-    }
-
-    override fun describe(): String {
-        return if (method.kind == ElementKind.CONSTRUCTOR) {
-            """
-                Constructor for: $declaringClass
-                Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
-                Exception Types: ${exceptionsTypes.joinToString(", ")}
-                Annotations: ${annotations.joinToString(", ")}
-            """.trimIndent()
-        } else {
-            """
-                Method Name: $name
-                Return Type: $type
-                Declaring Class: $declaringClass
-                Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { it.toString() }}
-                Exception Types: ${exceptionsTypes.joinToString(", ")}
-                Annotations: ${annotations.joinToString(", ")}
-            """.trimIndent()
         }
     }
 }

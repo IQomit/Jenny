@@ -22,7 +22,31 @@ import io.github.landerlyoung.jenny.element.model.JennyParameter
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 
 internal interface JennyExecutableElement : JennyElement, JennyCallableElement {
+    fun isConstructor(): Boolean
+
     val parameters: List<JennyParameter>
     val exceptionsTypes: List<String>
     val returnType: JennyType
+
+    override fun describe(): String {
+        return if (isConstructor()) {
+            """
+                Constructor for: $${declaringClass?.name}
+                Modifiers: ${modifiers.joinToString(", ")}
+                Parameters: ${parameters.joinToString { "${it.name}: ${it.type}" }}
+                Exception Types: ${exceptionsTypes.joinToString(", ")}
+                Annotations: ${annotations.joinToString(", ")}
+            """.trimIndent()
+        } else {
+            """
+                Method Name: $name
+                Return Type: $type
+                Declaring Class: ${declaringClass?.name}
+                Modifiers: ${modifiers.joinToString(", ")}
+                Parameters: ${parameters.joinToString { it.toString() }}
+                Exception Types: ${exceptionsTypes.joinToString(", ")}
+                Annotations: ${annotations.joinToString(", ")}
+            """.trimIndent()
+        }
+    }
 }

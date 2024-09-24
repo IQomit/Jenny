@@ -20,18 +20,19 @@ import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClassElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.JennyParameter
-import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyReflectType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.lang.reflect.Constructor
 import java.lang.reflect.Executable
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.lang.reflect.Type
 
 internal class JennyExecutableReflectElement(private val executable: Executable) : JennyExecutableElement {
+
+    override fun isConstructor() = executable is Constructor<*>
+
     override val name: String
-        get() = if (executable is Constructor<*>) "<init>" else executable.name
+        get() = if (isConstructor()) "<init>" else executable.name
 
     override val type: JennyType
         get() = returnType
@@ -79,28 +80,6 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
             throw RuntimeException("Invalid arguments passed to executable: $name", e)
         } catch (e: InvocationTargetException) {
             throw RuntimeException("Exception thrown by executable: $name", e.cause)
-        }
-    }
-
-    override fun describe(): String {
-        return if (executable is Constructor<*>) {
-            """
-                Constructor for: $declaringClass
-                Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { it.toString() }}
-                Exception Types: ${exceptionsTypes.joinToString(", ")}
-                Annotations: ${annotations.joinToString(", ")}
-            """.trimIndent()
-        } else {
-            """
-                Method Name: $name
-                Return Type: $type
-                Declaring Class: $declaringClass
-                Modifiers: ${modifiers.joinToString(", ")}
-                Parameters: ${parameters.joinToString { it.toString() }}
-                Exception Types: ${exceptionsTypes.joinToString(", ")}
-                Annotations: ${annotations.joinToString(", ")}
-            """.trimIndent()
         }
     }
 }
