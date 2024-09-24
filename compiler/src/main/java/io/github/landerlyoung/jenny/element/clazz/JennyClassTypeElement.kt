@@ -17,10 +17,11 @@
 package io.github.landerlyoung.jenny.element.clazz
 
 import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
+import io.github.landerlyoung.jenny.element.field.JennyVariableElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableVariableElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
-import io.github.landerlyoung.jenny.element.field.JennyVariableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import javax.lang.model.element.ElementKind
@@ -62,7 +63,7 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
             .filter { it.kind == ElementKind.METHOD }
             .map { JennyExecutableVariableElement(it) }
 
-    override val fields: List<JennyElement>
+    override val fields: List<JennyVarElement>
         get() = clazz.enclosedElements
             .filterIsInstance<VariableElement>()
             .map { JennyVariableElement(it) }

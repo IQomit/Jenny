@@ -43,14 +43,4 @@ internal class JennyFieldElement(private val reflectField: Field) : JennyVarElem
         reflectField.isAccessible = true
         return reflectField.get(instance)
     }
-
-    override fun describe(): String {
-        return """
-            Field Name: $name
-            Type: $type
-            Declaring Class: $declaringClass
-            Modifiers: ${modifiers.joinToString(", ")}
-            Annotations: ${annotations.joinToString(", ")}
-        """.trimIndent()
-    }
 }

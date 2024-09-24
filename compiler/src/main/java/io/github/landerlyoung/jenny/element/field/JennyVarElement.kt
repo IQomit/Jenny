@@ -19,4 +19,14 @@ package io.github.landerlyoung.jenny.element.field
 import io.github.landerlyoung.jenny.element.JennyCallableElement
 import io.github.landerlyoung.jenny.element.JennyElement
 
-internal interface JennyVarElement : JennyElement, JennyCallableElement
+internal interface JennyVarElement : JennyElement, JennyCallableElement {
+    override fun describe(): String {
+        return """
+            Field Name: $name
+            Type: $type
+            Declaring Class: $declaringClass
+            Modifiers: ${modifiers.joinToString(", ")}
+            Annotations: ${annotations.joinToString(", ")}
+        """.trimIndent()
+    }
+}

@@ -18,12 +18,12 @@ package io.github.landerlyoung.jenny.element.clazz
 
 import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.field.JennyFieldElement
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.method.JennyExecutableReflectElement
+import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyReflectType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
-import java.lang.reflect.Type
 
 internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElement {
     override val name: String
@@ -53,6 +53,6 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
     override val methods: List<JennyExecutableElement>
         get() = clazz.methods.map { JennyExecutableReflectElement(it) }
 
-    override val fields: List<JennyElement>
+    override val fields: List<JennyVarElement>
         get() = clazz.fields.map { JennyFieldElement(it) }
 }

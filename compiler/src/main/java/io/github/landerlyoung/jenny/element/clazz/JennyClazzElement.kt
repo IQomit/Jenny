@@ -17,13 +17,14 @@
 package io.github.landerlyoung.jenny.element.clazz
 
 import io.github.landerlyoung.jenny.element.JennyElement
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 
 internal interface JennyClazzElement : JennyElement {
     val fullClassName: String
     val constructors: List<JennyExecutableElement>
     val methods: List<JennyExecutableElement>
-    val fields: List<JennyElement>
+    val fields: List<JennyVarElement>
     val isNestedClass: Boolean
 
     override fun describe(): String {

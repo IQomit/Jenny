@@ -41,13 +41,4 @@ internal class JennyVariableElement(private val variableElement: VariableElement
         get() = JennyClassTypeElement(variableElement.enclosingElement as TypeElement)
 
     override fun call(instance: Any?, vararg args: Any?): Any? = variableElement.constantValue
-
-    override fun describe(): String {
-        return """
-            Variable Name: $name
-            Type: $type
-            Modifiers: ${modifiers.joinToString(", ")}
-            Annotations: ${annotations.joinToString(", ")}
-        """.trimIndent()
-    }
 }
