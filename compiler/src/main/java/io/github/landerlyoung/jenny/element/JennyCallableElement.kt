@@ -17,5 +17,5 @@
 package io.github.landerlyoung.jenny.element
 
 internal interface JennyCallableElement {
-    fun call(instance: Any?, vararg args: Any?): Any?
+    fun call(instance: Any?=null, vararg args: Any?= arrayOf(null)): Any?
 }

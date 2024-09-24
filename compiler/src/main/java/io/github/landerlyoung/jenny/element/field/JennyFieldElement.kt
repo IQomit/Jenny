@@ -40,7 +40,15 @@ internal class JennyFieldElement(private val reflectField: Field) : JennyVarElem
         get() = JennyClassElement(reflectField.declaringClass)
 
     override fun call(instance: Any?, vararg args: Any?): Any? {
-        reflectField.isAccessible = true
-        return reflectField.get(instance)
+        return try {
+            if (JennyModifier.STATIC in modifiers) {
+                reflectField.get(null)
+            } else {
+                requireNotNull(instance) { "Instance must not be null for non-static field $name." }
+                reflectField.get(instance)
+            }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Failed to access field '$name' in class '${declaringClass.name}'.", e)
+        }
     }
 }

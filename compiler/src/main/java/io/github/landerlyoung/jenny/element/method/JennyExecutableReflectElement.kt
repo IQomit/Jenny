@@ -64,9 +64,10 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
             executable.isAccessible = true
             when (executable) {
                 is Method -> {
-                    if (modifiers.find { it == JennyModifier.STATIC } != null) {
+                    if (JennyModifier.STATIC in modifiers) {
                         executable.invoke(null, *args)
                     } else {
+                        requireNotNull(instance) { "Instance must not be null for non-static field $name." }
                         executable.invoke(instance, *args)
                     }
                 }

@@ -18,10 +18,12 @@ package io.github.landerlyoung.jenny.element.method
 
 import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
+import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.JennyParameter
 import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
+import java.lang.reflect.InvocationTargetException
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
@@ -58,25 +60,27 @@ internal class JennyExecutableVariableElement(private val method: ExecutableElem
 
     override fun call(instance: Any?, vararg args: Any?): Any? {
         return try {
-            val clazz = (instance?.javaClass ?: method.enclosingElement.asType().toString().let { Class.forName(it) })
-            if (method.kind == ElementKind.CONSTRUCTOR) {
+            val clazz = Class.forName((declaringClass as JennyClazzElement).fullClassName)
+            if (isConstructor()) {
                 val constructor = clazz.getConstructor(*args.map { it?.javaClass }.toTypedArray())
                 constructor.isAccessible = true
-                constructor.newInstance(*args) // Create a new instance
+                constructor.newInstance(*args)
             } else {
                 val runtimeMethod = clazz.getDeclaredMethod(name, *args.map { it?.javaClass }.toTypedArray())
                 runtimeMethod.isAccessible = true
-                if (modifiers.contains(JennyModifier.STATIC)) {
+                if (JennyModifier.STATIC in modifiers) {
                     runtimeMethod.invoke(null, *args)
                 } else {
+                    requireNotNull(instance) { "Instance must not be null for non-static method $name." }
                     runtimeMethod.invoke(instance, *args)
                 }
             }
-        } catch (e: Exception) {
-            throw RuntimeException(
-                "Failed to invoke ${if (method.kind == ElementKind.CONSTRUCTOR) "constructor" else "method"}: $name",
-                e
-            )
+        } catch (e: NoSuchMethodException) {
+            throw RuntimeException("Method or constructor not found: $name", e)
+        } catch (e: IllegalAccessException) {
+            throw RuntimeException("Unable to access method or constructor: $name", e)
+        } catch (e: InvocationTargetException) {
+            throw RuntimeException("Exception thrown by method or constructor: $name", e.cause)
         }
     }
 }
