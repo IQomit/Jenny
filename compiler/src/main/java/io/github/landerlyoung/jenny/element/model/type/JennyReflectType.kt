@@ -27,9 +27,15 @@ internal class JennyReflectType(private val type: Type) : JennyType {
     override val jennyKind: JennyKind
         get() = JennyKind.fromReflectionType(type)
 
-    override fun isPrimitive() = (type as? Class<*>)?.isPrimitive ?: false
+    override fun isPrimitive(): Boolean {
+        return jennyKind in setOf(
+            JennyKind.BOOLEAN, JennyKind.BYTE, JennyKind.CHAR,
+            JennyKind.SHORT, JennyKind.INT, JennyKind.LONG,
+            JennyKind.FLOAT, JennyKind.DOUBLE
+        )
+    }
 
-    override fun isArray() = (type as? Class<*>)?.isArray ?: false
+    override fun isArray() = jennyKind == JennyKind.ARRAY
 
     override val componentType: JennyType?
         get() = when (type) {
