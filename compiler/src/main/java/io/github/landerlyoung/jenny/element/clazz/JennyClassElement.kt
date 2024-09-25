@@ -51,7 +51,9 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
         get() = clazz.constructors.map { JennyExecutableReflectElement(it) }
 
     override val methods: List<JennyExecutableElement>
-        get() = clazz.methods.map { JennyExecutableReflectElement(it) }
+        get() = clazz.methods
+            .filter { it.declaringClass != Any::class.java }
+            .map { JennyExecutableReflectElement(it) }
 
     override val fields: List<JennyVarElement>
         get() = clazz.fields.map { JennyFieldElement(it) }
