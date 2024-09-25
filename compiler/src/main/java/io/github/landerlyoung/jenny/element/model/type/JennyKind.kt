@@ -42,14 +42,14 @@ internal enum class JennyKind {
                 is Class<*> -> {
                     when {
                         type.isArray -> ARRAY  // Handle array types (including primitive arrays)
-                        Boolean::class.javaObjectType.isAssignableFrom(type) -> BOOLEAN
-                        Byte::class.javaObjectType.isAssignableFrom(type) -> BYTE
-                        Short::class.javaObjectType.isAssignableFrom(type) -> SHORT
-                        Int::class.javaObjectType.isAssignableFrom(type) -> INT
-                        Long::class.javaObjectType.isAssignableFrom(type) -> LONG
-                        Float::class.javaObjectType.isAssignableFrom(type) -> FLOAT
-                        Double::class.javaObjectType.isAssignableFrom(type) -> DOUBLE
-                        Char::class.javaObjectType.isAssignableFrom(type) -> CHAR
+                        Boolean::class.java.isAssignableFrom(type) -> BOOLEAN
+                        Byte::class.java.isAssignableFrom(type) -> BYTE
+                        Short::class.java.isAssignableFrom(type) -> SHORT
+                        Int::class.java.isAssignableFrom(type) -> INT
+                        Long::class.java.isAssignableFrom(type) -> LONG
+                        Float::class.java.isAssignableFrom(type) -> FLOAT
+                        Double::class.java.isAssignableFrom(type) -> DOUBLE
+                        Char::class.java.isAssignableFrom(type) -> CHAR
                         Void.TYPE.isAssignableFrom(type) -> VOID
                         Executable::class.java.isAssignableFrom(type) -> EXECUTABLE
                         else -> DECLARED
