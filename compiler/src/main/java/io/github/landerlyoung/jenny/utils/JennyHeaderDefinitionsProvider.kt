@@ -24,10 +24,12 @@ import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.resolver.JennyMethodRecord
 import io.github.landerlyoung.jenny.stripNonASCII
 
-internal object NativeHeaderDefinitions {
-    fun getHeaderInit(classInfo: ClassInfo): String {
+internal object JennyHeaderDefinitionsProvider {
+    fun getHeaderInitForGlue(classInfo: ClassInfo): String {
         return """
                 |
                 |/* C++ header file for class ${classInfo.slashClassName} */
@@ -43,12 +45,11 @@ internal object NativeHeaderDefinitions {
                 |""".trimMargin()
     }
 
-    fun getConstantsDefinitions(constants: Collection<JennyVarElement>): String {
-        val outputString = StringBuilder()
+    fun getConstantsDefinitions(constants: Collection<JennyVarElement>) = buildString {
         constants.forEach {
-            outputString.append(getConstexprStatement(it))
+            append(getConstexprStatement(it))
         }
-        return outputString.toString()
+        append('\n')
     }
 
     private fun getConstexprStatement(property: JennyVarElement): String {
@@ -95,8 +96,8 @@ internal object NativeHeaderDefinitions {
         }
 
         methods.forEach { method ->
-            val javaModifiers = method.modifiers
-            val javaReturnType = method.type
+            val javaModifiers = method.modifiers.print()
+            val javaReturnType = method.type.typeName
             val javaMethodName = method.name
             val javaParameters = getMethodParameters(method)
             val javaMethodSignature = getBinaryMethodSignature(method)
@@ -145,9 +146,9 @@ internal object NativeHeaderDefinitions {
     }
 
     private fun getReturnStatement(function: JennyExecutableElement): String {
-        val returnType = function.type
+        val returnType = function.returnType
         return buildString {
-            if (returnType == Void.TYPE) {
+            if (returnType.jennyKind == JennyKind.VOID) {
                 return@buildString // No return statement needed for void
             }
 
@@ -159,6 +160,7 @@ internal object NativeHeaderDefinitions {
                 JennyKind.SHORT, JennyKind.BYTE,
                 JennyKind.FLOAT, JennyKind.DOUBLE,
                 JennyKind.CHAR -> append("0")
+
                 else -> append("nullptr")
             }
             append(";")
@@ -177,7 +179,7 @@ internal object NativeHeaderDefinitions {
             sb.append(", jobject thiz")
         }
         // Add parameters from the function
-        method.parameters.drop(1).forEach { param ->
+        method.parameters.forEach { param ->
             sb.append(", ")
             sb.append(param.type.toJniTypeString())
             sb.append(' ')
@@ -200,15 +202,15 @@ internal object NativeHeaderDefinitions {
 
         private fun getSignatureClassName(type: JennyType): String {
             val output = StringBuilder()
-            var kType = type
+            var jennyType = type
 
-            while (kType.isArray()) {
+            while (jennyType.isArray()) {
                 output.append('[')
-                kType = (kType.componentType ?: error("Array type missing"))
+                jennyType = (jennyType.componentType ?: error("Array type missing"))
             }
 
-            when (kType.jennyKind) {
-                JennyKind.BOOLEAN-> output.append('Z')
+            when (jennyType.jennyKind) {
+                JennyKind.BOOLEAN -> output.append('Z')
                 JennyKind.BYTE -> output.append('B')
                 JennyKind.CHAR -> output.append('C')
                 JennyKind.SHORT -> output.append('S')
@@ -217,7 +219,7 @@ internal object NativeHeaderDefinitions {
                 JennyKind.FLOAT -> output.append('F')
                 JennyKind.DOUBLE -> output.append('D')
                 JennyKind.VOID -> output.append('V')
-                else -> output.append('L' + type.toString().replace('.', '/')).append(';')
+                else -> output.append('L' + type.typeName.replace('.', '/')).append(';')
             }
             return output.toString()
         }
@@ -242,7 +244,165 @@ internal object NativeHeaderDefinitions {
     private fun getMethodParameters(method: JennyExecutableElement): String {
         return method.parameters
             .joinToString(", ") { param ->
-                "${param.type} ${param.name}"
+                "${param.type.typeName} ${param.name}"
             }
     }
+
+    fun getJniRegister(methods: Collection<JennyExecutableElement>): String = buildString {
+        append(
+            """
+            |/**
+            |* register Native functions
+            |* @returns success or not
+            |*/
+            |inline bool registerNativeFunctions(JNIEnv* env) {
+            |// 1. C++20 has u8"" string as char8_t type, we should cast them.
+            |// 2. jni.h has JNINativeMethod::name as char* type not const char*. (while Android does)
+            |#define jenny_u8cast(u8) const_cast<char *>(reinterpret_cast<const char *>(u8))
+            |   const JNINativeMethod gsNativeMethods[] = {
+            |""".trimMargin()
+        )
+        append(getJniNativeMethods(methods))
+        append(
+            """
+            |   };
+            |
+            |   const int gsMethodCount = sizeof(gsNativeMethods) / sizeof(JNINativeMethod);
+            |
+            |   bool success = false;
+            |   jclass clazz = env->FindClass(jenny_u8cast(FULL_CLASS_NAME));
+            |   if (clazz != nullptr) {
+            |       success = !env->RegisterNatives(clazz, gsNativeMethods, gsMethodCount);
+            |       env->DeleteLocalRef(clazz);
+            |   }
+            |   return success;
+            |#undef jenny_u8cast
+            |}
+            |""".trimMargin()
+        )
+    }
+
+    private fun getJniNativeMethods(methods: Collection<JennyExecutableElement>) = buildString {
+        methods.forEachIndexed { index, method ->
+            val methodName = method.name
+            val signature = getBinaryMethodSignature(method)
+            append(
+                """
+            |       {
+            |           /* method name      */ jenny_u8cast(u8"$methodName"),
+            |           /* method signature */ jenny_u8cast(u8"$signature"),
+            |           /* function pointer */ reinterpret_cast<void *>($methodName)
+            |       }""".trimMargin()
+            )
+            if (index < methods.size - 1) {
+                append(",")
+            }
+            append('\n')
+        }
+    }
+
+
+    fun getProxyHeaderInit(proxyConfiguration: ProxyConfiguration) = buildString {
+        append(
+            """
+            |#pragma once
+            |
+            |#include <jni.h>
+            |#include <assert.h>                        
+            |""".trimMargin()
+        )
+        if (proxyConfiguration.threadSafe)
+            append(
+                """
+                |#include <atomic>
+                |#include <mutex>
+                |
+                |""".trimMargin()
+            )
+
+        if (proxyConfiguration.useJniHelper) {
+            append(
+                """
+                |#include "jnihelper.h"
+                |
+                |""".trimMargin()
+            )
+        }
+    }
+
+    fun getProxyHeaderClazzInit() = buildString {
+        append(
+            """
+            |
+            |public:
+            |
+            |    static bool initClazz(JNIEnv* env);
+            |    
+            |    static void releaseClazz(JNIEnv* env);
+            |
+            |    static void assertInited(JNIEnv* env) {
+            |        auto initClazzSuccess = initClazz(env);
+            |        assert(initClazzSuccess);
+            |    }
+            |    
+            |""".trimMargin()
+        )
+    }
+
+    fun getMethodOverloadPostfix(method: JennyExecutableElement): String {
+        val signature = getBinaryMethodSignature(method)
+        val paramSig = signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
+        return "__" + paramSig.replace("_", "_1")
+            .replace("/", "_")
+            .replace(";", "_2")
+            .stripNonASCII()
+    }
+
+    fun getConstructorsDefinitions(
+        simpleClassName: String,
+        constructors: Collection<JennyMethodRecord>,
+        useJniHelper: Boolean
+    ) = buildString {
+        val paramerter = makeParam(true,useJniHelper,)
+        constructors.forEach { constructor ->
+            append(
+                """
+                    |    // construct: ${constructor.method.modifiers.print()} ${simpleClassName}(${getMethodParameters(constructor.method)
+                })
+                    |    static ${constructor.method.type.typeName} newInstance${constructor.resolvedPostFix}(${param}) {
+                    |        ${methodPrologue(true, useJniHelper)}
+                    |        return env->NewObject(${mHelper.getClassState(mHelper.getClazz())}, ${
+                    mHelper.getClassState(
+                        mHelper.getConstructorName(constructor.index)
+                    )
+                }${mHelper.getJniMethodParamVal(mClazz, constructor.method, useJniHelper)});
+                    |    }
+                    |
+                    |""".trimMargin()
+            )
+        }
+        append('\n')
+    }
 }
+//
+//internal class MethodOverloadResolver(private val resolver: Resolver<JennyElement, String>) :
+//    Resolver<List<JennyExecutableElement>, List<MethodRecord<JennyExecutableElement>>> {
+//    override fun resolve(
+//        input: List<JennyExecutableElement>
+//    ): List<MethodRecord<JennyExecutableElement>> {
+//        val duplicateRecord = mutableMapOf<String, Boolean>()
+//        input.forEach {
+//            val p = resolver.resolve(it)
+//            duplicateRecord[p] = duplicateRecord.containsKey(p)
+//        }
+//
+//        return input.mapIndexed { index, method ->
+//            val p = resolver.resolve(method)
+//            if (duplicateRecord[p]!! || Constants.CPP_RESERVED_WORS.contains(method.name)) {
+//                MethodRecord(method, JennyHeaderDefinitionsProvider.getMethodOverloadPostfix(method), index)
+//            } else {
+//                MethodRecord(method, "", index)
+//            }
+//        }
+//    }
+//}

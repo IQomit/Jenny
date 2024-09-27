@@ -16,23 +16,9 @@
  */
 package io.github.landerlyoung.jenny
 
-import java.util.ArrayDeque
-import java.util.Locale
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
-import javax.lang.model.type.ArrayType
-import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.IntersectionType
-import javax.lang.model.type.NoType
-import javax.lang.model.type.PrimitiveType
-import javax.lang.model.type.TypeKind
-import javax.lang.model.type.TypeMirror
-import javax.lang.model.type.TypeVariable
-import javax.lang.model.type.WildcardType
+import java.util.*
+import javax.lang.model.element.*
+import javax.lang.model.type.*
 
 /**
  * Author: landerlyoung@gmail.com
@@ -62,9 +48,9 @@ class HandyHelper(private val mEnv: Environment) {
         val signature = getBinaryMethodSignature(method)
         val paramSig = signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
         return "__" + paramSig.replace("_", "_1")
-                .replace("/", "_")
-                .replace(";", "_2")
-                .stripNonASCII()
+            .replace("/", "_")
+            .replace(";", "_2")
+            .stripNonASCII()
     }
 
     /**
@@ -111,28 +97,28 @@ class HandyHelper(private val mEnv: Environment) {
      */
     fun toJNIClassName(className: String): String {
         return className.replace("_", "_1")
-                .replace(".", "_")
-                .stripNonASCII()
+            .replace(".", "_")
+            .stripNonASCII()
     }
 
     fun getModifiers(m: Element): String =
-            m.modifiers.asSequence()
-                    .filter { modifier ->
-                        modifier == Modifier.PUBLIC
-                                || modifier == Modifier.PROTECTED
-                                || modifier == Modifier.PRIVATE
-                                || modifier == Modifier.FINAL
-                                || modifier == Modifier.STATIC
-                                || modifier == Modifier.ABSTRACT
-                                || modifier == Modifier.SYNCHRONIZED
-                    }
-                    .sorted()
-                    .joinToString(" ") { it.toString().toLowerCase(Locale.US) }
+        m.modifiers.asSequence()
+            .filter { modifier ->
+                modifier == Modifier.PUBLIC
+                        || modifier == Modifier.PROTECTED
+                        || modifier == Modifier.PRIVATE
+                        || modifier == Modifier.FINAL
+                        || modifier == Modifier.STATIC
+                        || modifier == Modifier.ABSTRACT
+                        || modifier == Modifier.SYNCHRONIZED
+            }
+            .sorted()
+            .joinToString(" ") { it.toString().toLowerCase(Locale.US) }
 
     fun getJavaMethodParam(m: ExecutableElement) =
-            m.parameters.joinToString(", ") {
-                it.asType().toString() + " " + it.simpleName
-            }
+        m.parameters.joinToString(", ") {
+            it.asType().toString() + " " + it.simpleName
+        }
 
     fun getReturnStatement(e: ExecutableElement): String = buildString {
         val returnType = e.returnType
@@ -242,11 +228,11 @@ class HandyHelper(private val mEnv: Environment) {
             // function param
             val upper = t.upperBound
             getNonGenericName(
-                    if (upper is IntersectionType) {
-                        upper.bounds[0]
-                    } else {
-                        upper
-                    }
+                if (upper is IntersectionType) {
+                    upper.bounds[0]
+                } else {
+                    upper
+                }
             )
         }
         is WildcardType -> {
@@ -345,8 +331,8 @@ class HandyHelper(private val mEnv: Environment) {
     }
 
     private inner class Signature(
-            private val mMethod: ExecutableElement?,
-            private val mType: TypeMirror?) {
+        private val mMethod: ExecutableElement?,
+        private val mType: TypeMirror?) {
 
         constructor(method: ExecutableElement) : this(method, null)
 

@@ -16,12 +16,30 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
+import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
-import kotlin.reflect.KClass
+import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
-class NativeProxyHeaderGenerator : Generator<KClass<*>, String> {
+internal class NativeProxyHeaderGenerator(
+    private val proxyConfiguration: ProxyConfiguration
+) : Generator<HeaderData, String> {
 
-    override fun generate(input: KClass<*>): String {
-        TODO("Not yet implemented")
+    override fun generate(input: HeaderData): String {
+        val classInfo = input.classInfo
+        return buildString {
+            append(Constants.AUTO_GENERATE_NOTICE)
+            append(JennyHeaderDefinitionsProvider.getProxyHeaderInit(proxyConfiguration))
+            append(JennyHeaderDefinitionsProvider.getConstantsDefinitions(input.constants))
+            append(JennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
+            append(
+                JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
+                    classInfo.simpleClassName,
+                    input.constructors,
+                    proxyConfiguration.useJniHelper
+                )
+            )
+
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 landerlyoung@gmail.com
+ * Copyright (C) 2024 The Qt Company Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.landerlyoung.jennysample;
-
-import io.github.landerlyoung.jenny.processor.NativeGlueProcessor;
 
 
-/**
- * Author: landerlyoung@gmail.com
- * Date:   2016-06-19
- * Time:   21:51
- * Life with Passion, Code with Creativity.
- */
-public class Main {
-    public static void main(String[] args) {
-        NativeGlueProcessor glueProcessor = new NativeGlueProcessor("");
-        glueProcessor.process(ComputeClass.class);
-    }
+package io.github.landerlyoung.jenny.resolver
+
+internal interface Resolver<in T, out H> {
+    fun resolve(input: T): H
 }

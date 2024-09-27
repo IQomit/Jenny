@@ -15,11 +15,7 @@
  */
 package io.github.landerlyoung.jenny
 
-import javax.annotation.processing.AbstractProcessor
-import javax.annotation.processing.Filer
-import javax.annotation.processing.Messager
-import javax.annotation.processing.ProcessingEnvironment
-import javax.annotation.processing.RoundEnvironment
+import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypesException
@@ -85,10 +81,10 @@ class JennyAnnotationProcessor : AbstractProcessor() {
 
         classes += roundEnv.getElementsAnnotatedWith(NativeProxy::class.java)
                 .map {
-                    val config = NativeProxyAnnotationGenerator.NativeProxyConfig(
+                    val config = NativeProxyGenerator.NativeProxyConfig(
                             (it.getAnnotation(NativeProxy::class.java)
                                     ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java)))
-                    NativeProxyAnnotationGenerator(env, it as TypeElement, config).doGenerate()
+                    NativeProxyGenerator(env, it as TypeElement, config).doGenerate()
                 }
 
         classes += (roundEnv.getElementsAnnotatedWith(NativeProxyForClasses::class.java)
@@ -109,10 +105,10 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                     }.map {
                         val clazz = mTypeUtils.asElement(it) as TypeElement
 
-                        val config = NativeProxyAnnotationGenerator.NativeProxyConfig(
+                        val config = NativeProxyGenerator.NativeProxyConfig(
                                 allMethods = true, allFields = true, namespace = annotation.namespace, onlyPublic = true)
 
-                        NativeProxyAnnotationGenerator(env, clazz, config).doGenerate()
+                        NativeProxyGenerator(env, clazz, config).doGenerate()
                     }
                 }
 

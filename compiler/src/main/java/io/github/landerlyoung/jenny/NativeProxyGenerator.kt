@@ -16,26 +16,19 @@
  */
 package io.github.landerlyoung.jenny
 
+import gg.jte.ContentType
+import gg.jte.TemplateEngine
+import gg.jte.output.StringOutput
+import gg.jte.resolve.DirectoryCodeResolver
+import java.io.File
 import java.io.IOException
+import java.nio.file.Path
 import java.util.*
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
+import javax.lang.model.element.*
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
-import kotlin.collections.LinkedHashSet
 import kotlin.collections.component1
 import kotlin.collections.component2
-import java.nio.file.*;
-
-import gg.jte.ContentType;
-import gg.jte.TemplateEngine;
-import gg.jte.resolve.DirectoryCodeResolver;
-import gg.jte.output.StringOutput;
-import java.io.File
 
 /**
  * Author: landerlyoung@gmail.com
@@ -43,7 +36,7 @@ import java.io.File
  * Time:   00:30
  * Life with Passion, Code with Creativity.
  */
-class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativeProxy: NativeProxyConfig) :
+class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: NativeProxyConfig) :
     AbsCodeGenerator(env, clazz) {
 
     data class NativeProxyConfig(
@@ -111,8 +104,9 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
                     codeResolver,
                     Path.of(path),
                     ContentType.Plain,
-                    NativeProxyAnnotationGenerator::class.java.classLoader
+                    NativeProxyGenerator::class.java.classLoader
                 )
+                templateEngine.setTrimControlStructures(true);
                 templateEngine.precompileAll()
             }
         }
@@ -230,14 +224,23 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
                         append("\n\n")
                         generateSourceContent(true)
                     }
+                    generateHeaderPostamble()
                 }.let { content ->
                     out.write(content.toByteArray(Charsets.UTF_8))
                 }
             } catch (e: IOException) {
                 warn("generate header file $mHeaderName failed!")
             } catch (e: gg.jte.TemplateException) {
-                warn("Processing jte template failed!")
+                warn("Processing jte template failed!\n $e")
             }
+        }
+    }
+
+    private fun StringBuilder.generateHeaderPostamble() {
+        if (useTemplates) {
+            val stringOutput = StringOutput()
+            templateEngine.render("header_final_postamble.kte", jteData, stringOutput)
+            append(stringOutput.toString())
         }
     }
 
@@ -497,14 +500,15 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
             val functionReturnType = m.returnType.toJniTypeForReturn(useJniHelper)
             val staticMod = if (isStatic || !useJniHelper) "static " else ""
             val constMod = if (isStatic || !useJniHelper) "" else "const "
+            val rawStaticMod = if (isStatic) "static " else ""
+            val rawConstMod = if (isStatic) "" else "const "
             val classOrObj = if (isStatic) mHelper.getClassState(mHelper.getClazz()) else "thiz"
             val static = if (isStatic) "Static" else ""
             var returnStatement = if (m.returnType.kind !== TypeKind.VOID) "return " else ""
-            var wrapLocalRef =
-                if (useJniHelper && mHelper.needWrapLocalRef(m.returnType)) "${functionReturnType}(" else ""
+            var wrapLocalRef = if (useJniHelper && mHelper.needWrapLocalRef(m.returnType))  "${functionReturnType}(" else ""
             var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
                 "reinterpret_cast<${jniReturnType}>(" else ""
-            var callExpressionClosing: StringBuilder = StringBuilder()
+            var callExpressionClosing : StringBuilder = StringBuilder()
             if (mHelper.returnTypeNeedCast(jniReturnType)) {
                 callExpressionClosing.append(")")
             }
@@ -526,6 +530,8 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
                 jteData.methodPrologue = prologue
                 jteData.staticMod = staticMod
                 jteData.constMod = constMod
+                jteData.rawStaticMod = rawStaticMod
+                jteData.rawConstMod = rawConstMod
                 jteData.classOrObj = classOrObj
                 jteData.static = static
                 jteData.returnStatement = returnStatement
@@ -587,8 +593,7 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
     private fun StringBuilder.buildFieldDefines(useJniHelper: Boolean) {
         mFields.forEachIndexed { index, f ->
             val isStatic = f.modifiers.contains(Modifier.STATIC)
-            val camelCaseName = f.simpleName.toString()
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+            val camelCaseName = f.simpleName.toString().capitalize()
             val getterSetters = hasGetterSetter(f)
             val fieldId = mHelper.getFieldName(f, index)
             val typeForJniCall = mHelper.getTypeForJniCall(f.asType())
@@ -596,6 +601,7 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
 
             val static = if (isStatic) "Static" else ""
             val staticMod = if (isStatic || !useJniHelper) "static " else ""
+            val rawStaticMod = if (isStatic) "static " else ""
             val constMod = if (isStatic || !useJniHelper) "" else "const "
             val classOrObj = if (isStatic) mHelper.getClassState(mHelper.getClazz()) else "thiz"
             val jniEnv = "env"
@@ -606,11 +612,10 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
             if (useJniHelper) {
                 comment = "    // for jni helper\n    $comment"
             }
-            var wrapLocalRef =
-                if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) "${functionReturnType}(" else ""
+            var wrapLocalRef = if (useJniHelper && mHelper.needWrapLocalRef(f.asType()))  "${functionReturnType}(" else ""
             var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
                 "reinterpret_cast<${jniReturnType}>(" else ""
-            var callExpressionClosing: StringBuilder = StringBuilder()
+            var callExpressionClosing : StringBuilder = StringBuilder()
             if (mHelper.returnTypeNeedCast(jniReturnType)) {
                 callExpressionClosing.append(")")
             }
@@ -631,6 +636,7 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
                     jteData.jniReturnType = jniReturnType
                     jteData.methodPrologue = prologue
                     jteData.staticMod = staticMod
+                    jteData.rawStaticMod = rawStaticMod
                     jteData.constMod = constMod
                     jteData.classOrObj = classOrObj
                     jteData.static = static
@@ -704,6 +710,7 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
                     jteData.jniReturnType = jniReturnType
                     jteData.methodPrologue = prologue
                     jteData.staticMod = staticMod
+                    jteData.rawStaticMod = rawStaticMod
                     jteData.constMod = constMod
                     jteData.classOrObj = classOrObj
                     jteData.static = static
@@ -920,10 +927,10 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
     }
 
     private fun StringBuilder.buildFieldIdInit() {
-        if (useTemplates) {
+        if (useTemplates){
             val stringOutput = StringOutput()
-            val fields = FieldIdDeclaration(mHelper, mFields)
-            templateEngine.render("fields_ids_initialisations.kte", fields, stringOutput)
+            val fields = FieldIdDeclaration(mHelper,mFields)
+            templateEngine.render("fields_ids_initialisations.kte",fields,stringOutput)
             append(stringOutput.toString())
         } else {
             mFields.forEachIndexed { index, f ->
@@ -1142,5 +1149,8 @@ class NativeProxyAnnotationGenerator(env: Environment, clazz: TypeElement, nativ
             needComma = true
         }
     }
-
 }
+
+// replace deprecated kotlin-stdlib one
+private fun String.capitalize():String =
+    replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }

@@ -18,7 +18,8 @@ package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
-import io.github.landerlyoung.jenny.utils.NativeHeaderDefinitions
+import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
 internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
     override fun generate(input: SourceData) = createSource(input)
@@ -32,7 +33,13 @@ internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
                     |
                     |""".trimMargin()
             )
-            append(NativeHeaderDefinitions.getMethodsDefinitions(input.classInfo, input.methods, true))
+            append(
+                JennyHeaderDefinitionsProvider.getMethodsDefinitions(
+                    input.headerData.classInfo,
+                    input.headerData.methods,
+                    true
+                )
+            )
         }
     }
 }

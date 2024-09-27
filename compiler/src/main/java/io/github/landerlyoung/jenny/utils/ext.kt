@@ -17,30 +17,43 @@
 
 package io.github.landerlyoung.jenny.utils
 
+import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.util.*
-import javax.lang.model.type.PrimitiveType
 
 internal fun JennyType.toJniTypeString(): String {
-    if (isPrimitive())
-        return "j${typeName.lowercase(Locale.US)}"
-    if (isArray()) {
-        return if (componentType is PrimitiveType) {
-            "j${componentType!!.typeName.lowercase(Locale.US)}Array"
-        } else {
-            "jobjectArray"
+    val locale = Locale.US
+    return when {
+        isPrimitive() -> "j${typeName.lowercase(locale)}"
+        isArray() -> {
+            if (componentType?.isPrimitive() == true) {
+                "j${componentType!!.typeName.lowercase(locale)}Array"
+            } else {
+                "jobjectArray"
+            }
         }
+
+        jennyKind == JennyKind.VOID -> "void"
+        jennyKind == JennyKind.DECLARED -> {
+            when (typeName) {
+                "java.lang.String" -> "jstring"
+                "java.lang.Class" -> "jclass"
+                "java.lang.Throwable" -> "jthrowable"
+                else -> "jobject"
+            }
+        }
+
+        else -> "jobject"
     }
-    if (jennyKind == JennyKind.VOID)
-        return "void"
-    if (jennyKind == JennyKind.DECLARED) {
-        //todo : finish this on
-    }
-    return "jobject"
 }
 
-fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toRegex()) {
+internal fun Collection<JennyModifier>.print(): String {
+    return this.sorted()
+        .joinToString(" ") { it.toString().lowercase(Locale.US) }
+}
+
+internal fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toRegex()) {
     String.format(Locale.US, "_%05x", it.value.codePointAt(0))
 }
 

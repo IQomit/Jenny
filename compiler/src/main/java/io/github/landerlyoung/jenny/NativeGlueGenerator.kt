@@ -16,12 +16,8 @@
 package io.github.landerlyoung.jenny
 
 import java.io.IOException
-import java.util.LinkedList
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
+import java.util.*
+import javax.lang.model.element.*
 
 /**
  * Author: landerlyoung@gmail.com
@@ -48,8 +44,8 @@ class NativeGlueGenerator(env: Environment, clazz: TypeElement) : AbsCodeGenerat
     private lateinit var mSourceName: String
     private val mMethods: MutableList<MethodOverloadResolver.MethodRecord> = LinkedList()
     private val mNativeClassAnnotation: NativeClass =
-            clazz.getAnnotation(NativeClass::class.java)
-                    ?: AnnotationResolver.getDefaultImplementation(NativeClass::class.java)
+        clazz.getAnnotation(NativeClass::class.java)
+            ?: AnnotationResolver.getDefaultImplementation(NativeClass::class.java)
 
     private val cppClassName: String = mSimpleClassName
 
@@ -79,21 +75,21 @@ class NativeGlueGenerator(env: Environment, clazz: TypeElement) : AbsCodeGenerat
 
     private fun findNativeMethods() {
         mClazz.enclosedElements
-                .asSequence()
-                .filter { it.kind == ElementKind.METHOD }
-                .map { e ->
-                    if (!e.modifiers.contains(Modifier.NATIVE) && e.getAnnotation(NativeCode::class.java) != null) {
-                        error("Annotation @" + NativeCode::class.java.simpleName
-                                + " should only be applied to NATIVE method! found at:${mClassName}.${e}")
-                    }
-                    e as ExecutableElement
-                }.filter {
-                    it.modifiers.contains(Modifier.NATIVE)
-                }.groupBy { it.simpleName.toString() }.forEach { (_, methods) ->
-                    MethodOverloadResolver(mHelper) { "" }.resolve(methods).let {
-                        mMethods.addAll(it)
-                    }
+            .asSequence()
+            .filter { it.kind == ElementKind.METHOD }
+            .map { e ->
+                if (!e.modifiers.contains(Modifier.NATIVE) && e.getAnnotation(NativeCode::class.java) != null) {
+                    error("Annotation @" + NativeCode::class.java.simpleName
+                            + " should only be applied to NATIVE method! found at:${mClassName}.${e}")
                 }
+                e as ExecutableElement
+            }.filter {
+                it.modifiers.contains(Modifier.NATIVE)
+            }.groupBy { it.simpleName.toString() }.forEach { (_, methods) ->
+                MethodOverloadResolver(mHelper) { "" }.resolve(methods).let {
+                    mMethods.addAll(it)
+                }
+            }
     }
 
     private fun generateHeader() {
@@ -180,15 +176,15 @@ class NativeGlueGenerator(env: Environment, clazz: TypeElement) : AbsCodeGenerat
 
     private fun StringBuilder.buildConstantsDefinition() {
         mClazz.enclosedElements
-                .asSequence()
-                .filter { it.kind.isField && it.modifiers.containsAll(listOf(Modifier.STATIC, Modifier.FINAL)) }
-                .map { it as VariableElement }
-                .filter {
-                    // if this field is a compile-time constant value it's
-                    // value will be returned, otherwise null will be returned.
-                    it.constantValue != null
-                }
-                .forEach { append("${mHelper.getConstexprStatement(it)}\n") }
+            .asSequence()
+            .filter { it.kind.isField && it.modifiers.containsAll(listOf(Modifier.STATIC, Modifier.FINAL)) }
+            .map { it as VariableElement }
+            .filter {
+                // if this field is a compile-time constant value it's
+                // value will be returned, otherwise null will be returned.
+                it.constantValue != null
+            }
+            .forEach { append("${mHelper.getConstexprStatement(it)}\n") }
         append('\n')
     }
 
@@ -214,10 +210,10 @@ class NativeGlueGenerator(env: Environment, clazz: TypeElement) : AbsCodeGenerat
             val jniCall = if (isSource) "" else "JNICALL "
             val jniReturnType = mHelper.toJNIType(e.returnType)
             val nativeMethodName =
-                    if (isSource && mNativeClassAnnotation.dynamicRegisterJniMethods)
-                        cppClassName + "::" + getMethodName(e) + m.resolvedPostFix
-                    else
-                        getMethodName(e) + m.resolvedPostFix
+                if (isSource && mNativeClassAnnotation.dynamicRegisterJniMethods)
+                    cppClassName + "::" + getMethodName(e) + m.resolvedPostFix
+                else
+                    getMethodName(e) + m.resolvedPostFix
             val nativeParameters = mHelper.getNativeMethodParam(e)
 
             append("""

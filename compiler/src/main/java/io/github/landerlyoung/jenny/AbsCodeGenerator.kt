@@ -47,9 +47,9 @@ abstract class AbsCodeGenerator(protected val mEnv: Environment, protected val m
 
     init {
         if (mClazz.kind != ElementKind.CLASS
-                && mClazz.kind != ElementKind.INTERFACE
-                && mClazz.kind != ElementKind.ENUM
-                && mClazz.kind != ElementKind.ANNOTATION_TYPE) {
+            && mClazz.kind != ElementKind.INTERFACE
+            && mClazz.kind != ElementKind.ENUM
+            && mClazz.kind != ElementKind.ANNOTATION_TYPE) {
             error("type element $mClazz is not class type")
         }
         mHelper = HandyHelper(mEnv)

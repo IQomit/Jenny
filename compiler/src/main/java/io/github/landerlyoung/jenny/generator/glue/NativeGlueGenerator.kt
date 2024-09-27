@@ -22,10 +22,12 @@ import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.Generator
+import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileNameGenerator
 import io.github.landerlyoung.jenny.utils.stripNonASCII
 
-internal class NativeGlueGenerator : Generator<JennyClazzElement, Unit> {
+internal class NativeGlueGenerator(private val outputDirectory: String) : Generator<JennyClazzElement, Unit> {
 
     // Generators
     private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator()
@@ -37,12 +39,33 @@ internal class NativeGlueGenerator : Generator<JennyClazzElement, Unit> {
 
         val nativeMethods = extractNativeMethods(input.methods)
         val constants = extractConstants(input.fields)
-
-        val headerContent = nativeGlueHeaderGenerator.generate(HeaderData(classInfo, nativeMethods, constants))
+        val headerData = HeaderData(
+            classInfo = classInfo,
+            constructors = emptyList(),
+            methods = nativeMethods,
+            constants = constants,
+            fields = emptyList()
+        )
+        // Header generation
+        val headerContent = nativeGlueHeaderGenerator.generate(headerData)
         val headerFile = cppFileNameGenerator.generateHeaderFile(className = classInfo.simpleClassName)
+        println("Header Content $headerContent")
+//        FileHandler.createOutputFile(
+//            outputDirectory,
+//            Constants.JENNY_GEN_DIR_GLUE_HEADER + File.separatorChar + headerFile
+//        ).use {
+//            it.write(headerContent.toByteArray(Charsets.UTF_8))
+//        }
 
-        val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, classInfo, nativeMethods))
+        // Source generation
+        val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, headerData))
         val sourceFile = cppFileNameGenerator.generateSourceFile(className = classInfo.simpleClassName)
+//        FileHandler.createOutputFile(
+//            outputDirectory,
+//            Constants.JENNY_GEN_DIR_GLUE_SOURCE + File.separatorChar + sourceFile
+//        ).use {
+//            it.write(sourceContent.toByteArray(Charsets.UTF_8))
+//        }
     }
 
     private fun extractConstants(fields: List<JennyVarElement>): List<JennyVarElement> {

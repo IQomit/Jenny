@@ -18,9 +18,11 @@ package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
-import io.github.landerlyoung.jenny.utils.NativeHeaderDefinitions
+import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
-internal class NativeGlueHeaderGenerator : Generator<HeaderData, String> {
+internal class NativeGlueHeaderGenerator(private val registerJniMethods: Boolean = true) :
+    Generator<HeaderData, String> {
     //TODO: Use template instead of NativeHeaderDefinitions predefined Strings
 
     override fun generate(input: HeaderData) = createHeader(input)
@@ -29,10 +31,17 @@ internal class NativeGlueHeaderGenerator : Generator<HeaderData, String> {
         val classInfo = input.classInfo
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
-            append(NativeHeaderDefinitions.getHeaderInit(classInfo))
-            append(NativeHeaderDefinitions.getConstantsDefinitions(input.constants))
-            append(NativeHeaderDefinitions.getEndNameSpace(classInfo.simpleClassName))
-            append(NativeHeaderDefinitions.getMethodsDefinitions(classInfo, input.methods))
+            append(JennyHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo))
+            if (registerJniMethods) {
+                append(JennyHeaderDefinitionsProvider.getConstantsDefinitions(input.constants))
+                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(classInfo, input.methods))
+                append(JennyHeaderDefinitionsProvider.getJniRegister(input.methods))
+                append(JennyHeaderDefinitionsProvider.getEndNameSpace(classInfo.simpleClassName))
+            } else {
+                append(JennyHeaderDefinitionsProvider.getConstantsDefinitions(input.constants))
+                append(JennyHeaderDefinitionsProvider.getEndNameSpace(classInfo.simpleClassName))
+                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(classInfo, input.methods))
+            }
         }
     }
 }
