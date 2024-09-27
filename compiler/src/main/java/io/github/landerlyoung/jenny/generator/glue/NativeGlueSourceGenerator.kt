@@ -34,7 +34,7 @@ internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
                     |""".trimMargin()
             )
             append(
-                JennyHeaderDefinitionsProvider.getMethodsDefinitions(
+                JennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(
                     input.headerData.classInfo,
                     input.headerData.methods,
                     true

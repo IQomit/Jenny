@@ -286,11 +286,11 @@ class HandyHelper(private val mEnv: Environment) {
         val result: String
         val k = type.kind
         result = if (k.isPrimitive || k == TypeKind.VOID) {
-            k.name.toLowerCase(Locale.US)
+            k.name.lowercase(Locale.US)
         } else {
             "object"
         }
-        return result.capitalize()
+        return result.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
     }
 
 

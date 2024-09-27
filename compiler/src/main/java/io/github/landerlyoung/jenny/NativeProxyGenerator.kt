@@ -505,10 +505,11 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
             val classOrObj = if (isStatic) mHelper.getClassState(mHelper.getClazz()) else "thiz"
             val static = if (isStatic) "Static" else ""
             var returnStatement = if (m.returnType.kind !== TypeKind.VOID) "return " else ""
-            var wrapLocalRef = if (useJniHelper && mHelper.needWrapLocalRef(m.returnType))  "${functionReturnType}(" else ""
+            var wrapLocalRef =
+                if (useJniHelper && mHelper.needWrapLocalRef(m.returnType)) "${functionReturnType}(" else ""
             var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
                 "reinterpret_cast<${jniReturnType}>(" else ""
-            var callExpressionClosing : StringBuilder = StringBuilder()
+            var callExpressionClosing: StringBuilder = StringBuilder()
             if (mHelper.returnTypeNeedCast(jniReturnType)) {
                 callExpressionClosing.append(")")
             }
@@ -547,10 +548,8 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
 
                 append(
                     """
-                |    // method: ${mHelper.getModifiers(m)} ${m.returnType} ${m.simpleName}($
-                        mHelper.getJavaMethodParam(
-                            m
-                        )
+                |    // method: ${mHelper.getModifiers(m)} ${m.returnType} ${m.simpleName}(${
+                        mHelper.getJavaMethodParam(m)
                     })
                 |    ${staticMod}${functionReturnType} ${m.simpleName}${r.resolvedPostFix}(${jniParam}) ${constMod}{
                 |        ${prologue}
@@ -612,10 +611,11 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
             if (useJniHelper) {
                 comment = "    // for jni helper\n    $comment"
             }
-            var wrapLocalRef = if (useJniHelper && mHelper.needWrapLocalRef(f.asType()))  "${functionReturnType}(" else ""
+            var wrapLocalRef =
+                if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) "${functionReturnType}(" else ""
             var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
                 "reinterpret_cast<${jniReturnType}>(" else ""
-            var callExpressionClosing : StringBuilder = StringBuilder()
+            var callExpressionClosing: StringBuilder = StringBuilder()
             if (mHelper.returnTypeNeedCast(jniReturnType)) {
                 callExpressionClosing.append(")")
             }
@@ -927,10 +927,10 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
     }
 
     private fun StringBuilder.buildFieldIdInit() {
-        if (useTemplates){
+        if (useTemplates) {
             val stringOutput = StringOutput()
-            val fields = FieldIdDeclaration(mHelper,mFields)
-            templateEngine.render("fields_ids_initialisations.kte",fields,stringOutput)
+            val fields = FieldIdDeclaration(mHelper, mFields)
+            templateEngine.render("fields_ids_initialisations.kte", fields, stringOutput)
             append(stringOutput.toString())
         } else {
             mFields.forEachIndexed { index, f ->
@@ -1152,5 +1152,5 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
 }
 
 // replace deprecated kotlin-stdlib one
-private fun String.capitalize():String =
+private fun String.capitalize(): String =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }

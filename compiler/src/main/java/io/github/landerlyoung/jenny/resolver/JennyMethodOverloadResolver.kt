@@ -18,15 +18,14 @@
 package io.github.landerlyoung.jenny.resolver
 
 import io.github.landerlyoung.jenny.Constants
-import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
-internal class JennyMethodOverloadResolver(private val resolver: Resolver<JennyElement, String>) :
-    Resolver<List<JennyExecutableElement>, List<JennyMethodRecord>> {
+internal class JennyMethodOverloadResolver(private val resolver: MethodParameterResolver = MethodParameterResolver()) :
+    Resolver<Collection<JennyExecutableElement>, Collection<JennyMethodRecord>> {
     override fun resolve(
-        input: List<JennyExecutableElement>
-    ): List<JennyMethodRecord> {
+        input: Collection<JennyExecutableElement>
+    ): Collection<JennyMethodRecord> {
         val duplicateRecord = mutableMapOf<String, Boolean>()
         input.forEach {
             val p = resolver.resolve(it)

@@ -34,13 +34,13 @@ internal class NativeGlueHeaderGenerator(private val registerJniMethods: Boolean
             append(JennyHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo))
             if (registerJniMethods) {
                 append(JennyHeaderDefinitionsProvider.getConstantsDefinitions(input.constants))
-                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(classInfo, input.methods))
+                append(JennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
                 append(JennyHeaderDefinitionsProvider.getJniRegister(input.methods))
                 append(JennyHeaderDefinitionsProvider.getEndNameSpace(classInfo.simpleClassName))
             } else {
                 append(JennyHeaderDefinitionsProvider.getConstantsDefinitions(input.constants))
                 append(JennyHeaderDefinitionsProvider.getEndNameSpace(classInfo.simpleClassName))
-                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(classInfo, input.methods))
+                append(JennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
             }
         }
     }

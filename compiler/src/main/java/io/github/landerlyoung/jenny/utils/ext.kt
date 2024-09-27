@@ -17,6 +17,7 @@
 
 package io.github.landerlyoung.jenny.utils
 
+import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
@@ -55,5 +56,9 @@ internal fun Collection<JennyModifier>.print(): String {
 
 internal fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toRegex()) {
     String.format(Locale.US, "_%05x", it.value.codePointAt(0))
+}
+
+internal fun JennyExecutableElement.isStatic(): Boolean {
+    return JennyModifier.STATIC in modifiers
 }
 

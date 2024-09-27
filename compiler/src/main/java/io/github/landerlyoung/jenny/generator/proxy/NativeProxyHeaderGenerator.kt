@@ -19,11 +19,14 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
 internal class NativeProxyHeaderGenerator(
     private val proxyConfiguration: ProxyConfiguration
 ) : Generator<HeaderData, String> {
+
+    private val methodOverloadResolver = JennyMethodOverloadResolver()
 
     override fun generate(input: HeaderData): String {
         val classInfo = input.classInfo
@@ -35,8 +38,14 @@ internal class NativeProxyHeaderGenerator(
             append(
                 JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
                     classInfo.simpleClassName,
-                    input.constructors,
-                    proxyConfiguration.useJniHelper
+                    methodOverloadResolver.resolve(input.constructors) ,
+                    false
+                )
+            )
+            append(
+                JennyHeaderDefinitionsProvider.getMethodsDefinitions(
+                    methodOverloadResolver.resolve(input.methods) ,
+                    false
                 )
             )
 
