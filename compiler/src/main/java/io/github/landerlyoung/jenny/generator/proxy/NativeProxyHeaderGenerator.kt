@@ -17,6 +17,7 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
@@ -28,12 +29,21 @@ internal class NativeProxyHeaderGenerator(
 ) : Generator<HeaderData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
-    private val getterSetterForAllFields = true
 
     override fun generate(input: HeaderData): String {
         val classInfo = input.classInfo
-        val constructors = methodOverloadResolver.resolve(input.constructors)
-        val methods = methodOverloadResolver.resolve(input.methods)
+        val constructors = input.constructors.filter { method ->
+            !proxyConfiguration.onlyPublicMethod || JennyModifier.PUBLIC in method.modifiers
+        }
+        val resolvedConstructors = methodOverloadResolver.resolve(constructors)
+        val methods = input.methods.filter { method ->
+            !proxyConfiguration.onlyPublicMethod || JennyModifier.PUBLIC in method.modifiers
+        }
+        val fields = input.fields.filter { method ->
+            !proxyConfiguration.onlyPublicMethod || JennyModifier.PUBLIC in method.modifiers
+        }
+        val resolvedMethods = methodOverloadResolver.resolve(methods)
+
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
             append(JennyHeaderDefinitionsProvider.getProxyHeaderInit(proxyConfiguration, classInfo))
@@ -41,20 +51,20 @@ internal class NativeProxyHeaderGenerator(
             append(JennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
             append(
                 JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
-                    classInfo.simpleClassName, constructors, false
+                    classInfo.simpleClassName,
+                    resolvedConstructors,
+                    false
                 )
             )
-            append(
-                JennyHeaderDefinitionsProvider.getMethodsDefinitions(
-                    methodOverloadResolver.resolve(input.methods), false
-                )
-            )
+            append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, false))
             append(
                 JennyHeaderDefinitionsProvider.getFieldsDefinitions(
                     fields = input.fields,
-                    allMethods = input.methods,
+                    allMethods = methods,
                     useJniHelper = false,
-                    getterSetterForAllFields = getterSetterForAllFields,
+                    getterSetterForAllFields = proxyConfiguration.allFields,
+                    generateGetterForFields = proxyConfiguration.gettersForFields,
+                    generateSetterForFields = proxyConfiguration.settersForFields,
                 )
             )
             if (proxyConfiguration.useJniHelper) {
@@ -62,26 +72,28 @@ internal class NativeProxyHeaderGenerator(
                 append(
                     JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
                         classInfo.simpleClassName,
-                        constructors,
+                        resolvedConstructors,
                         true
                     )
                 )
-                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(methods, true))
+                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, true))
                 append(
                     JennyHeaderDefinitionsProvider.getFieldsDefinitions(
                         fields = input.fields,
-                        allMethods = input.methods,
+                        allMethods = methods,
                         useJniHelper = true,
-                        getterSetterForAllFields = getterSetterForAllFields,
+                        getterSetterForAllFields = proxyConfiguration.allFields,
+                        generateGetterForFields = proxyConfiguration.gettersForFields,
+                        generateSetterForFields = proxyConfiguration.settersForFields,
                     )
                 )
             }
 
             append(JennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
 
-            append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(input.constructors))
-            append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(input.methods))
-            append(JennyHeaderDefinitionsProvider.getFieldIdDeclare(input.fields))
+            append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(constructors))
+            append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(methods))
+            append(JennyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
             append(JennyHeaderDefinitionsProvider.initPostDefinition())
 
             if (proxyConfiguration.headerOnlyProxy) {
@@ -93,9 +105,9 @@ internal class NativeProxyHeaderGenerator(
                         proxyConfiguration.threadSafe,
                     )
                 )
-                append(JennySourceDefinitionsProvider.getConstructorIdInit(input.constructors))
-                append(JennySourceDefinitionsProvider.getMethodIdInit(input.methods))
-                append(JennySourceDefinitionsProvider.getFieldIdInit(input.fields))
+                append(JennySourceDefinitionsProvider.getConstructorIdInit(constructors))
+                append(JennySourceDefinitionsProvider.getMethodIdInit(methods))
+                append(JennySourceDefinitionsProvider.getFieldIdInit(fields))
                 append(
                     JennySourceDefinitionsProvider.generateSourcePostContent(
                         classInfo.simpleClassName,

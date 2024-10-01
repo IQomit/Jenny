@@ -27,12 +27,15 @@ import java.lang.reflect.Executable
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
-internal class JennyExecutableReflectElement(private val executable: Executable) : JennyExecutableElement {
+internal class JennyExecutableReflectElement(
+    private val executable: Executable,
+    private val customName: String? = null
+) : JennyExecutableElement {
 
     override fun isConstructor() = executable is Constructor<*>
 
     override val name: String
-        get() = if (isConstructor()) "<init>" else executable.name
+        get() = customName ?: if (isConstructor()) "<init>" else executable.name
 
     override val type: JennyType
         get() = returnType
@@ -43,6 +46,10 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
         } else {
             JennyReflectType(Void.TYPE)
         }
+
+    override fun withNewName(newName: String): JennyExecutableElement {
+        return JennyExecutableReflectElement(executable, newName)
+    }
 
     override val annotations: List<String>
         get() = executable.annotations.map { it.annotationClass.simpleName ?: "Unknown" }

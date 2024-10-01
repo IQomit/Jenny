@@ -23,11 +23,11 @@ import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
 internal class JennyMethodOverloadResolver(
     private val resolver: MethodParameterResolver = MethodParameterResolver()
-) : Resolver<Collection<JennyExecutableElement>, Collection<JennyMethodRecord>> {
+) : Resolver<Collection<JennyExecutableElement>, Collection<JennyExecutableElement>> {
 
     override fun resolve(
         input: Collection<JennyExecutableElement>
-    ): Collection<JennyMethodRecord> {
+    ): Collection<JennyExecutableElement> {
         val overloadMap = mutableMapOf<String, Boolean>()
 
         input.forEach { method ->
@@ -35,16 +35,16 @@ internal class JennyMethodOverloadResolver(
             overloadMap[paramSignature] = overloadMap.containsKey(paramSignature)
         }
 
-        return input.mapIndexed { index, method ->
+        return input.map { method ->
             val paramSignature = resolver.resolve(method)
             val isOverloaded = overloadMap[paramSignature] == true
             val isCppReserved = Constants.CPP_RESERVED_WORS.contains(method.name)
 
             if (isOverloaded || isCppReserved) {
                 val postfix = JennyHeaderDefinitionsProvider.getMethodOverloadPostfix(method)
-                JennyMethodRecord(method, postfix, index)
+                JennyExecutableElement.createWithNewName(method,"${method.name}_${postfix}")
             } else {
-                JennyMethodRecord(method = method, index = index)
+                method
             }
         }
     }

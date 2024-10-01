@@ -18,7 +18,12 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 data class ProxyConfiguration(
-    val threadSafe : Boolean,
-    val useJniHelper : Boolean,
+    val threadSafe: Boolean,
+    val useJniHelper: Boolean,
     val headerOnlyProxy: Boolean,
+
+    val allFields: Boolean,
+    val onlyPublicMethod: Boolean,
+    val gettersForFields: Boolean,
+    val settersForFields: Boolean,
 )

@@ -28,18 +28,25 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 
-internal class JennyExecutableVariableElement(private val method: ExecutableElement) : JennyExecutableElement {
+internal class JennyExecutableVariableElement(
+    private val method: ExecutableElement,
+    private val customName: String? = null // New property for custom name
+) : JennyExecutableElement {
 
     override fun isConstructor() = method.kind == ElementKind.CONSTRUCTOR
 
     override val name: String
-        get() = method.simpleName.toString()
+        get() = customName ?: method.simpleName.toString()
 
     override val type: JennyType
         get() = JennyMirrorType(method.asType())
 
     override val returnType: JennyType
         get() = JennyMirrorType(method.returnType)
+
+    override fun withNewName(newName: String): JennyExecutableElement {
+        return JennyExecutableVariableElement(method, newName)
+    }
 
     override val annotations: List<String>
         get() = method.annotationMirrors.map { it.annotationType.toString() }

@@ -28,6 +28,14 @@ internal interface JennyExecutableElement : JennyElement, JennyCallableElement {
     val exceptionsTypes: List<String>
     val returnType: JennyType
 
+    companion object {
+        fun createWithNewName(original: JennyExecutableElement, newName: String): JennyExecutableElement {
+            return original.withNewName(newName) // This calls the internal method
+        }
+    }
+
+    fun withNewName(newName: String): JennyExecutableElement
+
     override fun describe(): String {
         return if (isConstructor()) {
             """

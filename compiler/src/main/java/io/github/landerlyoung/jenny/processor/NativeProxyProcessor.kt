@@ -31,7 +31,11 @@ class NativeProxyProcessor : Processor {
         ProxyConfiguration(
             threadSafe = true,
             useJniHelper = true,
-            headerOnlyProxy = true
+            headerOnlyProxy = true,
+            allFields = true,
+            onlyPublicMethod = true,
+            gettersForFields = false,
+            settersForFields = false,
         )
     )
 
