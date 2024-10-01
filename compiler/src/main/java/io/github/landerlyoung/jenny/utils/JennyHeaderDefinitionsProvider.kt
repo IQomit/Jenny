@@ -102,7 +102,7 @@ internal object JennyHeaderDefinitionsProvider {
             val javaReturnType = method.type.typeName
             val javaMethodName = method.name
             val javaParameters = getJavaMethodParameters(method)
-            val javaMethodSignature = getBinaryMethodSignature(method)
+            val javaMethodSignature = Signature.getBinaryJennyElementSignature(method)
             val export = if (isSource) "" else "JNIEXPORT "
             val jniCall = if (isSource) "" else "JNICALL "
             val jniReturnType = method.type.toJniReturnTypeString()
@@ -239,55 +239,6 @@ internal object JennyHeaderDefinitionsProvider {
         return "Java_" + jniClassName + "_" + method.name.replace("_", "_1").stripNonASCII()
     }
 
-    private fun getBinaryMethodSignature(function: JennyExecutableElement): String {
-        return Signature(function).toString()
-    }
-
-    private class Signature(
-        private val function: JennyExecutableElement
-    ) {
-
-        private fun getSignatureClassName(type: JennyType): String {
-            val output = StringBuilder()
-            var jennyType = type
-
-            while (jennyType.isArray()) {
-                output.append('[')
-                jennyType = (jennyType.componentType ?: error("Array type missing"))
-            }
-
-            when (jennyType.jennyKind) {
-                JennyKind.BOOLEAN -> output.append('Z')
-                JennyKind.BYTE -> output.append('B')
-                JennyKind.CHAR -> output.append('C')
-                JennyKind.SHORT -> output.append('S')
-                JennyKind.INT -> output.append('I')
-                JennyKind.LONG -> output.append('J')
-                JennyKind.FLOAT -> output.append('F')
-                JennyKind.DOUBLE -> output.append('D')
-                JennyKind.VOID -> output.append('V')
-                else -> output.append('L' + type.typeName.replace('.', '/')).append(';')
-            }
-            return output.toString()
-        }
-
-        override fun toString(): String = buildString {
-            append('(')
-
-            if (function.name.contentEquals("<init>")) {
-                val clazz = function.declaringClass
-                if ((clazz?.declaringClass as JennyClazzElement).isNestedClass) {
-                    append(getSignatureClassName(clazz.type))
-                }
-            }
-            for (param in function.parameters) {
-                append(getSignatureClassName(param.type))
-            }
-            append(')')
-            append(getSignatureClassName(function.returnType))
-        }
-    }
-
     private fun getJavaMethodParameters(method: JennyExecutableElement): String {
         return method.parameters
             .joinToString(", ") { param ->
@@ -332,7 +283,7 @@ internal object JennyHeaderDefinitionsProvider {
     private fun getJniNativeMethods(methods: Collection<JennyExecutableElement>) = buildString {
         methods.forEachIndexed { index, method ->
             val methodName = method.name
-            val signature = getBinaryMethodSignature(method)
+            val signature = Signature.getBinaryJennyElementSignature(method)
             append(
                 """
             |       {
@@ -347,7 +298,6 @@ internal object JennyHeaderDefinitionsProvider {
             append('\n')
         }
     }
-
 
     fun getProxyHeaderInit(proxyConfiguration: ProxyConfiguration, classInfo: ClassInfo) = buildString {
         append(
@@ -405,7 +355,7 @@ internal object JennyHeaderDefinitionsProvider {
     }
 
     fun getMethodOverloadPostfix(method: JennyExecutableElement): String {
-        val signature = getBinaryMethodSignature(method)
+        val signature = Signature.getBinaryJennyElementSignature(method)
         val paramSig = signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
         return "__" + paramSig.replace("_", "_1")
             .replace("/", "_")
@@ -427,8 +377,8 @@ internal object JennyHeaderDefinitionsProvider {
                     |    // construct: ${constructor.method.modifiers.print()} ${simpleClassName}($javaParameters)
                     |    static ${constructor.method.type.typeName} newInstance${constructor.resolvedPostFix}(${jniParameters}) {
                     |           $methodPrologue
-                    |        return env->NewObject(${getClassState(getClazz())}, ${
-                    getClassState(getConstructorName(constructor.index))
+                    |        return env->NewObject(${JennyNameProvider.getClassState()}, ${
+                    JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(constructor.index))
                 }${getJniMethodParamVal(constructor.method, useJniHelper)});
                     |    }
                     |
@@ -469,7 +419,7 @@ internal object JennyHeaderDefinitionsProvider {
                     jniReturnType
             val staticMod = if (isStatic || !useJniHelper) "static " else ""
             val constMod = if (isStatic || !useJniHelper) "" else "const "
-            val classOrObj = if (isStatic) getClassState(getClazz()) else "thiz"
+            val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"
             val static = if (isStatic) "Static" else ""
             val callExpressionClosing: StringBuilder = StringBuilder()
             if (returnTypeNeedCast(jniReturnType)) {
@@ -509,7 +459,12 @@ internal object JennyHeaderDefinitionsProvider {
             }
             append(
                 "env->Call${static}${method.returnType.toJniCall()}Method(${classOrObj}, ${
-                    getClassState(getMethodName(jennyMethodRecord.method, jennyMethodRecord.index))
+                    JennyNameProvider.getClassState(
+                        JennyNameProvider.getElementName(
+                            jennyMethodRecord.method,
+                            jennyMethodRecord.index
+                        )
+                    )
                 }${getJniMethodParamVal(method, useJniHelper)})"
             )
             if (returnTypeNeedCast(jniReturnType)) {
@@ -544,12 +499,12 @@ internal object JennyHeaderDefinitionsProvider {
                 generateSetterForFields = generateSetterForFields,
                 allFields = getterSetterForAllFields
             )
-            val fieldId = getFieldName(field, index)
+            val fieldId = JennyNameProvider.getElementName(field, index)
             val typeForJniCall = field.type.toJniCall()
             val static = if (isStatic) "Static" else ""
             val staticMod = if (isStatic || !useJniHelper) "static " else ""
             val constMod = if (isStatic || !useJniHelper) "" else "const "
-            val classOrObj = if (isStatic) getClassState(getClazz()) else "thiz"
+            val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"
             val jniEnv = "env"
             val methodPrologue = getMethodPrologue(useJniHelper)
             val jniReturnType = field.type.toJniReturnTypeString()
@@ -575,7 +530,11 @@ internal object JennyHeaderDefinitionsProvider {
                 }
 
                 append(
-                    "${jniEnv}->Get${static}${typeForJniCall}Field(${classOrObj}, ${getClassState(fieldId)})"
+                    "${jniEnv}->Get${static}${typeForJniCall}Field(${classOrObj}, ${
+                        JennyNameProvider.getClassState(
+                            fieldId
+                        )
+                    })"
                 )
             }
 
@@ -594,7 +553,7 @@ internal object JennyHeaderDefinitionsProvider {
                         |    ${staticMod}void set${camelCase}(${param}) ${constMod}{
                         |        $methodPrologue
                         |        ${jniEnv}->Set${static}${typeForJniCall}Field(${classOrObj}, ${
-                        getClassState(fieldId)
+                        JennyNameProvider.getClassState(fieldId)
                     }, ${passedParam});
                         |    }
                         |
@@ -604,16 +563,6 @@ internal object JennyHeaderDefinitionsProvider {
             }
         }
     }
-
-    private fun getMethodName(jennyMethodRecord: JennyExecutableElement, index: Int) =
-        "sMethod_" + jennyMethodRecord.name + "_" + index
-
-    private fun getFieldName(e: JennyElement, index: Int): String = "sField_" + e.name + "_" + index
-
-
-    private fun getClassState(what: String) = "getClassInitState().$what"
-    private fun getClazz() = "sClazz"
-    private fun getConstructorName(index: Int) = "sConstruct_$index"
 
     private fun returnTypeNeedCast(jniReturnType: String): Boolean {
         return when (jniReturnType) {
@@ -748,21 +697,21 @@ internal object JennyHeaderDefinitionsProvider {
 
     fun getConstructorIdDeclare(constructors: Collection<JennyExecutableElement>): String = buildString {
         constructors.forEachIndexed { index, _ ->
-            append("    jmethodID ${getConstructorName(index)} = nullptr;\n")
+            append("    jmethodID ${JennyNameProvider.getConstructorName(index)} = nullptr;\n")
         }
         append('\n')
     }
 
     fun getMethodIdDeclare(methods: Collection<JennyExecutableElement>): String = buildString {
         methods.forEachIndexed { index, jennyExecutableElement ->
-            append("    jmethodID ${getMethodName(jennyExecutableElement, index)} = nullptr;\n")
+            append("    jmethodID ${JennyNameProvider.getElementName(jennyExecutableElement, index)} = nullptr;\n")
         }
         append('\n')
     }
 
     fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String = buildString {
         fields.forEachIndexed { index, field ->
-            append("    jfieldID ${getFieldName(field, index)} = nullptr;\n")
+            append("    jfieldID ${JennyNameProvider.getElementName(field, index)} = nullptr;\n")
         }
         append('\n')
     }
@@ -783,68 +732,6 @@ internal object JennyHeaderDefinitionsProvider {
 
         append("};\n")
         append("\n\n")
-    }
-
-    fun generateSourceContent(simpleClassName: String,threadSafe: Boolean): String = buildString {
-        append("\n\n")
-
-        append(buildNativeInitClass(simpleClassName,true, threadSafe))
-
-        append("\n")
-    }
-
-    private fun buildNativeInitClass(simpleClassName: String,headerOnly: Boolean, threadSafe: Boolean): String = buildString {
-        val prefix = if (headerOnly) "/*static*/ inline" else "/*static*/"
-        append(
-            """
-                |${prefix} bool ${simpleClassName}Proxy::initClazz(JNIEnv* env) {
-                |#define JENNY_CHECK_NULL(val)                      \
-                |       do {                                        \
-                |           if ((val) == nullptr) {                 \
-                |""".trimMargin()
-        )
-
-        append(
-            """
-                |               env->ExceptionDescribe();           \
-                |""".trimMargin()
-        )
-
-        append(
-            """
-                |               return false;                       \
-                |           }                                       \
-                |       } while(false)
-                |
-                |""".trimMargin()
-        )
-
-
-        append(
-            """
-                    |    auto& state = getClassInitState();
-                    |""".trimMargin()
-        )
-
-        if (threadSafe) {
-            append(
-                """
-                    |    if (!state.sInited) {
-                    |        std::lock_guard<std::mutex> lg(state.sInitLock);
-                    |""".trimMargin()
-            )
-        }
-        append(
-            """
-                    |        if (!state.sInited) {
-                    |            auto clazz = env->FindClass(FULL_CLASS_NAME);
-                    |            JENNY_CHECK_NULL(clazz);
-                    |            state.sClazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
-                    |            env->DeleteLocalRef(clazz);
-                    |            JENNY_CHECK_NULL(state.sClazz);
-                    |
-                    |""".trimMargin()
-        )
     }
 
     private enum class GetterSetter {

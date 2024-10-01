@@ -21,6 +21,7 @@ import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.JennySourceDefinitionsProvider
 
 internal class NativeProxyHeaderGenerator(
     private val proxyConfiguration: ProxyConfiguration
@@ -75,6 +76,7 @@ internal class NativeProxyHeaderGenerator(
                     )
                 )
             }
+
             append(JennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
 
             append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(input.constructors))
@@ -85,9 +87,20 @@ internal class NativeProxyHeaderGenerator(
             if (proxyConfiguration.headerOnlyProxy) {
                 append("\n\n")
                 append(
-                    JennyHeaderDefinitionsProvider.generateSourceContent(
+                    JennySourceDefinitionsProvider.generateSourcePreContent(
                         classInfo.simpleClassName,
-                        proxyConfiguration.threadSafe
+                        headerOnly = true,
+                        proxyConfiguration.threadSafe,
+                    )
+                )
+                append(JennySourceDefinitionsProvider.getConstructorIdInit(input.constructors))
+                append(JennySourceDefinitionsProvider.getMethodIdInit(input.methods))
+                append(JennySourceDefinitionsProvider.getFieldIdInit(input.fields))
+                append(
+                    JennySourceDefinitionsProvider.generateSourcePostContent(
+                        classInfo.simpleClassName,
+                        headerOnly = true,
+                        proxyConfiguration.threadSafe,
                     )
                 )
             }

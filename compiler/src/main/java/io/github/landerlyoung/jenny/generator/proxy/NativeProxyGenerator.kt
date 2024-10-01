@@ -16,10 +16,50 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
+import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
+import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.Generator
+import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.utils.isConstant
+import io.github.landerlyoung.jenny.utils.stripNonASCII
 
-internal class NativeProxyGenerator : Generator<Any, Unit> {
-    override fun generate(input: Any) {
-        TODO("Not yet implemented")
+internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration) : Generator<JennyClazzElement, Unit> {
+
+    private val nativeProxyHeaderGenerator = NativeProxyHeaderGenerator(proxyConfiguration)
+
+    override fun generate(input: JennyClazzElement) {
+        val classInfo = extractClassInfo(input)
+
+        val headerData = HeaderData(
+            classInfo = classInfo,
+            constructors = input.constructors,
+            methods = input.methods,
+            constants = extractConstants(input.fields),
+            fields = input.fields
+        )
+        val headerContent = nativeProxyHeaderGenerator.generate(headerData)
+        println("Proxy Header Content:::::::: $headerContent")
+    }
+
+    private fun extractClassInfo(input: JennyClazzElement): ClassInfo {
+        val className = input.fullClassName
+        val simpleClassName = input.name
+        val slashClassName = className.replace('.', '/')
+        val jniClassName = className.replace("_", "_1")
+            .replace(".", "_")
+            .stripNonASCII()
+        return ClassInfo(
+            simpleClassName = simpleClassName,
+            className = className,
+            slashClassName = slashClassName,
+            jniClassName = jniClassName
+        )
+    }
+
+    private fun extractConstants(fields: List<JennyVarElement>): List<JennyVarElement> {
+        return fields.filter { field ->
+            field.isConstant()
+        }
     }
 }
