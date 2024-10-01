@@ -17,9 +17,16 @@
 package io.github.landerlyoung.jenny.resolver
 
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
+import io.github.landerlyoung.jenny.utils.toJniReturnTypeString
 
 internal class MethodParameterResolver : Resolver<JennyExecutableElement, String> {
-    override fun resolve(input: JennyExecutableElement): String {
-        TODO("Not yet implemented")
+    override fun resolve(input: JennyExecutableElement): String = buildString {
+        append(input.name)
+        append(' ')
+        input.parameters.forEach { param ->
+            append(param.type.toJniReturnTypeString())
+            append(' ')
+            append(param.name)
+        }
     }
 }

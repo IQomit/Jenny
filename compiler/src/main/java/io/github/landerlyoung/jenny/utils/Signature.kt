@@ -56,8 +56,10 @@ internal class Signature(
 
             if (jennyElement.name.contentEquals("<init>")) {
                 val clazz = jennyElement.declaringClass
-                if ((clazz?.declaringClass as JennyClazzElement).isNestedClass) {
-                    append(getSignatureClassName(clazz.type))
+                clazz?.declaringClass?.let {
+                    if ((it as JennyClazzElement).isNestedClass) {
+                        append(getSignatureClassName(clazz.type))
+                    }
                 }
             }
 

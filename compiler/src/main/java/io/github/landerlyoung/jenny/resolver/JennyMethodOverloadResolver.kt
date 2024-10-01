@@ -21,21 +21,28 @@ import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
-internal class JennyMethodOverloadResolver(private val resolver: MethodParameterResolver = MethodParameterResolver()) :
-    Resolver<Collection<JennyExecutableElement>, Collection<JennyMethodRecord>> {
+internal class JennyMethodOverloadResolver(
+    private val resolver: MethodParameterResolver = MethodParameterResolver()
+) : Resolver<Collection<JennyExecutableElement>, Collection<JennyMethodRecord>> {
+
     override fun resolve(
         input: Collection<JennyExecutableElement>
     ): Collection<JennyMethodRecord> {
-        val duplicateRecord = mutableMapOf<String, Boolean>()
-        input.forEach {
-            val p = resolver.resolve(it)
-            duplicateRecord[p] = duplicateRecord.containsKey(p)
+        val overloadMap = mutableMapOf<String, Boolean>()
+
+        input.forEach { method ->
+            val paramSignature = resolver.resolve(method)
+            overloadMap[paramSignature] = overloadMap.containsKey(paramSignature)
         }
 
         return input.mapIndexed { index, method ->
-            val p = resolver.resolve(method)
-            if (duplicateRecord[p]!! || Constants.CPP_RESERVED_WORS.contains(method.name)) {
-                JennyMethodRecord(method, JennyHeaderDefinitionsProvider.getMethodOverloadPostfix(method), index)
+            val paramSignature = resolver.resolve(method)
+            val isOverloaded = overloadMap[paramSignature] == true
+            val isCppReserved = Constants.CPP_RESERVED_WORS.contains(method.name)
+
+            if (isOverloaded || isCppReserved) {
+                val postfix = JennyHeaderDefinitionsProvider.getMethodOverloadPostfix(method)
+                JennyMethodRecord(method, postfix, index)
             } else {
                 JennyMethodRecord(method = method, index = index)
             }
