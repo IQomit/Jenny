@@ -27,28 +27,70 @@ internal class NativeProxyHeaderGenerator(
 ) : Generator<HeaderData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
+    private val getterSetterForAllFields = true
 
     override fun generate(input: HeaderData): String {
         val classInfo = input.classInfo
+        val constructors = methodOverloadResolver.resolve(input.constructors)
+        val methods = methodOverloadResolver.resolve(input.methods)
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
-            append(JennyHeaderDefinitionsProvider.getProxyHeaderInit(proxyConfiguration))
-            append(JennyHeaderDefinitionsProvider.getConstantsDefinitions(input.constants))
+            append(JennyHeaderDefinitionsProvider.getProxyHeaderInit(proxyConfiguration, classInfo))
+            append(JennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
             append(JennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
             append(
                 JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
-                    classInfo.simpleClassName,
-                    methodOverloadResolver.resolve(input.constructors) ,
-                    false
+                    classInfo.simpleClassName, constructors, false
                 )
             )
             append(
                 JennyHeaderDefinitionsProvider.getMethodsDefinitions(
-                    methodOverloadResolver.resolve(input.methods) ,
-                    false
+                    methodOverloadResolver.resolve(input.methods), false
                 )
             )
+            append(
+                JennyHeaderDefinitionsProvider.getFieldsDefinitions(
+                    fields = input.fields,
+                    allMethods = input.methods,
+                    useJniHelper = false,
+                    getterSetterForAllFields = getterSetterForAllFields,
+                )
+            )
+            if (proxyConfiguration.useJniHelper) {
+                append(JennyHeaderDefinitionsProvider.generateForJniHelper(classInfo.simpleClassName))
+                append(
+                    JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
+                        classInfo.simpleClassName,
+                        constructors,
+                        true
+                    )
+                )
+                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(methods, true))
+                append(
+                    JennyHeaderDefinitionsProvider.getFieldsDefinitions(
+                        fields = input.fields,
+                        allMethods = input.methods,
+                        useJniHelper = true,
+                        getterSetterForAllFields = getterSetterForAllFields,
+                    )
+                )
+            }
+            append(JennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
 
+            append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(input.constructors))
+            append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(input.methods))
+            append(JennyHeaderDefinitionsProvider.getFieldIdDeclare(input.fields))
+            append(JennyHeaderDefinitionsProvider.initPostDefinition())
+
+            if (proxyConfiguration.headerOnlyProxy) {
+                append("\n\n")
+                append(
+                    JennyHeaderDefinitionsProvider.generateSourceContent(
+                        classInfo.simpleClassName,
+                        proxyConfiguration.threadSafe
+                    )
+                )
+            }
         }
     }
 }

@@ -17,13 +17,13 @@
 
 package io.github.landerlyoung.jenny.utils
 
-import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
+import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 import java.util.*
 
-internal fun JennyType.toJniTypeString(): String {
+internal fun JennyType.toJniReturnTypeString(): String {
     val locale = Locale.US
     return when {
         isPrimitive() -> "j${typeName.lowercase(locale)}"
@@ -48,6 +48,14 @@ internal fun JennyType.toJniTypeString(): String {
         else -> "jobject"
     }
 }
+internal fun JennyType.toJniCall(): String {
+    val result = if (this.isPrimitive ()|| this.jennyKind == JennyKind.VOID) {
+        this.typeName.lowercase()
+    } else {
+        "object"
+    }
+    return result.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+}
 
 internal fun Collection<JennyModifier>.print(): String {
     return this.sorted()
@@ -58,7 +66,9 @@ internal fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toReg
     String.format(Locale.US, "_%05x", it.value.codePointAt(0))
 }
 
-internal fun JennyExecutableElement.isStatic(): Boolean {
-    return JennyModifier.STATIC in modifiers
-}
+internal fun String.toCamelCase() =
+    replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
+
+internal fun JennyElement.isStatic() = JennyModifier.STATIC in modifiers
+internal fun JennyElement.isConstant() = isStatic() && JennyModifier.FINAL in modifiers
 

@@ -25,6 +25,7 @@ import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileNameGenerator
+import io.github.landerlyoung.jenny.utils.isConstant
 import io.github.landerlyoung.jenny.utils.stripNonASCII
 
 internal class NativeGlueGenerator(private val outputDirectory: String) : Generator<JennyClazzElement, Unit> {
@@ -70,7 +71,7 @@ internal class NativeGlueGenerator(private val outputDirectory: String) : Genera
 
     private fun extractConstants(fields: List<JennyVarElement>): List<JennyVarElement> {
         return fields.filter { field ->
-            JennyModifier.STATIC in field.modifiers && JennyModifier.FINAL in field.modifiers
+            field.isConstant()
         }
     }
 
