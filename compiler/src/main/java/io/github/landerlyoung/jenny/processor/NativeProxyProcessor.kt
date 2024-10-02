@@ -28,10 +28,11 @@ import kotlin.reflect.KClass
 
 class NativeProxyProcessor(outputDirectory: String) : Processor {
 
+    // todo expose some the configurations
     private val proxyConfiguration = ProxyConfiguration(
         threadSafe = false,
         useJniHelper = false,
-        headerOnlyProxy = true,
+        headerOnlyProxy = false,
         allFields = true,
         onlyPublicMethod = true,
         gettersForFields = false,
