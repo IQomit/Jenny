@@ -24,12 +24,15 @@ import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
 
-class NativeGlueProcessor(namespace: String, outputDirectory: String) : Processor {
+class NativeGlueProcessor(outputDirectory: String) : Processor {
 
-    private val nativeGlueGenerator = NativeGlueGenerator(namespace, outputDirectory)
+    private val nativeGlueGenerator = NativeGlueGenerator(outputDirectory)
 
-    override fun process(input: Any) {
-        nativeGlueGenerator.generate(makeJennyClazz(input))
+    override fun process(namespace: String, input: Any) {
+        nativeGlueGenerator.apply {
+            setNamespace(namespace)
+            generate(makeJennyClazz(input))
+        }
     }
 
     private fun makeJennyClazz(input: Any): JennyClazzElement {
@@ -40,4 +43,6 @@ class NativeGlueProcessor(namespace: String, outputDirectory: String) : Processo
             else -> throw IllegalArgumentException("${input.javaClass.name} input type is not supported")
         }
     }
+
+
 }

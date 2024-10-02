@@ -17,8 +17,8 @@
 package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
-import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.NativeGenerator
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
@@ -26,13 +26,13 @@ import io.github.landerlyoung.jenny.utils.isNative
 import java.io.File
 import java.io.IOException
 
-internal class NativeGlueGenerator(namespace: String, private val outputDirectory: String) :
-    Generator<JennyClazzElement, Unit> {
+internal class NativeGlueGenerator(private val outputDirectory: String) :
+    NativeGenerator<JennyClazzElement, Unit> {
 
     // Generators
     private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator()
     private val nativeSourceGenerator = NativeGlueSourceGenerator()
-    private val cppFileHelper = CppFileHelper(namespace)
+    private val cppFileHelper = CppFileHelper()
 
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)
@@ -78,5 +78,7 @@ internal class NativeGlueGenerator(namespace: String, private val outputDirector
     companion object {
         private const val JENNY_GEN_DIR_GLUE = "jenny.glue"
     }
+
+    override fun setNamespace(namespace: String) = cppFileHelper.setNamespace(namespace)
 
 }

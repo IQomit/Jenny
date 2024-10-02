@@ -25,10 +25,9 @@ import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
 
-class NativeProxyProcessor(namespace: String, outputDirectory: String) : Processor {
+class NativeProxyProcessor(outputDirectory: String) : Processor {
 
     private val proxyConfiguration = ProxyConfiguration(
-        namespace = namespace,
         threadSafe = false,
         useJniHelper = false,
         headerOnlyProxy = true,
@@ -39,8 +38,11 @@ class NativeProxyProcessor(namespace: String, outputDirectory: String) : Process
     )
     private val nativeProxyGenerator = NativeProxyGenerator(proxyConfiguration, outputDirectory)
 
-    override fun process(input: Any) {
-        nativeProxyGenerator.generate(makeJennyClazz(input))
+    override fun process(namespace: String, input: Any) {
+        nativeProxyGenerator.apply {
+            setNamespace(namespace)
+            generate(makeJennyClazz(input))
+        }
     }
 
     private fun makeJennyClazz(input: Any): JennyClazzElement {
@@ -51,4 +53,6 @@ class NativeProxyProcessor(namespace: String, outputDirectory: String) : Process
             else -> throw IllegalArgumentException("${input.javaClass.name} input type is not supported")
         }
     }
+
+
 }

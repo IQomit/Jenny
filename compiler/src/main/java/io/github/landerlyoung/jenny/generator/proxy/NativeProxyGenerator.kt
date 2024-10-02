@@ -17,8 +17,8 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
-import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.NativeGenerator
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
@@ -26,13 +26,13 @@ import java.io.File
 import java.io.IOException
 
 internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration, private val outputDirectory: String) :
-    Generator<JennyClazzElement, Unit> {
+    NativeGenerator<JennyClazzElement, Unit> {
     private val headerOnlyProxy = proxyConfiguration.headerOnlyProxy
 
     private val nativeProxyHeaderGenerator = NativeProxyHeaderGenerator(proxyConfiguration)
     private val nativeProxySourceGenerator =
         NativeProxySourceGenerator(proxyConfiguration.threadSafe, proxyConfiguration.onlyPublicMethod)
-    private val cppFileHelper = CppFileHelper(proxyConfiguration.namespace)
+    private val cppFileHelper = CppFileHelper()
 
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)
@@ -79,4 +79,5 @@ internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration, priv
         private const val JENNY_GEN_DIR_PROXY = "jenny.proxy"
     }
 
+    override fun setNamespace(namespace: String) = cppFileHelper.setNamespace(namespace)
 }

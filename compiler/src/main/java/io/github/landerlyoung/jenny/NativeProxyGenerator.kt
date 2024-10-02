@@ -72,7 +72,7 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
     private val mFields = mutableListOf<VariableElement>()
     private val mConstants: MutableSet<VariableElement> = LinkedHashSet()
     private val mNativeProxyConfig = nativeProxy
-    private val mNamespaceHelper = NamespaceHelper(mNativeProxyConfig.namespace)
+    private val mNamespaceHelper = NamespaceHelper().apply { assignNamespace(mNativeProxyConfig.namespace) }
     private val mHeaderName: String
     private val mSourceName: String
 

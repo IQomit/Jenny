@@ -61,7 +61,7 @@ class NativeGlueGenerator(env: Environment, clazz: TypeElement) : AbsCodeGenerat
     private fun init(): Boolean {
         if (mClazz.kind != ElementKind.CLASS) return false
 
-        mNamespaceHelper = NamespaceHelper(mNativeClassAnnotation.namespace)
+        mNamespaceHelper = NamespaceHelper().apply { assignNamespace(mNativeClassAnnotation.namespace) }
 
         mHeaderName = mNamespaceHelper.fileNamePrefix + "$cppClassName.h"
         mSourceName = mNamespaceHelper.fileNamePrefix + "$cppClassName.cpp"

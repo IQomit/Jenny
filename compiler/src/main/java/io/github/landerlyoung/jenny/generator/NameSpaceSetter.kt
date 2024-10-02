@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.processor
+package io.github.landerlyoung.jenny.generator
 
-interface Processor {
-    fun process(namespace: String, input: Any)
+internal interface NameSpaceSetter {
+    fun setNamespace(namespace: String)
 }
