@@ -81,10 +81,9 @@ internal object JennyHeaderDefinitionsProvider {
         classInfo: ClassInfo,
         methods: Collection<JennyExecutableElement>,
         isSource: Boolean = false
-    ): String {
-        val outputString = StringBuilder()
+    ): String = buildString {
         if (!isSource) {
-            outputString.append(
+            append(
                 """
                 |
                 |#ifdef __cplusplus
@@ -106,12 +105,12 @@ internal object JennyHeaderDefinitionsProvider {
             val jniReturnType = method.type.toJniReturnTypeString()
             val nativeMethodName =
                 if (isSource)
-                    classInfo.className + "::" + getNativeMethodName(classInfo.jniClassName, method)
+                    classInfo.simpleClassName + "::" + getNativeMethodName(classInfo.jniClassName, method)
                 else
                     getNativeMethodName(classInfo.jniClassName, method)
             val nativeParameters = getJennyElementJniParams(element = method)
 
-            outputString.append(
+            append(
                 """
                     |/*
                     | * Class:     ${classInfo.className}
@@ -122,13 +121,20 @@ internal object JennyHeaderDefinitionsProvider {
             )
 
             if (isSource) {
-                outputString.append(buildMethodBodyWithReturnStatement(method))
+                append(buildMethodBodyWithReturnStatement(method))
             } else {
-                outputString.append(';')
+                append(';')
             }
-            outputString.append("\n\n")
+            append("\n\n")
         }
-        return outputString.toString()
+        if (!isSource) {
+            append(
+                """|#ifdef __cplusplus
+                   |}
+                   |#endif"""
+                    .trimMargin()
+            )
+        }
     }
 
     private fun buildMethodBodyWithReturnStatement(method: JennyExecutableElement) = buildString {
@@ -297,33 +303,34 @@ internal object JennyHeaderDefinitionsProvider {
         }
     }
 
-    fun getProxyHeaderInit(proxyConfiguration: ProxyConfiguration,startOfNamespace: String, classInfo: ClassInfo) = buildString {
-        append(
-            """
+    fun getProxyHeaderInit(proxyConfiguration: ProxyConfiguration, startOfNamespace: String, classInfo: ClassInfo) =
+        buildString {
+            append(
+                """
             |#pragma once
             |
             |#include <jni.h>
             |#include <assert.h>                        
             |""".trimMargin()
-        )
-        if (proxyConfiguration.threadSafe)
-            append(
-                """
+            )
+            if (proxyConfiguration.threadSafe)
+                append(
+                    """
                 |#include <atomic>
                 |#include <mutex>
                 |""".trimMargin()
-            )
+                )
 
-        if (proxyConfiguration.useJniHelper) {
-            append(
-                """
+            if (proxyConfiguration.useJniHelper) {
+                append(
+                    """
                 |#include "jnihelper.h"
                 |
                 |""".trimMargin()
-            )
-        }
-        append(
-            """
+                )
+            }
+            append(
+                """
                 |${startOfNamespace}
                 |class ${classInfo.simpleClassName}Proxy {
                 |
@@ -331,8 +338,8 @@ internal object JennyHeaderDefinitionsProvider {
                 |    static constexpr auto FULL_CLASS_NAME = "${classInfo.slashClassName}";
                 |
                 |""".trimMargin()
-        )
-    }
+            )
+        }
 
     fun getProxyHeaderClazzInit() = buildString {
         append(
@@ -367,6 +374,8 @@ internal object JennyHeaderDefinitionsProvider {
         constructors: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ) = buildString {
+        val returnType = if (useJniHelper) simpleClassName + "Proxy" else "jobject"
+
         constructors.forEach { (constructor, count) ->
             val jniParameters = getJennyElementJniParams(element = constructor, forceStatic = true)
             val javaParameters = getJavaMethodParameters(constructor)
@@ -374,7 +383,7 @@ internal object JennyHeaderDefinitionsProvider {
             append(
                 """
                     |    // construct: ${constructor.modifiers.print()} ${simpleClassName}($javaParameters)
-                    |    static ${constructor.type.typeName} newInstance${constructor.name}(${jniParameters}) {
+                    |    static $returnType newInstance(${jniParameters}) {
                     |           $methodPrologue
                     |        return env->NewObject(${JennyNameProvider.getClassState()}, ${
                     JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(count))

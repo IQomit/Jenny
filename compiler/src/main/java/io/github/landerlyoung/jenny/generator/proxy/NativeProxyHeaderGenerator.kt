@@ -99,6 +99,7 @@ internal class NativeProxyHeaderGenerator(
             append(JennyHeaderDefinitionsProvider.initPostDefinition(input.namespace.endOfNameSpace))
 
             if (proxyConfiguration.headerOnlyProxy) {
+                append(input.namespace.startOfNamespace)
                 append("\n\n")
                 append(
                     JennySourceDefinitionsProvider.generateSourcePreContent(

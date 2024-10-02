@@ -29,7 +29,7 @@ internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
             append(Constants.AUTO_GENERATE_SOURCE_NOTICE)
             append(
                 """
-                    |#include ${input.headerFileName}"
+                    |#include "${input.headerFileName}"
                     |
                     |${input.headerData.namespace.startOfNamespace}
                     |
