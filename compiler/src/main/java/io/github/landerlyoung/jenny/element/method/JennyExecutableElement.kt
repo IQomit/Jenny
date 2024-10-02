@@ -30,7 +30,7 @@ internal interface JennyExecutableElement : JennyElement, JennyCallableElement {
 
     companion object {
         fun createWithNewName(original: JennyExecutableElement, newName: String): JennyExecutableElement {
-            return original.withNewName(newName) // This calls the internal method
+            return original.withNewName(newName)
         }
     }
 

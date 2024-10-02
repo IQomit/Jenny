@@ -27,10 +27,12 @@ import java.lang.reflect.Executable
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
-internal class JennyExecutableReflectElement(
-    private val executable: Executable,
-    private val customName: String? = null
-) : JennyExecutableElement {
+internal class JennyExecutableReflectElement(private val executable: Executable) : JennyExecutableElement {
+
+    private constructor(executable: Executable, customName: String) : this(executable) {
+        this.customName = customName
+    }
+    private var customName: String? = null
 
     override fun isConstructor() = executable is Constructor<*>
 

@@ -30,8 +30,13 @@ import javax.lang.model.element.TypeElement
 
 internal class JennyExecutableVariableElement(
     private val method: ExecutableElement,
-    private val customName: String? = null // New property for custom name
 ) : JennyExecutableElement {
+
+    private constructor(method: ExecutableElement, customName: String) : this(method) {
+        this.customName = customName
+    }
+
+    private var customName: String? = null
 
     override fun isConstructor() = method.kind == ElementKind.CONSTRUCTOR
 
