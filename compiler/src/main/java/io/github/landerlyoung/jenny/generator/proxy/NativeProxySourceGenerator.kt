@@ -19,11 +19,21 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.JennySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.visibility
 
-internal class NativeProxySourceGenerator(private val threadSafe: Boolean) : Generator<SourceData, String> {
+internal class NativeProxySourceGenerator(private val threadSafe: Boolean, private val onlyPublicMethod: Boolean) :
+    Generator<SourceData, String> {
+    private val methodOverloadResolver = JennyMethodOverloadResolver()
+
     override fun generate(input: SourceData): String {
         val header = input.headerData
+        val constructors = header.constructors.visibility(onlyPublicMethod)
+        val methods = header.methods.visibility(onlyPublicMethod)
+        val resolvedConstructors = methodOverloadResolver.resolve(constructors)
+        val resolvedMethods = methodOverloadResolver.resolve(methods)
+
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
 
@@ -42,8 +52,8 @@ internal class NativeProxySourceGenerator(private val threadSafe: Boolean) : Gen
                     threadSafe,
                 )
             )
-            append(JennySourceDefinitionsProvider.getConstructorIdInit(header.constructors))
-            append(JennySourceDefinitionsProvider.getMethodIdInit(header.methods))
+            append(JennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
+            append(JennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
             append(JennySourceDefinitionsProvider.getFieldIdInit(header.fields))
             append(
                 JennySourceDefinitionsProvider.generateSourcePostContent(

@@ -107,8 +107,8 @@ internal class NativeProxyHeaderGenerator(
                         proxyConfiguration.threadSafe,
                     )
                 )
-                append(JennySourceDefinitionsProvider.getConstructorIdInit(constructors))
-                append(JennySourceDefinitionsProvider.getMethodIdInit(methods))
+                append(JennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
+                append(JennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
                 append(JennySourceDefinitionsProvider.getFieldIdInit(fields))
                 append(
                     JennySourceDefinitionsProvider.generateSourcePostContent(

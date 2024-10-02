@@ -84,7 +84,7 @@ internal object JennySourceDefinitionsProvider {
 
     fun generateSourcePostContent(
         simpleClassName: String,
-        endNamespace:String,
+        endNamespace: String,
         headerOnly: Boolean,
         threadSafe: Boolean,
     ): String = buildString {
@@ -134,9 +134,9 @@ internal object JennySourceDefinitionsProvider {
         append("\n")
     }
 
-    fun getConstructorIdInit(constructors: Collection<JennyExecutableElement>): String = buildString {
-        constructors.forEachIndexed { index, constructor ->
-            val name = "state.${JennyNameProvider.getConstructorName(index)}"
+    fun getConstructorIdInit(constructors: Map<JennyExecutableElement, Int>): String = buildString {
+        constructors.forEach { (constructor, count) ->
+            val name = "state.${JennyNameProvider.getConstructorName(count)}"
             val signature = Signature.getBinaryJennyElementSignature(constructor)
 
             append(
@@ -150,9 +150,9 @@ internal object JennySourceDefinitionsProvider {
         append('\n')
     }
 
-    fun getMethodIdInit(methods: Collection<JennyExecutableElement>): String = buildString {
-        methods.forEachIndexed { index, method ->
-            val name = "state.${JennyNameProvider.getElementName(method, index)}"
+    fun getMethodIdInit(methods: Map<JennyExecutableElement, Int>): String = buildString {
+        methods.forEach { (method, count) ->
+            val name = "state.${JennyNameProvider.getElementName(method, count)}"
             val static = if (method.isStatic()) "Static" else ""
             val methodName = method.name
             val signature = Signature.getBinaryJennyElementSignature(method)

@@ -23,38 +23,58 @@ import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
 import java.io.File
+import java.io.IOException
 
 internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration, private val outputDirectory: String) :
     Generator<JennyClazzElement, Unit> {
+    private val headerOnlyProxy = proxyConfiguration.headerOnlyProxy
 
     private val nativeProxyHeaderGenerator = NativeProxyHeaderGenerator(proxyConfiguration)
-    private val nativeProxySourceGenerator = NativeProxySourceGenerator(proxyConfiguration.threadSafe)
+    private val nativeProxySourceGenerator =
+        NativeProxySourceGenerator(proxyConfiguration.threadSafe, proxyConfiguration.onlyPublicMethod)
     private val cppFileHelper = CppFileHelper(proxyConfiguration.namespace)
 
     override fun generate(input: JennyClazzElement) {
-        val headerData = HeaderData.Builder()
-            .namespace(cppFileHelper.provideNamespace())
-            .jennyClazz(input)
-            .build()
-
-        val headerContent = nativeProxyHeaderGenerator.generate(headerData)
-        val headerFile = cppFileHelper.provideHeaderFile(className = input.name)
-        saveContent(headerContent, headerFile)
-
-        val sourceContent = nativeProxySourceGenerator.generate(SourceData(headerFile, headerData))
-        val sourceFile = cppFileHelper.provideSourceFile(className = input.name)
-        saveContent(sourceContent, sourceFile)
-    }
-
-    private fun saveContent(content: String, fileName: String) {
-        FileHandler.createOutputFile(
-            outputDirectory,
-            JENNY_GEN_DIR_PROXY + File.separatorChar + fileName
-        ).use {
-            it.write(content.toByteArray(Charsets.UTF_8))
+        generateHeaderFile(input)
+        if (!headerOnlyProxy) {
+            generateSourceFile(input)
         }
     }
 
+    private fun generateHeaderFile(input: JennyClazzElement) {
+        val headerData = createHeaderData(input)
+        val headerContent = nativeProxyHeaderGenerator.generate(headerData)
+        val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
+        writeFileContent(headerContent, headerFileName)
+    }
+
+    private fun generateSourceFile(input: JennyClazzElement) {
+        val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
+        val headerData = createHeaderData(input)
+        val sourceContent = nativeProxySourceGenerator.generate(SourceData(headerFileName, headerData))
+        val sourceFileName = cppFileHelper.provideSourceFile(className = input.name)
+        writeFileContent(sourceContent, sourceFileName)
+    }
+
+    private fun createHeaderData(input: JennyClazzElement): HeaderData {
+        return HeaderData.Builder()
+            .namespace(cppFileHelper.provideNamespace())
+            .jennyClazz(input)
+            .build()
+    }
+
+    private fun writeFileContent(content: String, fileName: String) {
+        try {
+            FileHandler.createOutputFile(
+                outputDirectory,
+                JENNY_GEN_DIR_PROXY + File.separatorChar + fileName
+            ).use {
+                it.write(content.toByteArray(Charsets.UTF_8))
+            }
+        } catch (e: IOException) {
+            println("Error writing file $fileName: ${e.message}")
+        }
+    }
     companion object {
         private const val JENNY_GEN_DIR_PROXY = "jenny.proxy"
     }

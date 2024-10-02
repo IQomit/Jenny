@@ -24,6 +24,7 @@ import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
 import io.github.landerlyoung.jenny.utils.isNative
 import java.io.File
+import java.io.IOException
 
 internal class NativeGlueGenerator(namespace: String, private val outputDirectory: String) :
     Generator<JennyClazzElement, Unit> {
@@ -34,30 +35,43 @@ internal class NativeGlueGenerator(namespace: String, private val outputDirector
     private val cppFileHelper = CppFileHelper(namespace)
 
     override fun generate(input: JennyClazzElement) {
-        val headerData = HeaderData.Builder()
-            .jennyClazz(input)
-            .namespace(cppFileHelper.provideNamespace())
-            .methods(input.methods.filter { it.isNative() })
-            .build()
-
-
-        // Header generation
-        val headerContent = nativeGlueHeaderGenerator.generate(headerData)
-        val headerFile = cppFileHelper.provideHeaderFile(className = input.name)
-        saveContent(headerContent, headerFile)
-
-        // Source generation
-        val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, headerData))
-        val sourceFile = cppFileHelper.provideSourceFile(className = input.name)
-        saveContent(sourceContent, sourceFile)
+        generateHeaderFile(input)
+        generateSourceFile(input)
     }
 
-    private fun saveContent(content: String, fileName: String) {
-        FileHandler.createOutputFile(
-            outputDirectory,
-            JENNY_GEN_DIR_GLUE + File.separatorChar + fileName
-        ).use {
-            it.write(content.toByteArray(Charsets.UTF_8))
+    private fun generateHeaderFile(input: JennyClazzElement) {
+        val headerData = createHeaderData(input)
+        val headerContent = nativeGlueHeaderGenerator.generate(headerData)
+        val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
+        writeFileContent(headerContent, headerFileName)
+    }
+
+    private fun generateSourceFile(input: JennyClazzElement) {
+        val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
+        val headerData = createHeaderData(input)
+        val sourceContent = nativeSourceGenerator.generate(SourceData(headerFileName, headerData))
+        val sourceFileName = cppFileHelper.provideSourceFile(className = input.name)
+        writeFileContent(sourceContent, sourceFileName)
+    }
+
+    private fun createHeaderData(input: JennyClazzElement): HeaderData {
+        return HeaderData.Builder()
+            .namespace(cppFileHelper.provideNamespace())
+            .jennyClazz(input)
+            .methods(input.methods.filter { it.isNative() })
+            .build()
+    }
+
+    private fun writeFileContent(content: String, fileName: String) {
+        try {
+            FileHandler.createOutputFile(
+                outputDirectory,
+                JENNY_GEN_DIR_GLUE + File.separatorChar + fileName
+            ).use {
+                it.write(content.toByteArray(Charsets.UTF_8))
+            }
+        } catch (e: IOException) {
+            println("Error writing file $fileName: ${e.message}")
         }
     }
 
