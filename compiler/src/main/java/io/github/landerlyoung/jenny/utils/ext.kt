@@ -71,4 +71,5 @@ internal fun String.toCamelCase() =
 
 internal fun JennyElement.isStatic() = JennyModifier.STATIC in modifiers
 internal fun JennyElement.isConstant() = isStatic() && JennyModifier.FINAL in modifiers
+internal fun JennyElement.isNative() = JennyModifier.NATIVE in modifiers
 
