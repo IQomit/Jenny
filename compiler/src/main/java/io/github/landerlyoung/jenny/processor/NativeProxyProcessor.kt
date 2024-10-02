@@ -21,6 +21,7 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.proxy.NativeProxyGenerator
 import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.utils.CppFileHelper
 import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
@@ -36,13 +37,12 @@ class NativeProxyProcessor(outputDirectory: String) : Processor {
         gettersForFields = false,
         settersForFields = false,
     )
-    private val nativeProxyGenerator = NativeProxyGenerator(proxyConfiguration, outputDirectory)
+    private val cppFileHelper = CppFileHelper()
+    private val nativeProxyGenerator = NativeProxyGenerator(cppFileHelper, proxyConfiguration, outputDirectory)
 
     override fun process(namespace: String, input: Any) {
-        nativeProxyGenerator.apply {
-            setNamespace(namespace)
-            generate(makeJennyClazz(input))
-        }
+        cppFileHelper.setNamespace(namespace)
+        nativeProxyGenerator.generate(makeJennyClazz(input))
     }
 
     private fun makeJennyClazz(input: Any): JennyClazzElement {

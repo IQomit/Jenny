@@ -16,10 +16,9 @@
 
 package io.github.landerlyoung.jenny.utils
 
-import io.github.landerlyoung.jenny.generator.NameSpaceSetter
 import io.github.landerlyoung.jenny.generator.Namespace
 
-internal class CppFileHelper : NameSpaceSetter {
+internal class CppFileHelper  {
     private val namespaceHelper = NamespaceHelper()
     fun provideHeaderFile(className: String) = "${namespaceHelper.fileNamePrefix}$className.h"
     fun provideSourceFile(className: String) = "${namespaceHelper.fileNamePrefix}$className.cpp"
@@ -30,7 +29,7 @@ internal class CppFileHelper : NameSpaceSetter {
         )
     }
 
-    override fun setNamespace(namespace: String) {
+    fun setNamespace(namespace: String) {
         namespaceHelper.assignNamespace(namespace)
     }
 }

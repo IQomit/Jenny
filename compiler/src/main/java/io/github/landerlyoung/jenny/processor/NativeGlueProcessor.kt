@@ -20,19 +20,18 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClassElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.glue.NativeGlueGenerator
+import io.github.landerlyoung.jenny.utils.CppFileHelper
 import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
 
 class NativeGlueProcessor(outputDirectory: String) : Processor {
-
-    private val nativeGlueGenerator = NativeGlueGenerator(outputDirectory)
+    private val cppFileHelper = CppFileHelper()
+    private val nativeGlueGenerator = NativeGlueGenerator(cppFileHelper, outputDirectory)
 
     override fun process(namespace: String, input: Any) {
-        nativeGlueGenerator.apply {
-            setNamespace(namespace)
-            generate(makeJennyClazz(input))
-        }
+        cppFileHelper.setNamespace(namespace)
+        nativeGlueGenerator.generate(makeJennyClazz(input))
     }
 
     private fun makeJennyClazz(input: Any): JennyClazzElement {
@@ -43,6 +42,4 @@ class NativeGlueProcessor(outputDirectory: String) : Processor {
             else -> throw IllegalArgumentException("${input.javaClass.name} input type is not supported")
         }
     }
-
-
 }

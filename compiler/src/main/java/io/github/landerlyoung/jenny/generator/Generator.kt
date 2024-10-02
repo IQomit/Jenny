@@ -19,6 +19,3 @@ package io.github.landerlyoung.jenny.generator
 internal interface Generator<in Input, out Output> {
     fun generate(input: Input): Output
 }
-
-
-internal interface NativeGenerator<in Input, out Output> : Generator<Input, Output>, NameSpaceSetter

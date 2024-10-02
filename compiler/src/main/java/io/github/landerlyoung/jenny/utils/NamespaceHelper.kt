@@ -25,9 +25,7 @@ package io.github.landerlyoung.jenny.utils
  * Life with Passion, Code with Creativity.
  * ```
  */
-class NamespaceHelper {
-
-    private var namespace: String = ""
+class NamespaceHelper(private var namespace: String = "") {
     private val namespaces: List<String>
         get() = namespace.split("::").map { it.trim() }
             .filter { it.isNotEmpty() }
@@ -53,5 +51,6 @@ class NamespaceHelper {
     fun assignNamespace(namespace: String) {
         this.namespace = namespace
     }
+
     fun getNamespace() = namespace
 }
