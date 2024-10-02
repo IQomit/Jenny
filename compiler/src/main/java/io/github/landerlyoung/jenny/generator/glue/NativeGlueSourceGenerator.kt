@@ -31,6 +31,8 @@ internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
                 """
                     |#include ${input.headerFileName}"
                     |
+                    |${input.headerData.namespace.startOfNamespace}
+                    |
                     |""".trimMargin()
             )
             append(
@@ -38,6 +40,13 @@ internal class NativeGlueSourceGenerator : Generator<SourceData, String> {
                     input.headerData.classInfo,
                     input.headerData.methods,
                     true
+                )
+            )
+            append(
+                JennyHeaderDefinitionsProvider.getEndNameSpace(
+                    className = input.headerData.classInfo.simpleClassName,
+                    endNamespace = input.headerData.namespace.endOfNameSpace,
+                    isSource = true
                 )
             )
         }

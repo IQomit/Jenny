@@ -84,6 +84,7 @@ internal object JennySourceDefinitionsProvider {
 
     fun generateSourcePostContent(
         simpleClassName: String,
+        endNamespace:String,
         headerOnly: Boolean,
         threadSafe: Boolean,
     ): String = buildString {
@@ -128,6 +129,9 @@ internal object JennySourceDefinitionsProvider {
                 |
                 |""".trimMargin()
         )
+        append("\n")
+        append(endNamespace)
+        append("\n")
     }
 
     fun getConstructorIdInit(constructors: Collection<JennyExecutableElement>): String = buildString {

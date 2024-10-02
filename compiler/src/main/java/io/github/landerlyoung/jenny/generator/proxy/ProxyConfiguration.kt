@@ -22,6 +22,7 @@ data class ProxyConfiguration(
     val useJniHelper: Boolean,
     val headerOnlyProxy: Boolean,
 
+    val namespace:String,
     val allFields: Boolean,
     val onlyPublicMethod: Boolean,
     val gettersForFields: Boolean,

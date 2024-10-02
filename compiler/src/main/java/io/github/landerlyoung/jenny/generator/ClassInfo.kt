@@ -17,7 +17,6 @@
 package io.github.landerlyoung.jenny.generator
 
 data class ClassInfo(
-
     val simpleClassName: String,
     // package.simpleClassName
     val className: String,

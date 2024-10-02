@@ -33,6 +33,8 @@ internal class NativeProxySourceGenerator(private val threadSafe: Boolean) : Gen
                 |
                 |""".trimMargin()
             )
+            append(input.headerData.namespace.startOfNamespace)
+            append("\n\n")
             append(
                 JennySourceDefinitionsProvider.generateSourcePreContent(
                     header.classInfo.simpleClassName,
@@ -45,7 +47,8 @@ internal class NativeProxySourceGenerator(private val threadSafe: Boolean) : Gen
             append(JennySourceDefinitionsProvider.getFieldIdInit(header.fields))
             append(
                 JennySourceDefinitionsProvider.generateSourcePostContent(
-                    header.classInfo.simpleClassName,
+                    simpleClassName = header.classInfo.simpleClassName,
+                    endNamespace = input.headerData.namespace.endOfNameSpace,
                     headerOnly = true,
                     threadSafe,
                 )

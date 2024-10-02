@@ -35,14 +35,20 @@ internal class NativeProxyHeaderGenerator(
 
         val constructors = input.constructors.visibility(proxyConfiguration.onlyPublicMethod)
         val methods = input.methods.visibility(proxyConfiguration.onlyPublicMethod)
-        val fields =  input.fields.visibility(proxyConfiguration.onlyPublicMethod)
+        val fields = input.fields.visibility(proxyConfiguration.onlyPublicMethod)
 
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
         val resolvedMethods = methodOverloadResolver.resolve(methods)
 
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
-            append(JennyHeaderDefinitionsProvider.getProxyHeaderInit(proxyConfiguration, classInfo))
+            append(
+                JennyHeaderDefinitionsProvider.getProxyHeaderInit(
+                    proxyConfiguration,
+                    input.namespace.startOfNamespace,
+                    classInfo
+                )
+            )
             append(JennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
             append(JennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
             append(
@@ -90,7 +96,7 @@ internal class NativeProxyHeaderGenerator(
             append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(resolvedConstructors))
             append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(resolvedMethods))
             append(JennyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
-            append(JennyHeaderDefinitionsProvider.initPostDefinition())
+            append(JennyHeaderDefinitionsProvider.initPostDefinition(input.namespace.endOfNameSpace))
 
             if (proxyConfiguration.headerOnlyProxy) {
                 append("\n\n")
@@ -107,6 +113,7 @@ internal class NativeProxyHeaderGenerator(
                 append(
                     JennySourceDefinitionsProvider.generateSourcePostContent(
                         classInfo.simpleClassName,
+                        endNamespace = input.namespace.endOfNameSpace,
                         headerOnly = true,
                         proxyConfiguration.threadSafe,
                     )

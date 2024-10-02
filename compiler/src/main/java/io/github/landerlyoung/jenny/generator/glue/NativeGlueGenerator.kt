@@ -20,25 +20,27 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.utils.CppFileNameGenerator
+import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.isNative
 
-internal class NativeGlueGenerator(private val outputDirectory: String) : Generator<JennyClazzElement, Unit> {
+internal class NativeGlueGenerator(namespace: String, private val outputDirectory: String) :
+    Generator<JennyClazzElement, Unit> {
 
     // Generators
     private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator()
     private val nativeSourceGenerator = NativeGlueSourceGenerator()
-    private val cppFileNameGenerator = CppFileNameGenerator()
+    private val cppFileHelper = CppFileHelper(namespace)
 
     override fun generate(input: JennyClazzElement) {
         val headerData = HeaderData.Builder()
             .jennyClazz(input)
+            .namespace(cppFileHelper.provideNamespace())
             .methods(input.methods.filter { it.isNative() })
             .build()
         val classInfo = headerData.classInfo
         // Header generation
         val headerContent = nativeGlueHeaderGenerator.generate(headerData)
-        val headerFile = cppFileNameGenerator.generateHeaderFile(className = input.name)
+        val headerFile = cppFileHelper.provideHeaderFile(className = input.name)
         println("Header Content $headerContent")
 //        FileHandler.createOutputFile(
 //            outputDirectory,
@@ -49,7 +51,7 @@ internal class NativeGlueGenerator(private val outputDirectory: String) : Genera
 
         // Source generation
         val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, headerData))
-        val sourceFile = cppFileNameGenerator.generateSourceFile(className = classInfo.simpleClassName)
+        val sourceFile = cppFileHelper.provideSourceFile(className = classInfo.simpleClassName)
 //        FileHandler.createOutputFile(
 //            outputDirectory,
 //            Constants.JENNY_GEN_DIR_GLUE_SOURCE + File.separatorChar + sourceFile

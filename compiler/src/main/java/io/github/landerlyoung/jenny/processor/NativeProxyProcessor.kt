@@ -27,17 +27,17 @@ import kotlin.reflect.KClass
 
 class NativeProxyProcessor : Processor {
 
-    private val nativeProxyGenerator = NativeProxyGenerator(
-        ProxyConfiguration(
-            threadSafe = true,
-            useJniHelper = true,
-            headerOnlyProxy = true,
-            allFields = true,
-            onlyPublicMethod = true,
-            gettersForFields = false,
-            settersForFields = false,
-        )
+    private val proxyConfiguration = ProxyConfiguration(
+        namespace = "OK::FD::ER",
+        threadSafe = false,
+        useJniHelper = false,
+        headerOnlyProxy = true,
+        allFields = true,
+        onlyPublicMethod = true,
+        gettersForFields = false,
+        settersForFields = false,
     )
+    private val nativeProxyGenerator = NativeProxyGenerator(proxyConfiguration)
 
     override fun process(input: Any) {
         nativeProxyGenerator.generate(makeJennyClazz(input))

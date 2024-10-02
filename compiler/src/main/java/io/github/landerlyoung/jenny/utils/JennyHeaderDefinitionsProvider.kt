@@ -30,7 +30,7 @@ import io.github.landerlyoung.jenny.stripNonASCII
 import java.util.*
 
 internal object JennyHeaderDefinitionsProvider {
-    fun getHeaderInitForGlue(classInfo: ClassInfo): String {
+    fun getHeaderInitForGlue(classInfo: ClassInfo, startOfNamespace: String): String {
         return """
                 |
                 |/* C++ header file for class ${classInfo.slashClassName} */
@@ -38,6 +38,7 @@ internal object JennyHeaderDefinitionsProvider {
                 |
                 |#include <jni.h>
                 |
+                |${startOfNamespace}
                 |namespace ${classInfo.simpleClassName} {
                 |
                 |// DO NOT modify
@@ -69,13 +70,11 @@ internal object JennyHeaderDefinitionsProvider {
         return "static constexpr $nativeType ${property.name} = $value;"
     }
 
-    fun getEndNameSpace(className: String, isSource: Boolean = false): String {
-        val outputString = StringBuilder()
-
-        outputString.append('\n')
+    fun getEndNameSpace(className: String, endNamespace: String, isSource: Boolean = false) = buildString {
+        append('\n')
         if (!isSource)
-            outputString.append("} // endof namespace $className\n")
-        return outputString.toString()
+            append("} // endof namespace $className\n")
+        append("${endNamespace}\n\n")
     }
 
     fun getNativeMethodsDefinitions(
@@ -298,7 +297,7 @@ internal object JennyHeaderDefinitionsProvider {
         }
     }
 
-    fun getProxyHeaderInit(proxyConfiguration: ProxyConfiguration, classInfo: ClassInfo) = buildString {
+    fun getProxyHeaderInit(proxyConfiguration: ProxyConfiguration,startOfNamespace: String, classInfo: ClassInfo) = buildString {
         append(
             """
             |#pragma once
@@ -325,6 +324,7 @@ internal object JennyHeaderDefinitionsProvider {
         }
         append(
             """
+                |${startOfNamespace}
                 |class ${classInfo.simpleClassName}Proxy {
                 |
                 |public:
@@ -364,7 +364,7 @@ internal object JennyHeaderDefinitionsProvider {
 
     fun getConstructorsDefinitions(
         simpleClassName: String,
-        constructors: Map<JennyExecutableElement,Int>,
+        constructors: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ) = buildString {
         constructors.forEach { (constructor, count) ->
@@ -404,7 +404,7 @@ internal object JennyHeaderDefinitionsProvider {
     }
 
     fun getMethodsDefinitions(
-        methods: Map<JennyExecutableElement,Int>,
+        methods: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ) = buildString {
         methods.forEach { (method, count) ->
@@ -690,15 +690,15 @@ internal object JennyHeaderDefinitionsProvider {
 
     }
 
-    fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement,Int>): String = buildString {
-        constructors.forEach { (_,count) ->
+    fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String = buildString {
+        constructors.forEach { (_, count) ->
             append("    jmethodID ${JennyNameProvider.getConstructorName(count)} = nullptr;\n")
         }
         append('\n')
     }
 
-    fun getMethodIdDeclare(methods: Map<JennyExecutableElement,Int>): String = buildString {
-        methods.forEach { (method,count) ->
+    fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String = buildString {
+        methods.forEach { (method, count) ->
             append("    jmethodID ${JennyNameProvider.getElementName(method, count)} = nullptr;\n")
         }
         append('\n')
@@ -711,7 +711,7 @@ internal object JennyHeaderDefinitionsProvider {
         append('\n')
     }
 
-    fun initPostDefinition(): String = buildString {
+    fun initPostDefinition(endNamespace: String): String = buildString {
         append(
             """
               |    }; // endof struct ClassInitState
@@ -726,6 +726,7 @@ internal object JennyHeaderDefinitionsProvider {
         )
 
         append("};\n")
+        append(endNamespace)
         append("\n\n")
     }
 

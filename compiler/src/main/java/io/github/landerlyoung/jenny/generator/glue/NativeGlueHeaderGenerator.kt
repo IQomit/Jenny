@@ -31,15 +31,25 @@ internal class NativeGlueHeaderGenerator(private val registerJniMethods: Boolean
         val classInfo = input.classInfo
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
-            append(JennyHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo))
+            append(JennyHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo, input.namespace.startOfNamespace))
             if (registerJniMethods) {
                 append(JennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
                 append(JennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
                 append(JennyHeaderDefinitionsProvider.getJniRegister(input.methods))
-                append(JennyHeaderDefinitionsProvider.getEndNameSpace(classInfo.simpleClassName))
+                append(
+                    JennyHeaderDefinitionsProvider.getEndNameSpace(
+                        className = classInfo.simpleClassName,
+                        endNamespace = input.namespace.endOfNameSpace
+                    )
+                )
             } else {
                 append(JennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
-                append(JennyHeaderDefinitionsProvider.getEndNameSpace(classInfo.simpleClassName))
+                append(
+                    JennyHeaderDefinitionsProvider.getEndNameSpace(
+                        className = classInfo.simpleClassName,
+                        endNamespace = input.namespace.endOfNameSpace
+                    )
+                )
                 append(JennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
             }
         }

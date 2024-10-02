@@ -24,9 +24,9 @@ import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
 
-class NativeGlueProcessor(outputDirectory: String) : Processor {
+class NativeGlueProcessor(namespace: String, outputDirectory: String) : Processor {
 
-    private val nativeGlueGenerator = NativeGlueGenerator(outputDirectory)
+    private val nativeGlueGenerator = NativeGlueGenerator(namespace, outputDirectory)
 
     override fun process(input: Any) {
         nativeGlueGenerator.generate(makeJennyClazz(input))
