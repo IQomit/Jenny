@@ -17,12 +17,12 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.Constants
-import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.JennySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxyHeaderGenerator(
     private val proxyConfiguration: ProxyConfiguration
@@ -32,16 +32,12 @@ internal class NativeProxyHeaderGenerator(
 
     override fun generate(input: HeaderData): String {
         val classInfo = input.classInfo
-        val constructors = input.constructors.filter { method ->
-            !proxyConfiguration.onlyPublicMethod || JennyModifier.PUBLIC in method.modifiers
-        }
+
+        val constructors = input.constructors.visibility(proxyConfiguration.onlyPublicMethod)
+        val methods = input.methods.visibility(proxyConfiguration.onlyPublicMethod)
+        val fields =  input.fields.visibility(proxyConfiguration.onlyPublicMethod)
+
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
-        val methods = input.methods.filter { method ->
-            !proxyConfiguration.onlyPublicMethod || JennyModifier.PUBLIC in method.modifiers
-        }
-        val fields = input.fields.filter { method ->
-            !proxyConfiguration.onlyPublicMethod || JennyModifier.PUBLIC in method.modifiers
-        }
         val resolvedMethods = methodOverloadResolver.resolve(methods)
 
         return buildString {
@@ -91,8 +87,8 @@ internal class NativeProxyHeaderGenerator(
 
             append(JennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
 
-            append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(constructors))
-            append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(methods))
+            append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(resolvedConstructors))
+            append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(resolvedMethods))
             append(JennyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
             append(JennyHeaderDefinitionsProvider.initPostDefinition())
 

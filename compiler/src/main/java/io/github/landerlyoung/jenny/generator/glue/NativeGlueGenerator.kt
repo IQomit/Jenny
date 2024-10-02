@@ -38,7 +38,7 @@ internal class NativeGlueGenerator(private val outputDirectory: String) : Genera
         val classInfo = headerData.classInfo
         // Header generation
         val headerContent = nativeGlueHeaderGenerator.generate(headerData)
-        val headerFile = cppFileNameGenerator.generateHeaderFile(className = classInfo.simpleClassName)
+        val headerFile = cppFileNameGenerator.generateHeaderFile(className = input.name)
         println("Header Content $headerContent")
 //        FileHandler.createOutputFile(
 //            outputDirectory,

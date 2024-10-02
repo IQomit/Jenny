@@ -23,29 +23,37 @@ import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
 
 internal class JennyMethodOverloadResolver(
     private val resolver: MethodParameterResolver = MethodParameterResolver()
-) : Resolver<Collection<JennyExecutableElement>, Collection<JennyExecutableElement>> {
+) : Resolver<Collection<JennyExecutableElement>, Map<JennyExecutableElement, Int>> {
 
     override fun resolve(
         input: Collection<JennyExecutableElement>
-    ): Collection<JennyExecutableElement> {
+    ): Map<JennyExecutableElement, Int> {
         val overloadMap = mutableMapOf<String, Boolean>()
+        val nameCountMap = mutableMapOf<String, Int>()
+        val resultMap = mutableMapOf<JennyExecutableElement, Int>()
 
         input.forEach { method ->
             val paramSignature = resolver.resolve(method)
             overloadMap[paramSignature] = overloadMap.containsKey(paramSignature)
         }
 
-        return input.map { method ->
-            val paramSignature = resolver.resolve(method)
-            val isOverloaded = overloadMap[paramSignature] == true
-            val isCppReserved = Constants.CPP_RESERVED_WORS.contains(method.name)
+        input.forEach { method ->
+            val methodName = method.name
+            val currentCount = nameCountMap.getOrDefault(methodName, 0)
+            nameCountMap[methodName] = currentCount + 1
 
-            if (isOverloaded || isCppReserved) {
+            val paramSignature = resolver.resolve(method)
+            val isOverloaded = overloadMap[paramSignature]!!
+            val isCppReserved = Constants.CPP_RESERVED_WORS.contains(method.name)
+            val updatedMethod = if (isOverloaded || isCppReserved) {
                 val postfix = JennyHeaderDefinitionsProvider.getMethodOverloadPostfix(method)
-                JennyExecutableElement.createWithNewName(method,"${method.name}_${postfix}")
+                JennyExecutableElement.createWithNewName(method, "${methodName}_${postfix}")
             } else {
                 method
             }
+            resultMap[updatedMethod] = currentCount
         }
+
+        return resultMap
     }
 }

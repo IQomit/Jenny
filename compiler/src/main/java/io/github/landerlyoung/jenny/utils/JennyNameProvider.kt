@@ -21,6 +21,7 @@ import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 
 internal object JennyNameProvider {
+
     fun getElementName(jennyElement: JennyElement, index: Int): String {
         val type = getType(jennyElement)
         return "s${type}_" + jennyElement.name + "_" + index

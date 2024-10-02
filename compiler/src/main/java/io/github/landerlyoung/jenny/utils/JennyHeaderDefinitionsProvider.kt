@@ -364,10 +364,10 @@ internal object JennyHeaderDefinitionsProvider {
 
     fun getConstructorsDefinitions(
         simpleClassName: String,
-        constructors: Collection<JennyExecutableElement>,
+        constructors: Map<JennyExecutableElement,Int>,
         useJniHelper: Boolean
     ) = buildString {
-        constructors.forEachIndexed { index, constructor ->
+        constructors.forEach { (constructor, count) ->
             val jniParameters = getJennyElementJniParams(element = constructor, forceStatic = true)
             val javaParameters = getJavaMethodParameters(constructor)
             val methodPrologue = getMethodPrologue(useJniHelper, isStatic = true)
@@ -377,7 +377,7 @@ internal object JennyHeaderDefinitionsProvider {
                     |    static ${constructor.type.typeName} newInstance${constructor.name}(${jniParameters}) {
                     |           $methodPrologue
                     |        return env->NewObject(${JennyNameProvider.getClassState()}, ${
-                    JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(index))
+                    JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(count))
                 }${getJniMethodParamVal(constructor, useJniHelper)});
                     |    }
                     |
@@ -404,10 +404,10 @@ internal object JennyHeaderDefinitionsProvider {
     }
 
     fun getMethodsDefinitions(
-        methods: Collection<JennyExecutableElement>,
+        methods: Map<JennyExecutableElement,Int>,
         useJniHelper: Boolean
     ) = buildString {
-        methods.forEachIndexed {index, method ->
+        methods.forEach { (method, count) ->
             val isStatic = method.isStatic()
             val jniReturnType = method.returnType.toJniReturnTypeString()
             val functionReturnType =
@@ -458,7 +458,7 @@ internal object JennyHeaderDefinitionsProvider {
             append(
                 "env->Call${static}${method.returnType.toJniCall()}Method(${classOrObj}, ${
                     JennyNameProvider.getClassState(
-                        JennyNameProvider.getElementName(method,index)
+                        JennyNameProvider.getElementName(method, count)
                     )
                 }${getJniMethodParamVal(method, useJniHelper)})"
             )
@@ -690,16 +690,16 @@ internal object JennyHeaderDefinitionsProvider {
 
     }
 
-    fun getConstructorIdDeclare(constructors: Collection<JennyExecutableElement>): String = buildString {
-        constructors.forEachIndexed { index, _ ->
-            append("    jmethodID ${JennyNameProvider.getConstructorName(index)} = nullptr;\n")
+    fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement,Int>): String = buildString {
+        constructors.forEach { (_,count) ->
+            append("    jmethodID ${JennyNameProvider.getConstructorName(count)} = nullptr;\n")
         }
         append('\n')
     }
 
-    fun getMethodIdDeclare(methods: Collection<JennyExecutableElement>): String = buildString {
-        methods.forEachIndexed { index, jennyExecutableElement ->
-            append("    jmethodID ${JennyNameProvider.getElementName(jennyExecutableElement, index)} = nullptr;\n")
+    fun getMethodIdDeclare(methods: Map<JennyExecutableElement,Int>): String = buildString {
+        methods.forEach { (method,count) ->
+            append("    jmethodID ${JennyNameProvider.getElementName(method, count)} = nullptr;\n")
         }
         append('\n')
     }

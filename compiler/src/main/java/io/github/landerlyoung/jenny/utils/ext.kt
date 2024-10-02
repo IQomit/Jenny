@@ -48,8 +48,9 @@ internal fun JennyType.toJniReturnTypeString(): String {
         else -> "jobject"
     }
 }
+
 internal fun JennyType.toJniCall(): String {
-    val result = if (this.isPrimitive ()|| this.jennyKind == JennyKind.VOID) {
+    val result = if (this.isPrimitive() || this.jennyKind == JennyKind.VOID) {
         this.typeName.lowercase()
     } else {
         "object"
@@ -72,4 +73,13 @@ internal fun String.toCamelCase() =
 internal fun JennyElement.isStatic() = JennyModifier.STATIC in modifiers
 internal fun JennyElement.isConstant() = isStatic() && JennyModifier.FINAL in modifiers
 internal fun JennyElement.isNative() = JennyModifier.NATIVE in modifiers
+internal fun JennyElement.isPublic() = JennyModifier.PUBLIC in modifiers
+
+internal fun <T> Collection<T>.visibility(onlyPublic: Boolean): Collection<T> where T : JennyElement {
+    return if (onlyPublic) {
+        this.filter { it.isPublic() }
+    } else {
+        this
+    }
+}
 
