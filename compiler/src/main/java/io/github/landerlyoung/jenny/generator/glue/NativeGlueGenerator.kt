@@ -21,7 +21,9 @@ import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileHelper
+import io.github.landerlyoung.jenny.utils.FileHandler
 import io.github.landerlyoung.jenny.utils.isNative
+import java.io.File
 
 internal class NativeGlueGenerator(namespace: String, private val outputDirectory: String) :
     Generator<JennyClazzElement, Unit> {
@@ -37,27 +39,30 @@ internal class NativeGlueGenerator(namespace: String, private val outputDirector
             .namespace(cppFileHelper.provideNamespace())
             .methods(input.methods.filter { it.isNative() })
             .build()
-        val classInfo = headerData.classInfo
+
+
         // Header generation
         val headerContent = nativeGlueHeaderGenerator.generate(headerData)
         val headerFile = cppFileHelper.provideHeaderFile(className = input.name)
-        println("Header Content $headerContent")
-//        FileHandler.createOutputFile(
-//            outputDirectory,
-//            Constants.JENNY_GEN_DIR_GLUE_HEADER + File.separatorChar + headerFile
-//        ).use {
-//            it.write(headerContent.toByteArray(Charsets.UTF_8))
-//        }
+        saveContent(headerContent, headerFile)
 
         // Source generation
         val sourceContent = nativeSourceGenerator.generate(SourceData(headerFile, headerData))
-        val sourceFile = cppFileHelper.provideSourceFile(className = classInfo.simpleClassName)
-//        FileHandler.createOutputFile(
-//            outputDirectory,
-//            Constants.JENNY_GEN_DIR_GLUE_SOURCE + File.separatorChar + sourceFile
-//        ).use {
-//            it.write(sourceContent.toByteArray(Charsets.UTF_8))
-//        }
+        val sourceFile = cppFileHelper.provideSourceFile(className = input.name)
+        saveContent(sourceContent, sourceFile)
+    }
+
+    private fun saveContent(content: String, fileName: String) {
+        FileHandler.createOutputFile(
+            outputDirectory,
+            JENNY_GEN_DIR_GLUE + File.separatorChar + fileName
+        ).use {
+            it.write(content.toByteArray(Charsets.UTF_8))
+        }
+    }
+
+    companion object {
+        private const val JENNY_GEN_DIR_GLUE = "jenny.glue"
     }
 
 }

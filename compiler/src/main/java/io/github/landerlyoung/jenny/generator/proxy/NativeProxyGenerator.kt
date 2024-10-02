@@ -21,8 +21,11 @@ import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.utils.CppFileHelper
+import io.github.landerlyoung.jenny.utils.FileHandler
+import java.io.File
 
-internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration) : Generator<JennyClazzElement, Unit> {
+internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration, private val outputDirectory: String) :
+    Generator<JennyClazzElement, Unit> {
 
     private val nativeProxyHeaderGenerator = NativeProxyHeaderGenerator(proxyConfiguration)
     private val nativeProxySourceGenerator = NativeProxySourceGenerator(proxyConfiguration.threadSafe)
@@ -33,12 +36,27 @@ internal class NativeProxyGenerator(proxyConfiguration: ProxyConfiguration) : Ge
             .namespace(cppFileHelper.provideNamespace())
             .jennyClazz(input)
             .build()
+
         val headerContent = nativeProxyHeaderGenerator.generate(headerData)
         val headerFile = cppFileHelper.provideHeaderFile(className = input.name)
+        saveContent(headerContent, headerFile)
 
-        println("Proxy Header Content:::::::: $headerContent")
-        val sourceContent = nativeProxySourceGenerator.generate(SourceData(headerFile,headerData))
-        println("Proxy Source Content:::::::: $sourceContent")
-
+        val sourceContent = nativeProxySourceGenerator.generate(SourceData(headerFile, headerData))
+        val sourceFile = cppFileHelper.provideSourceFile(className = input.name)
+        saveContent(sourceContent, sourceFile)
     }
+
+    private fun saveContent(content: String, fileName: String) {
+        FileHandler.createOutputFile(
+            outputDirectory,
+            JENNY_GEN_DIR_PROXY + File.separatorChar + fileName
+        ).use {
+            it.write(content.toByteArray(Charsets.UTF_8))
+        }
+    }
+
+    companion object {
+        private const val JENNY_GEN_DIR_PROXY = "jenny.proxy"
+    }
+
 }

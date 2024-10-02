@@ -111,7 +111,7 @@ internal class FileHandler(private val file: File) {
     companion object {
         fun createOutputFile(path: String): OutputStream {
             return try {
-                File(path).apply { parentFile?.mkdirs() }.outputStream().buffered()
+                File(path).apply { parentFile.mkdirs() }.outputStream().buffered()
             } catch (e: IOException) {
                 println("Error creating output stream: ${e.message}")
                 throw e
@@ -120,7 +120,7 @@ internal class FileHandler(private val file: File) {
 
         fun createOutputFile(parent: String, name: String): OutputStream {
             return try {
-                File(parent, name).apply { parentFile?.mkdirs() }.outputStream().buffered()
+                File(parent, name).apply { parentFile.mkdirs() }.outputStream().buffered()
             } catch (e: IOException) {
                 println("Error creating output stream: ${e.message}")
                 throw e
