@@ -16,7 +16,6 @@
 
 package io.github.landerlyoung.jenny.utils
 
-import io.github.landerlyoung.jenny.NamespaceHelper
 import io.github.landerlyoung.jenny.generator.Namespace
 
 internal class CppFileHelper(namespace: String) {

@@ -15,6 +15,7 @@
  */
 package io.github.landerlyoung.jenny
 
+import io.github.landerlyoung.jenny.utils.NamespaceHelper
 import java.io.IOException
 import java.util.*
 import javax.lang.model.element.*

@@ -16,6 +16,7 @@
 
 package io.github.landerlyoung.jenny
 
+import io.github.landerlyoung.jenny.utils.NamespaceHelper
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 

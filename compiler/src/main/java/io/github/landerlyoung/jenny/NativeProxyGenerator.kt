@@ -20,6 +20,7 @@ import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.output.StringOutput
 import gg.jte.resolve.DirectoryCodeResolver
+import io.github.landerlyoung.jenny.utils.NamespaceHelper
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
