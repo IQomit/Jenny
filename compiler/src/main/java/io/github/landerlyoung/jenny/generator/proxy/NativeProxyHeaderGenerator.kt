@@ -16,6 +16,8 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
+import io.github.landerlyoung.jenny.NativeFieldProxy
+import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
@@ -30,6 +32,15 @@ internal class NativeProxyHeaderGenerator(
 ) : Generator<HeaderData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
+    private val generateGetterForField: (JennyVarElement) -> Boolean = { field ->
+        val annotation = field.getAnnotation(NativeFieldProxy::class.java)
+        annotation?.getter ?: false
+    }
+
+    private val generateSetterForField: (JennyVarElement) -> Boolean = { field ->
+        val annotation = field.getAnnotation(NativeFieldProxy::class.java)
+        annotation?.setter ?: false
+    }
 
     override fun generate(input: HeaderData): String {
         val classInfo = input.classInfo
@@ -66,8 +77,8 @@ internal class NativeProxyHeaderGenerator(
                     allMethods = methods,
                     useJniHelper = false,
                     getterSetterForAllFields = proxyConfiguration.allFields,
-                    generateGetterForFields = proxyConfiguration.gettersForFields,
-                    generateSetterForFields = proxyConfiguration.settersForFields,
+                    generateGetterForField = generateGetterForField,
+                    generateSetterForField = generateSetterForField,
                 )
             )
             if (proxyConfiguration.useJniHelper) {
@@ -86,8 +97,8 @@ internal class NativeProxyHeaderGenerator(
                         allMethods = methods,
                         useJniHelper = true,
                         getterSetterForAllFields = proxyConfiguration.allFields,
-                        generateGetterForFields = proxyConfiguration.gettersForFields,
-                        generateSetterForFields = proxyConfiguration.settersForFields,
+                        generateGetterForField = generateGetterForField,
+                        generateSetterForField = generateSetterForField,
                     )
                 )
             }

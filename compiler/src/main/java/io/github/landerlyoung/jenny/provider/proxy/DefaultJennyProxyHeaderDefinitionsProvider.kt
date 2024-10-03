@@ -161,14 +161,6 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             val constMod = if (isStatic || !useJniHelper) "" else "const "
             val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"
             val static = if (isStatic) "Static" else ""
-            val callExpressionClosing: StringBuilder = StringBuilder()
-            if (returnTypeNeedCast(jniReturnType)) {
-                callExpressionClosing.append(")")
-            }
-            if (useJniHelper && method.returnType.needWrapLocalRef()) {
-                callExpressionClosing.append(")")
-            }
-            callExpressionClosing.append(";")
             val jniParam = parametersProvider.getJennyElementJniParams(element = method)
             val methodPrologue = getJniMethodPrologue(useJniHelper)
             if (useJniHelper)
@@ -192,7 +184,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             if (useJniHelper && method.returnType.needWrapLocalRef()) {
                 append(functionReturnType).append("(")
             }
-            if (returnTypeNeedCast(jniReturnType)) {
+            if (parametersProvider.returnTypeNeedCast(jniReturnType)) {
                 append("reinterpret_cast<${jniReturnType}>(")
             }
             append(
@@ -202,7 +194,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                     )
                 }${parametersProvider.getJniMethodParamVal(method, useJniHelper)})"
             )
-            if (returnTypeNeedCast(jniReturnType)) {
+            if (parametersProvider.returnTypeNeedCast(jniReturnType)) {
                 append(")")
             }
             if (useJniHelper && method.returnType.needWrapLocalRef()) {
@@ -221,8 +213,8 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         allMethods: Collection<JennyExecutableElement>,
         useJniHelper: Boolean,
         getterSetterForAllFields: Boolean,
-        generateGetterForFields: Boolean,
-        generateSetterForFields: Boolean
+        generateGetterForField: (JennyVarElement) -> Boolean,
+        generateSetterForField: (JennyVarElement) -> Boolean
     ): String = buildString {
         fields.forEachIndexed { index, field ->
             val isStatic = field.isStatic()
@@ -230,8 +222,8 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             val hasGetterSetter = hasGetterSetter(
                 field = field,
                 allMethods = allMethods,
-                generateGetterForFields = generateGetterForFields,
-                generateSetterForFields = generateSetterForFields,
+                generateGetterForFields = generateGetterForField(field),
+                generateSetterForFields = generateSetterForField(field),
                 allFields = getterSetterForAllFields
             )
             val fieldId = JennyNameProvider.getElementName(field, index)
@@ -260,7 +252,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                     append(jniReturnType).append("(")
                 }
 
-                if (returnTypeNeedCast(jniReturnType)) {
+                if (parametersProvider.returnTypeNeedCast(jniReturnType)) {
                     append("reinterpret_cast<${jniReturnType}>(")
                 }
 
@@ -296,18 +288,6 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                 )
                 append('\n')
             }
-        }
-    }
-
-    private fun returnTypeNeedCast(jniReturnType: String): Boolean {
-        return when (jniReturnType) {
-            "jclass", "jstring", "jarray", "jobjectArray",
-            "jbooleanArray", "jbyteArray", "jcharArray",
-            "jshortArray", "jintArray", "jlongArray",
-            "jfloatArray", "jdoubleArray",
-            "jthrowable", "jweak" -> true
-
-            else -> false
         }
     }
 

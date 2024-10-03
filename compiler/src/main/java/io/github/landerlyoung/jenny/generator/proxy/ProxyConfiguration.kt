@@ -21,10 +21,6 @@ data class ProxyConfiguration(
     val threadSafe: Boolean,
     val useJniHelper: Boolean,
     val headerOnlyProxy: Boolean,
-
-//    val namespace:String,
     val allFields: Boolean,
     val onlyPublicMethod: Boolean,
-    val gettersForFields: Boolean,
-    val settersForFields: Boolean,
 )

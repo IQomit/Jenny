@@ -29,4 +29,6 @@ interface JennyVarElement : JennyElement, JennyCallableElement {
             Annotations: ${annotations.joinToString(", ")}
         """.trimIndent()
     }
+
+    fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T?
 }

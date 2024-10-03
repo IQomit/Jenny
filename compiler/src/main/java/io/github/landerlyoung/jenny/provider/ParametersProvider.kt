@@ -94,4 +94,16 @@ class ParametersProvider {
         }
         return "static constexpr $nativeType ${property.name} = $value;"
     }
+
+    fun returnTypeNeedCast(jniReturnType: String): Boolean {
+        return when (jniReturnType) {
+            "jclass", "jstring", "jarray", "jobjectArray",
+            "jbooleanArray", "jbyteArray", "jcharArray",
+            "jshortArray", "jintArray", "jlongArray",
+            "jfloatArray", "jdoubleArray",
+            "jthrowable", "jweak" -> true
+
+            else -> false
+        }
+    }
 }

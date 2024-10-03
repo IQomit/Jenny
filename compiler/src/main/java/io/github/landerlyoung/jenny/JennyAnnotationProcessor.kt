@@ -117,7 +117,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                     val config = NativeProxyGenerator.NativeProxyConfig(
                         allMethods = true, allFields = true, namespace = annotation.namespace, onlyPublic = true
                     )
-                    nativeProxyProcessor.process(config.namespace, clazz)
+                    nativeProxyProcessor.process(annotation.namespace, clazz)
 //                    NativeProxyGenerator(env, clazz, config).doGenerate()
                 }
             }

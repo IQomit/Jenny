@@ -34,9 +34,7 @@ class NativeProxyProcessor(outputDirectory: String) : Processor {
         useJniHelper = false,
         headerOnlyProxy = false,
         allFields = true,
-        onlyPublicMethod = true,
-        gettersForFields = false,
-        settersForFields = false,
+        onlyPublicMethod = true
     )
     private val cppFileHelper = CppFileHelper()
     private val nativeProxyGenerator = NativeProxyGenerator(cppFileHelper, proxyConfiguration, outputDirectory)

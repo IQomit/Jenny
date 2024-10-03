@@ -35,6 +35,10 @@ internal class JennyVariableElement(private val variableElement: VariableElement
     override val annotations: List<String>
         get() = variableElement.annotationMirrors.map { it.annotationType.toString() }
 
+    override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+        return variableElement.getAnnotation(annotationClass)
+    }
+
     override val modifiers: Set<JennyModifier>
         get() = JennyModifier.fromElementModifiers(variableElement.modifiers)
 
