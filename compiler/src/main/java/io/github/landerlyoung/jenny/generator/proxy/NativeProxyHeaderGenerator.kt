@@ -19,15 +19,15 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
-import io.github.landerlyoung.jenny.provider.JennyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.provider.JennySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxyHeaderGenerator(
     private val proxyConfiguration: ProxyConfiguration,
-    private val jennyHeaderDefinitionsProvider: JennyHeaderDefinitionsProvider,
-    private val jennySourceDefinitionsProvider: JennySourceDefinitionsProvider
+    private val jennyProxyHeaderDefinitionsProvider: JennyProxyHeaderDefinitionsProvider,
+    private val jennyProxySourceDefinitionsProvider: JennyProxySourceDefinitionsProvider
 ) : Generator<HeaderData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
@@ -45,24 +45,24 @@ internal class NativeProxyHeaderGenerator(
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
             append(
-                jennyHeaderDefinitionsProvider.getProxyHeaderInit(
+                jennyProxyHeaderDefinitionsProvider.getProxyHeaderInit(
                     proxyConfiguration,
                     input.namespace.startOfNamespace,
                     classInfo
                 )
             )
-            append(jennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
-            append(jennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
+            append(jennyProxyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
+            append(jennyProxyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
             append(
-                jennyHeaderDefinitionsProvider.getConstructorsDefinitions(
+                jennyProxyHeaderDefinitionsProvider.getConstructorsDefinitions(
                     classInfo.simpleClassName,
                     resolvedConstructors,
                     false
                 )
             )
-            append(jennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, false))
+            append(jennyProxyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, false))
             append(
-                jennyHeaderDefinitionsProvider.getFieldsDefinitions(
+                jennyProxyHeaderDefinitionsProvider.getFieldsDefinitions(
                     fields = input.fields,
                     allMethods = methods,
                     useJniHelper = false,
@@ -72,17 +72,17 @@ internal class NativeProxyHeaderGenerator(
                 )
             )
             if (proxyConfiguration.useJniHelper) {
-                append(jennyHeaderDefinitionsProvider.generateForJniHelper(classInfo.simpleClassName))
+                append(jennyProxyHeaderDefinitionsProvider.generateForJniHelper(classInfo.simpleClassName))
                 append(
-                    jennyHeaderDefinitionsProvider.getConstructorsDefinitions(
+                    jennyProxyHeaderDefinitionsProvider.getConstructorsDefinitions(
                         classInfo.simpleClassName,
                         resolvedConstructors,
                         true
                     )
                 )
-                append(jennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, true))
+                append(jennyProxyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, true))
                 append(
-                    jennyHeaderDefinitionsProvider.getFieldsDefinitions(
+                    jennyProxyHeaderDefinitionsProvider.getFieldsDefinitions(
                         fields = input.fields,
                         allMethods = methods,
                         useJniHelper = true,
@@ -93,28 +93,28 @@ internal class NativeProxyHeaderGenerator(
                 )
             }
 
-            append(jennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
+            append(jennyProxyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
 
-            append(jennyHeaderDefinitionsProvider.getConstructorIdDeclare(resolvedConstructors))
-            append(jennyHeaderDefinitionsProvider.getMethodIdDeclare(resolvedMethods))
-            append(jennyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
-            append(jennyHeaderDefinitionsProvider.initPostDefinition(input.namespace.endOfNameSpace))
+            append(jennyProxyHeaderDefinitionsProvider.getConstructorIdDeclare(resolvedConstructors))
+            append(jennyProxyHeaderDefinitionsProvider.getMethodIdDeclare(resolvedMethods))
+            append(jennyProxyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
+            append(jennyProxyHeaderDefinitionsProvider.initPostDefinition(input.namespace.endOfNameSpace))
 
             if (proxyConfiguration.headerOnlyProxy) {
                 append(input.namespace.startOfNamespace)
                 append("\n\n")
                 append(
-                    jennySourceDefinitionsProvider.generateSourcePreContent(
+                    jennyProxySourceDefinitionsProvider.generateSourcePreContent(
                         classInfo.simpleClassName,
                         headerOnly = true,
                         proxyConfiguration.threadSafe,
                     )
                 )
-                append(jennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
-                append(jennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
-                append(jennySourceDefinitionsProvider.getFieldIdInit(fields))
+                append(jennyProxySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
+                append(jennyProxySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
+                append(jennyProxySourceDefinitionsProvider.getFieldIdInit(fields))
                 append(
-                    jennySourceDefinitionsProvider.generateSourcePostContent(
+                    jennyProxySourceDefinitionsProvider.generateSourcePostContent(
                         classInfo.simpleClassName,
                         endNamespace = input.namespace.endOfNameSpace,
                         headerOnly = true,

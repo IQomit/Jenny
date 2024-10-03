@@ -20,7 +20,7 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.provider.DefaultJennyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.glue.DefaultJennyGlueHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
 import io.github.landerlyoung.jenny.utils.isNative
@@ -32,13 +32,13 @@ internal class NativeGlueGenerator(
     private val outputDirectory: String
 ) : Generator<JennyClazzElement, Unit> {
 
-    private val jennyHeaderDefinitionsProvider = DefaultJennyHeaderDefinitionsProvider()
+    private val jennyGlueHeaderDefinitionsProvider = DefaultJennyGlueHeaderDefinitionsProvider()
 
     // Generators
     private val nativeGlueHeaderGenerator =
-        NativeGlueHeaderGenerator(jennyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider)
+        NativeGlueHeaderGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
     private val nativeSourceGenerator =
-        NativeGlueSourceGenerator(jennyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider)
+        NativeGlueSourceGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
 
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)

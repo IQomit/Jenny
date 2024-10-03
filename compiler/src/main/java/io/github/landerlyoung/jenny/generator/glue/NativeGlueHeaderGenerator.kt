@@ -19,11 +19,11 @@ package io.github.landerlyoung.jenny.generator.glue
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
-import io.github.landerlyoung.jenny.provider.JennyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.glue.JennyGlueHeaderDefinitionsProvider
 
 internal class NativeGlueHeaderGenerator(
     private val registerJniMethods: Boolean = true,
-    private val jennyHeaderDefinitionsProvider: JennyHeaderDefinitionsProvider
+    private val jennyGlueHeaderDefinitionsProvider: JennyGlueHeaderDefinitionsProvider
 ) : Generator<HeaderData, String> {
 
     override fun generate(input: HeaderData) = createHeader(input)
@@ -32,26 +32,26 @@ internal class NativeGlueHeaderGenerator(
         val classInfo = input.classInfo
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
-            append(jennyHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo, input.namespace.startOfNamespace))
+            append(jennyGlueHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo, input.namespace.startOfNamespace))
             if (registerJniMethods) {
-                append(jennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
-                append(jennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
-                append(jennyHeaderDefinitionsProvider.getJniRegister(input.methods))
+                append(jennyGlueHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
+                append(jennyGlueHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
+                append(jennyGlueHeaderDefinitionsProvider.getJniRegister(input.methods))
                 append(
-                    jennyHeaderDefinitionsProvider.getEndNameSpace(
+                    jennyGlueHeaderDefinitionsProvider.getEndNameSpace(
                         className = classInfo.simpleClassName,
                         endNamespace = input.namespace.endOfNameSpace
                     )
                 )
             } else {
-                append(jennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
+                append(jennyGlueHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
                 append(
-                    jennyHeaderDefinitionsProvider.getEndNameSpace(
+                    jennyGlueHeaderDefinitionsProvider.getEndNameSpace(
                         className = classInfo.simpleClassName,
                         endNamespace = input.namespace.endOfNameSpace
                     )
                 )
-                append(jennyHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
+                append(jennyGlueHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
             }
         }
     }

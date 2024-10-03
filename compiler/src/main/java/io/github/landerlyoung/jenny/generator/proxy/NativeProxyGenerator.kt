@@ -20,8 +20,8 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.provider.DefaultJennyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.provider.DefaultJennySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.DefaultJennyProxyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.DefaultJennyProxyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
 import java.io.File
@@ -33,18 +33,18 @@ internal class NativeProxyGenerator(
     private val outputDirectory: String
 ) : Generator<JennyClazzElement, Unit> {
     private val headerOnlyProxy = proxyConfiguration.headerOnlyProxy
-    private val jennyHeaderDefinitionsProvider = DefaultJennyHeaderDefinitionsProvider()
-    private val jennySourceDefinitionsProvider = DefaultJennySourceDefinitionsProvider()
+    private val jennyHeaderDefinitionsProvider = DefaultJennyProxyHeaderDefinitionsProvider()
+    private val jennySourceDefinitionsProvider = DefaultJennyProxyProxySourceDefinitionsProvider()
 
     private val nativeProxyHeaderGenerator =
         NativeProxyHeaderGenerator(
             proxyConfiguration = proxyConfiguration,
-            jennyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider,
-            jennySourceDefinitionsProvider = jennySourceDefinitionsProvider
+            jennyProxyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider,
+            jennyProxySourceDefinitionsProvider = jennySourceDefinitionsProvider
         )
     private val nativeProxySourceGenerator =
         NativeProxySourceGenerator(
-            jennySourceDefinitionsProvider = jennySourceDefinitionsProvider,
+            jennyProxySourceDefinitionsProvider = jennySourceDefinitionsProvider,
             threadSafe = proxyConfiguration.threadSafe,
             onlyPublicMethod = proxyConfiguration.onlyPublicMethod
         )

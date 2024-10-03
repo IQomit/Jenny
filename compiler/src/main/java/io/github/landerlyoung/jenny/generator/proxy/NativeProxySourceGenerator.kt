@@ -19,12 +19,12 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.provider.JennySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxySourceGenerator(
-    private val jennySourceDefinitionsProvider: JennySourceDefinitionsProvider,
+    private val jennyProxySourceDefinitionsProvider: JennyProxySourceDefinitionsProvider,
     private val threadSafe: Boolean,
     private val onlyPublicMethod: Boolean
 ) : Generator<SourceData, String> {
@@ -49,17 +49,17 @@ internal class NativeProxySourceGenerator(
             append(input.headerData.namespace.startOfNamespace)
             append("\n\n")
             append(
-                jennySourceDefinitionsProvider.generateSourcePreContent(
+                jennyProxySourceDefinitionsProvider.generateSourcePreContent(
                     header.classInfo.simpleClassName,
                     headerOnly = false,
                     threadSafe,
                 )
             )
-            append(jennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
-            append(jennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
-            append(jennySourceDefinitionsProvider.getFieldIdInit(header.fields))
+            append(jennyProxySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
+            append(jennyProxySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
+            append(jennyProxySourceDefinitionsProvider.getFieldIdInit(header.fields))
             append(
-                jennySourceDefinitionsProvider.generateSourcePostContent(
+                jennyProxySourceDefinitionsProvider.generateSourcePostContent(
                     simpleClassName = header.classInfo.simpleClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
                     headerOnly = true,
