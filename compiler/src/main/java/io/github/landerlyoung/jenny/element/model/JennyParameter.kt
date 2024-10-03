@@ -19,7 +19,7 @@ package io.github.landerlyoung.jenny.element.model
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 
 
-internal data class JennyParameter(
+data class JennyParameter(
     val name: String,
     val type: JennyType,
 ) {

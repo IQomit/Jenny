@@ -58,13 +58,17 @@ internal fun JennyType.toJniCall(): String {
     return result.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 }
 
-internal fun Collection<JennyModifier>.print(): String {
+fun Collection<JennyModifier>.print(): String {
     return this.sorted()
         .joinToString(" ") { it.toString().lowercase(Locale.US) }
 }
 
 internal fun String.stripNonASCII(): String = this.replace("[^a-zA-Z0-9_]".toRegex()) {
     String.format(Locale.US, "_%05x", it.value.codePointAt(0))
+}
+
+internal fun JennyType.needWrapLocalRef(): Boolean {
+    return (!isPrimitive() && jennyKind != JennyKind.VOID)
 }
 
 internal fun String.toCamelCase() =

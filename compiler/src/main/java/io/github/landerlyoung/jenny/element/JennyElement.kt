@@ -20,7 +20,7 @@ import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 
 
-internal interface JennyElement : JennyDescribableElement<String> {
+interface JennyElement : JennyDescribableElement<String> {
     val name: String
     val type: JennyType
     val annotations: List<String>

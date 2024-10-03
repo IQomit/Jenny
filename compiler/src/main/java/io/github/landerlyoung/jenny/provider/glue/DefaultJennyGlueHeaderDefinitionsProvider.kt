@@ -49,25 +49,9 @@ internal class DefaultJennyGlueHeaderDefinitionsProvider : JennyGlueHeaderDefini
 
     override fun getConstantsIdDeclare(constants: Collection<JennyVarElement>) = buildString {
         constants.forEach {
-            append(getConstexprStatement(it))
+            append(parametersProvider.getConstexprStatement(it))
         }
         append('\n')
-    }
-
-    private fun getConstexprStatement(property: JennyVarElement): String {
-        val constValue = property.call()
-        val jniType = property.type.toJniReturnTypeString()
-        val nativeType = if (jniType == "jstring") "auto" else jniType
-
-        val value = when (constValue) {
-            is Boolean -> if (constValue) "JNI_TRUE" else "JNI_FALSE"
-            is Number -> constValue.toString()
-            is Char -> "'${constValue}'"
-            is String -> "u8\"$constValue\""
-            else -> throw IllegalArgumentException("Unknown type: $constValue (${constValue?.javaClass})")
-        }
-
-        return "static constexpr $nativeType ${property.name} = $value;"
     }
 
     override fun getEndNameSpace(className: String, endNamespace: String, isSource: Boolean) = buildString {

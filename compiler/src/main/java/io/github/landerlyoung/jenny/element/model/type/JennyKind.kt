@@ -20,7 +20,7 @@ import java.lang.reflect.*
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
-internal enum class JennyKind {
+enum class JennyKind {
     VOID,
     BOOLEAN,
     BYTE,

@@ -17,6 +17,6 @@
 package io.github.landerlyoung.jenny.element
 
 // This can be used later to output a description of The element (as String or templatized string or even template file)
-internal interface JennyDescribableElement<out T> {
+interface JennyDescribableElement<out T> {
     fun describe(): T
 }

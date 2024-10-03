@@ -22,15 +22,14 @@ import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
 
 internal interface JennyProxyHeaderDefinitionsProvider  {
-    fun getConstantsIdDeclare(constants: Collection<JennyVarElement>): String
     fun getProxyHeaderInit(
         proxyConfiguration: ProxyConfiguration,
         startOfNamespace: String,
         classInfo: ClassInfo
     ): String
+    fun getConstantsIdDeclare(constants: Collection<JennyVarElement>): String
 
     fun getProxyHeaderClazzInit(): String
-    fun getMethodOverloadPostfix(method: JennyExecutableElement): String
     fun getConstructorsDefinitions(
         simpleClassName: String,
         constructors: Map<JennyExecutableElement, Int>,
@@ -57,4 +56,5 @@ internal interface JennyProxyHeaderDefinitionsProvider  {
     fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String
     fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String
     fun initPostDefinition(endNamespace: String): String
+    fun getAutoGenerateNotice(): String
 }

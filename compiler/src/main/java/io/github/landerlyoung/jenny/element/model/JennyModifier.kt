@@ -16,7 +16,7 @@
 
 package io.github.landerlyoung.jenny.element.model
 
-internal enum class JennyModifier {
+enum class JennyModifier {
     PUBLIC,
     PRIVATE,
     DEFAULT,

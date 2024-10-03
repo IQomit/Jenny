@@ -16,7 +16,6 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
-import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
@@ -43,7 +42,7 @@ internal class NativeProxyHeaderGenerator(
         val resolvedMethods = methodOverloadResolver.resolve(methods)
 
         return buildString {
-            append(Constants.AUTO_GENERATE_NOTICE)
+            append(jennyProxyHeaderDefinitionsProvider.getAutoGenerateNotice())
             append(
                 jennyProxyHeaderDefinitionsProvider.getProxyHeaderInit(
                     proxyConfiguration,

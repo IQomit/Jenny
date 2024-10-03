@@ -21,7 +21,7 @@ import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.stripNonASCII
 
-internal object JennyNameProvider {
+object JennyNameProvider {
 
     fun getNativeMethodName(jniClassName: String, method: JennyExecutableElement): String {
         return "Java_" + jniClassName + "_" + method.name.replace("_", "_1").stripNonASCII()

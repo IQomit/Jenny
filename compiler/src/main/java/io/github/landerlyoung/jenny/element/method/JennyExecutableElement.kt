@@ -21,7 +21,7 @@ import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.model.JennyParameter
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 
-internal interface JennyExecutableElement : JennyElement, JennyCallableElement {
+interface JennyExecutableElement : JennyElement, JennyCallableElement {
     fun isConstructor(): Boolean
 
     val parameters: List<JennyParameter>

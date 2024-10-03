@@ -17,16 +17,14 @@
 
 package io.github.landerlyoung.jenny.provider.proxy
 
+import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.element.JennyElement
-import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
-import io.github.landerlyoung.jenny.element.model.type.JennyType
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
 import io.github.landerlyoung.jenny.provider.ParametersProvider
-import io.github.landerlyoung.jenny.stripNonASCII
 import io.github.landerlyoung.jenny.utils.*
 import java.util.*
 
@@ -34,55 +32,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
 
     private val parametersProvider = ParametersProvider()
 
-    override fun getConstantsIdDeclare(constants: Collection<JennyVarElement>) = buildString {
-        constants.forEach {
-            append(getConstexprStatement(it))
-        }
-        append('\n')
-    }
-
-    private fun getConstexprStatement(property: JennyVarElement): String {
-        val constValue = property.call()
-        val jniType = property.type.toJniReturnTypeString()
-        val nativeType = if (jniType == "jstring") "auto" else jniType
-
-        val value = when (constValue) {
-            is Boolean -> if (constValue) "JNI_TRUE" else "JNI_FALSE"
-            is Number -> constValue.toString()
-            is Char -> "'${constValue}'"
-            is String -> "u8\"$constValue\""
-            else -> throw IllegalArgumentException("Unknown type: $constValue (${constValue?.javaClass})")
-        }
-
-        return "static constexpr $nativeType ${property.name} = $value;"
-    }
-
-
-    private fun getJniMethodParamVal(
-        method: JennyExecutableElement,
-        useJniHelper: Boolean = false,
-    ): String = buildString {
-        method.declaringClass?.let {
-            if ((it as JennyClazzElement).isNestedClass) {
-                append(", ")
-                append("enclosingClass")
-                if (useJniHelper)
-                    append(".get()")
-            }
-        }
-
-        method.parameters.forEach { param ->
-            append(", ")
-            append(param.name)
-            if (useJniHelper && param.type.needWrapLocalRef()) {
-                append(".get()")
-            }
-        }
-    }
-
-    private fun JennyType.needWrapLocalRef(): Boolean {
-        return (!isPrimitive() && jennyKind != JennyKind.VOID)
-    }
+    override fun getAutoGenerateNotice() = Constants.AUTO_GENERATE_NOTICE
 
     override fun getProxyHeaderInit(
         proxyConfiguration: ProxyConfiguration,
@@ -126,6 +76,13 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             )
         }
 
+    override fun getConstantsIdDeclare(constants: Collection<JennyVarElement>) = buildString {
+        constants.forEach {
+            append(parametersProvider.getConstexprStatement(it))
+        }
+        append('\n')
+    }
+
     override fun getProxyHeaderClazzInit() = buildString {
         append(
             """
@@ -145,15 +102,6 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         )
     }
 
-    override fun getMethodOverloadPostfix(method: JennyExecutableElement): String {
-        val signature = Signature.getBinaryJennyElementSignature(method)
-        val paramSig = signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
-        return "__" + paramSig.replace("_", "_1")
-            .replace("/", "_")
-            .replace(";", "_2")
-            .stripNonASCII()
-    }
-
     override fun getConstructorsDefinitions(
         simpleClassName: String,
         constructors: Map<JennyExecutableElement, Int>,
@@ -164,7 +112,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         constructors.forEach { (constructor, count) ->
             val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor, forceStatic = true)
             val javaParameters = parametersProvider.getJavaMethodParameters(constructor)
-            val methodPrologue = getMethodPrologue(useJniHelper, isStatic = true)
+            val methodPrologue = getJniMethodPrologue(useJniHelper, isStatic = true)
             append(
                 """
                     |    // construct: ${constructor.modifiers.print()} ${simpleClassName}($javaParameters)
@@ -172,7 +120,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                     |           $methodPrologue
                     |        return env->NewObject(${JennyNameProvider.getClassState()}, ${
                     JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(count))
-                }${getJniMethodParamVal(constructor, useJniHelper)});
+                }${parametersProvider.getJniMethodParamVal(constructor, useJniHelper)});
                     |    }
                     |
                     |""".trimMargin()
@@ -181,10 +129,9 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         append('\n')
     }
 
-
-    private fun getMethodPrologue(
+    private fun getJniMethodPrologue(
         useJniHelper: Boolean,
-        isStatic: Boolean = true,
+        isStatic: Boolean = true
     ): String {
         return if (useJniHelper) {
             if (isStatic) {
@@ -196,6 +143,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             "assertInited(env);"
         }
     }
+
 
     override fun getMethodsDefinitions(
         methods: Map<JennyExecutableElement, Int>,
@@ -222,7 +170,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             }
             callExpressionClosing.append(";")
             val jniParam = parametersProvider.getJennyElementJniParams(element = method)
-            val methodPrologue = getMethodPrologue(useJniHelper)
+            val methodPrologue = getJniMethodPrologue(useJniHelper)
             if (useJniHelper)
                 append("    // for jni helper\n")
 
@@ -252,7 +200,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                     JennyNameProvider.getClassState(
                         JennyNameProvider.getElementName(method, count)
                     )
-                }${getJniMethodParamVal(method, useJniHelper)})"
+                }${parametersProvider.getJniMethodParamVal(method, useJniHelper)})"
             )
             if (returnTypeNeedCast(jniReturnType)) {
                 append(")")
@@ -293,7 +241,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             val constMod = if (isStatic || !useJniHelper) "" else "const "
             val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"
             val jniEnv = "env"
-            val methodPrologue = getMethodPrologue(useJniHelper)
+            val methodPrologue = getJniMethodPrologue(useJniHelper)
             val jniReturnType = field.type.toJniReturnTypeString()
             var comment = "// field: ${field.modifiers.print()} ${field.type.typeName} ${field.name}"
             if (useJniHelper) {
@@ -521,6 +469,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         append(endNamespace)
         append("\n\n")
     }
+
 
     private enum class GetterSetter {
         GETTER, SETTER
