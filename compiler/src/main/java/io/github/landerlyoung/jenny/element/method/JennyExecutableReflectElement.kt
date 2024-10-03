@@ -44,7 +44,7 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
 
     override val returnType: JennyType
         get() = if (executable is Method) {
-            JennyReflectType(executable.genericReturnType)
+            JennyReflectType(executable.returnType)
         } else {
             JennyReflectType(Void.TYPE)
         }
