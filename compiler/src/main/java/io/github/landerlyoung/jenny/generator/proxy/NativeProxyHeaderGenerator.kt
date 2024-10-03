@@ -19,13 +19,15 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.provider.JennyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.JennySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
-import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.utils.JennySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxyHeaderGenerator(
-    private val proxyConfiguration: ProxyConfiguration
+    private val proxyConfiguration: ProxyConfiguration,
+    private val jennyHeaderDefinitionsProvider: JennyHeaderDefinitionsProvider,
+    private val jennySourceDefinitionsProvider: JennySourceDefinitionsProvider
 ) : Generator<HeaderData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
@@ -43,24 +45,24 @@ internal class NativeProxyHeaderGenerator(
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
             append(
-                JennyHeaderDefinitionsProvider.getProxyHeaderInit(
+                jennyHeaderDefinitionsProvider.getProxyHeaderInit(
                     proxyConfiguration,
                     input.namespace.startOfNamespace,
                     classInfo
                 )
             )
-            append(JennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
-            append(JennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
+            append(jennyHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
+            append(jennyHeaderDefinitionsProvider.getProxyHeaderClazzInit())
             append(
-                JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
+                jennyHeaderDefinitionsProvider.getConstructorsDefinitions(
                     classInfo.simpleClassName,
                     resolvedConstructors,
                     false
                 )
             )
-            append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, false))
+            append(jennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, false))
             append(
-                JennyHeaderDefinitionsProvider.getFieldsDefinitions(
+                jennyHeaderDefinitionsProvider.getFieldsDefinitions(
                     fields = input.fields,
                     allMethods = methods,
                     useJniHelper = false,
@@ -70,17 +72,17 @@ internal class NativeProxyHeaderGenerator(
                 )
             )
             if (proxyConfiguration.useJniHelper) {
-                append(JennyHeaderDefinitionsProvider.generateForJniHelper(classInfo.simpleClassName))
+                append(jennyHeaderDefinitionsProvider.generateForJniHelper(classInfo.simpleClassName))
                 append(
-                    JennyHeaderDefinitionsProvider.getConstructorsDefinitions(
+                    jennyHeaderDefinitionsProvider.getConstructorsDefinitions(
                         classInfo.simpleClassName,
                         resolvedConstructors,
                         true
                     )
                 )
-                append(JennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, true))
+                append(jennyHeaderDefinitionsProvider.getMethodsDefinitions(resolvedMethods, true))
                 append(
-                    JennyHeaderDefinitionsProvider.getFieldsDefinitions(
+                    jennyHeaderDefinitionsProvider.getFieldsDefinitions(
                         fields = input.fields,
                         allMethods = methods,
                         useJniHelper = true,
@@ -91,28 +93,28 @@ internal class NativeProxyHeaderGenerator(
                 )
             }
 
-            append(JennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
+            append(jennyHeaderDefinitionsProvider.initPreDefinition(proxyConfiguration.threadSafe))
 
-            append(JennyHeaderDefinitionsProvider.getConstructorIdDeclare(resolvedConstructors))
-            append(JennyHeaderDefinitionsProvider.getMethodIdDeclare(resolvedMethods))
-            append(JennyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
-            append(JennyHeaderDefinitionsProvider.initPostDefinition(input.namespace.endOfNameSpace))
+            append(jennyHeaderDefinitionsProvider.getConstructorIdDeclare(resolvedConstructors))
+            append(jennyHeaderDefinitionsProvider.getMethodIdDeclare(resolvedMethods))
+            append(jennyHeaderDefinitionsProvider.getFieldIdDeclare(fields))
+            append(jennyHeaderDefinitionsProvider.initPostDefinition(input.namespace.endOfNameSpace))
 
             if (proxyConfiguration.headerOnlyProxy) {
                 append(input.namespace.startOfNamespace)
                 append("\n\n")
                 append(
-                    JennySourceDefinitionsProvider.generateSourcePreContent(
+                    jennySourceDefinitionsProvider.generateSourcePreContent(
                         classInfo.simpleClassName,
                         headerOnly = true,
                         proxyConfiguration.threadSafe,
                     )
                 )
-                append(JennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
-                append(JennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
-                append(JennySourceDefinitionsProvider.getFieldIdInit(fields))
+                append(jennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
+                append(jennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
+                append(jennySourceDefinitionsProvider.getFieldIdInit(fields))
                 append(
-                    JennySourceDefinitionsProvider.generateSourcePostContent(
+                    jennySourceDefinitionsProvider.generateSourcePostContent(
                         classInfo.simpleClassName,
                         endNamespace = input.namespace.endOfNameSpace,
                         headerOnly = true,

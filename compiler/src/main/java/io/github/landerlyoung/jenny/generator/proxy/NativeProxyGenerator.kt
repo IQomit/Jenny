@@ -20,6 +20,8 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.provider.DefaultJennyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.DefaultJennySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
 import java.io.File
@@ -29,13 +31,23 @@ internal class NativeProxyGenerator(
     private val cppFileHelper: CppFileHelper,
     proxyConfiguration: ProxyConfiguration,
     private val outputDirectory: String
-) :
-    Generator<JennyClazzElement, Unit> {
+) : Generator<JennyClazzElement, Unit> {
     private val headerOnlyProxy = proxyConfiguration.headerOnlyProxy
+    private val jennyHeaderDefinitionsProvider = DefaultJennyHeaderDefinitionsProvider()
+    private val jennySourceDefinitionsProvider = DefaultJennySourceDefinitionsProvider()
 
-    private val nativeProxyHeaderGenerator = NativeProxyHeaderGenerator(proxyConfiguration)
+    private val nativeProxyHeaderGenerator =
+        NativeProxyHeaderGenerator(
+            proxyConfiguration = proxyConfiguration,
+            jennyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider,
+            jennySourceDefinitionsProvider = jennySourceDefinitionsProvider
+        )
     private val nativeProxySourceGenerator =
-        NativeProxySourceGenerator(proxyConfiguration.threadSafe, proxyConfiguration.onlyPublicMethod)
+        NativeProxySourceGenerator(
+            jennySourceDefinitionsProvider = jennySourceDefinitionsProvider,
+            threadSafe = proxyConfiguration.threadSafe,
+            onlyPublicMethod = proxyConfiguration.onlyPublicMethod
+        )
 
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)

@@ -19,7 +19,8 @@ package io.github.landerlyoung.jenny.resolver
 
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.utils.JennyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.Signature
+import io.github.landerlyoung.jenny.utils.stripNonASCII
 
 internal class JennyMethodOverloadResolver(
     private val resolver: MethodParameterResolver = MethodParameterResolver()
@@ -43,10 +44,10 @@ internal class JennyMethodOverloadResolver(
             nameCountMap[methodName] = currentCount + 1
 
             val paramSignature = resolver.resolve(method)
-            val isOverloaded = overloadMap[paramSignature]!!
+            val isOverloaded = overloadMap[paramSignature] == true
             val isCppReserved = Constants.CPP_RESERVED_WORS.contains(method.name)
             val updatedMethod = if (isOverloaded || isCppReserved) {
-                val postfix = JennyHeaderDefinitionsProvider.getMethodOverloadPostfix(method)
+                val postfix = getMethodOverloadPostfix(method)
                 JennyExecutableElement.createWithNewName(method, "${methodName}_${postfix}")
             } else {
                 method
@@ -55,5 +56,14 @@ internal class JennyMethodOverloadResolver(
         }
 
         return resultMap
+    }
+
+    private fun getMethodOverloadPostfix(method: JennyExecutableElement): String {
+        val signature = Signature.getBinaryJennyElementSignature(method)
+        val paramSig = signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
+        return "__" + paramSig.replace("_", "_1")
+            .replace("/", "_")
+            .replace(";", "_2")
+            .stripNonASCII()
     }
 }

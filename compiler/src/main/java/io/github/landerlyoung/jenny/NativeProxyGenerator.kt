@@ -72,7 +72,7 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
     private val mFields = mutableListOf<VariableElement>()
     private val mConstants: MutableSet<VariableElement> = LinkedHashSet()
     private val mNativeProxyConfig = nativeProxy
-    private val mNamespaceHelper = NamespaceHelper().apply { assignNamespace(mNativeProxyConfig.namespace) }
+    private val mNamespaceHelper = NamespaceHelper(mNativeProxyConfig.namespace)
     private val mHeaderName: String
     private val mSourceName: String
 
@@ -96,6 +96,8 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
         if (useTemplates) {
             val path: String = mEnv.configurations.templateDirectory
                 ?: (System.getProperty("user.dir") + "/templates")
+            val templateBuildSuffix: String = mEnv.configurations.templateBuildSuffix
+                ?: ""
             if (!File(path).exists()) {
                 error("Templates folder does not exist failed to generate using templates. Attempting without templates")
                 useTemplates = false
@@ -103,7 +105,7 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
                 val codeResolver = DirectoryCodeResolver(Path.of(path))
                 templateEngine = TemplateEngine.create(
                     codeResolver,
-                    Path.of(path),
+                    Path.of(path + templateBuildSuffix),
                     ContentType.Plain,
                     NativeProxyGenerator::class.java.classLoader
                 )
@@ -506,11 +508,10 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
             val classOrObj = if (isStatic) mHelper.getClassState(mHelper.getClazz()) else "thiz"
             val static = if (isStatic) "Static" else ""
             var returnStatement = if (m.returnType.kind !== TypeKind.VOID) "return " else ""
-            var wrapLocalRef =
-                if (useJniHelper && mHelper.needWrapLocalRef(m.returnType)) "${functionReturnType}(" else ""
+            var wrapLocalRef = if (useJniHelper && mHelper.needWrapLocalRef(m.returnType))  "${functionReturnType}(" else ""
             var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
                 "reinterpret_cast<${jniReturnType}>(" else ""
-            var callExpressionClosing: StringBuilder = StringBuilder()
+            var callExpressionClosing : StringBuilder = StringBuilder()
             if (mHelper.returnTypeNeedCast(jniReturnType)) {
                 callExpressionClosing.append(")")
             }
@@ -614,60 +615,83 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
             if (useJniHelper) {
                 comment = "    // for jni helper\n    $comment"
             }
-//            var wrapLocalRef =
-//                if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) "${functionReturnType}(" else ""
-//            var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
-//                "reinterpret_cast<${jniReturnType}>(" else ""
-//            var callExpressionClosing: StringBuilder = StringBuilder()
-//            if (mHelper.returnTypeNeedCast(jniReturnType)) {
-//                callExpressionClosing.append(")")
-//            }
-//            if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) {
-//                callExpressionClosing.append(")")
-//            }
-//            callExpressionClosing.append(";")
+            var wrapLocalRef = if (useJniHelper && mHelper.needWrapLocalRef(f.asType()))  "${functionReturnType}(" else ""
+            var returnTypeCast = if (mHelper.returnTypeNeedCast(jniReturnType))
+                "reinterpret_cast<${jniReturnType}>(" else ""
+            var callExpressionClosing : StringBuilder = StringBuilder()
+            if (mHelper.returnTypeNeedCast(jniReturnType)) {
+                callExpressionClosing.append(")")
+            }
+            if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) {
+                callExpressionClosing.append(")")
+            }
+            callExpressionClosing.append(";")
 
             // getter
             if (getterSetters.contains(GetterSetter.GETTER)) {
                 val param = makeParam(isStatic, useJniHelper, "")
-                append(
-                    """
+                if (useTemplates) {
+                    val jteOutput = StringOutput()
+                    jteData.param = param
+                    jteData.useJniHelper = useJniHelper
+                    jteData.clazz = mClazz
+                    jteData.returnType = functionReturnType
+                    jteData.jniReturnType = jniReturnType
+                    jteData.methodPrologue = prologue
+                    jteData.staticMod = staticMod
+                    jteData.rawStaticMod = rawStaticMod
+                    jteData.constMod = constMod
+                    jteData.classOrObj = classOrObj
+                    jteData.static = static
+                    jteData.wrapLocalRef = wrapLocalRef
+                    jteData.returnTypeCast = returnTypeCast
+                    jteData.callExpressionClosing = callExpressionClosing.toString()
+                    jteData.field = f
+                    jteData.fieldId = fieldId
+                    jteData.fieldCamelCaseName = camelCaseName
+                    jteData.fieldComment = comment
+
+                    templateEngine.render("field_getter.kte", jteData, jteOutput)
+                    append(jteOutput.toString())
+                } else {
+                    append(
+                        """
                         |    $comment
                         |    ${staticMod}$functionReturnType get${camelCaseName}(${param}) ${constMod}{
                         |       ${methodPrologue(isStatic, useJniHelper)}
                         |       return """.trimMargin()
-                )
+                    )
 
-                if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) {
-                    append(functionReturnType).append("(")
-                }
+                    if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) {
+                        append(functionReturnType).append("(")
+                    }
 
-                if (mHelper.returnTypeNeedCast(jniReturnType)) {
-                    append("reinterpret_cast<${jniReturnType}>(")
-                }
+                    if (mHelper.returnTypeNeedCast(jniReturnType)) {
+                        append("reinterpret_cast<${jniReturnType}>(")
+                    }
 
-                append(
-                    "${jniEnv}->Get${static}${typeForJniCall}Field(${classOrObj}, ${
-                        mHelper.getClassState(
-                            fieldId
-                        )
-                    })"
-                )
+                    append(
+                        "${jniEnv}->Get${static}${typeForJniCall}Field(${classOrObj}, ${
+                            mHelper.getClassState(
+                                fieldId
+                            )
+                        })"
+                    )
 
-                if (mHelper.returnTypeNeedCast(jniReturnType)) {
-                    append(")")
-                }
-                if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) {
-                    append(")")
-                }
-                append(
-                    """;
+                    if (mHelper.returnTypeNeedCast(jniReturnType)) {
+                        append(")")
+                    }
+                    if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) {
+                        append(")")
+                    }
+                    append(
+                        """;
                         |
                         |    }
                         |
                         |""".trimMargin()
-                )
-
+                    )
+                }
             }
 
             // setter
@@ -679,22 +703,47 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
                 )
                 val passedParam =
                     if (useJniHelper && mHelper.needWrapLocalRef(f.asType())) "${f.simpleName}.get()" else f.simpleName
-                append(
-                    """
+                if (useTemplates) {
+                    val jteOutput = StringOutput()
+                    jteData.param = param
+                    jteData.fieldSetterParam = passedParam.toString()
+                    jteData.useJniHelper = useJniHelper
+                    jteData.clazz = mClazz
+                    jteData.returnType = functionReturnType
+                    jteData.jniReturnType = jniReturnType
+                    jteData.methodPrologue = prologue
+                    jteData.staticMod = staticMod
+                    jteData.rawStaticMod = rawStaticMod
+                    jteData.constMod = constMod
+                    jteData.classOrObj = classOrObj
+                    jteData.static = static
+                    jteData.wrapLocalRef = wrapLocalRef
+                    jteData.returnTypeCast = returnTypeCast
+                    jteData.callExpressionClosing = callExpressionClosing.toString()
+                    jteData.field = f
+                    jteData.fieldId = fieldId
+                    jteData.fieldCamelCaseName = camelCaseName
+                    jteData.fieldComment = comment
+
+                    templateEngine.render("field_setter.kte", jteData, jteOutput)
+                    append(jteOutput.toString())
+                } else {
+                    append(
+                        """
                         |    $comment
                         |    ${staticMod}void set${camelCaseName}(${param}) ${constMod}{
                         |        ${methodPrologue(isStatic, useJniHelper)}
                         |        ${jniEnv}->Set${static}${typeForJniCall}Field(${classOrObj}, ${
-                        mHelper.getClassState(
-                            fieldId
-                        )
-                    }, ${passedParam});
+                            mHelper.getClassState(
+                                fieldId
+                            )
+                        }, ${passedParam});
                         |    }
                         |
                         |""".trimMargin()
-                )
-                append('\n')
-
+                    )
+                    append('\n')
+                }
             }
         }
     }
@@ -881,10 +930,10 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
     }
 
     private fun StringBuilder.buildFieldIdInit() {
-        if (useTemplates) {
+        if (useTemplates){
             val stringOutput = StringOutput()
-            val fields = FieldIdDeclaration(mHelper, mFields)
-            templateEngine.render("fields_ids_initialisations.kte", fields, stringOutput)
+            val fields = FieldIdDeclaration(mHelper,mFields)
+            templateEngine.render("fields_ids_initialisations.kte",fields,stringOutput)
             append(stringOutput.toString())
         } else {
             mFields.forEachIndexed { index, f ->
@@ -1106,5 +1155,5 @@ class NativeProxyGenerator(env: Environment, clazz: TypeElement, nativeProxy: Na
 }
 
 // replace deprecated kotlin-stdlib one
-private fun String.capitalize(): String =
+private fun String.capitalize():String =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }

@@ -19,12 +19,15 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.provider.JennySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
-import io.github.landerlyoung.jenny.utils.JennySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.visibility
 
-internal class NativeProxySourceGenerator(private val threadSafe: Boolean, private val onlyPublicMethod: Boolean) :
-    Generator<SourceData, String> {
+internal class NativeProxySourceGenerator(
+    private val jennySourceDefinitionsProvider: JennySourceDefinitionsProvider,
+    private val threadSafe: Boolean,
+    private val onlyPublicMethod: Boolean
+) : Generator<SourceData, String> {
     private val methodOverloadResolver = JennyMethodOverloadResolver()
 
     override fun generate(input: SourceData): String {
@@ -46,17 +49,17 @@ internal class NativeProxySourceGenerator(private val threadSafe: Boolean, priva
             append(input.headerData.namespace.startOfNamespace)
             append("\n\n")
             append(
-                JennySourceDefinitionsProvider.generateSourcePreContent(
+                jennySourceDefinitionsProvider.generateSourcePreContent(
                     header.classInfo.simpleClassName,
                     headerOnly = false,
                     threadSafe,
                 )
             )
-            append(JennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
-            append(JennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
-            append(JennySourceDefinitionsProvider.getFieldIdInit(header.fields))
+            append(jennySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
+            append(jennySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
+            append(jennySourceDefinitionsProvider.getFieldIdInit(header.fields))
             append(
-                JennySourceDefinitionsProvider.generateSourcePostContent(
+                jennySourceDefinitionsProvider.generateSourcePostContent(
                     simpleClassName = header.classInfo.simpleClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
                     headerOnly = true,
