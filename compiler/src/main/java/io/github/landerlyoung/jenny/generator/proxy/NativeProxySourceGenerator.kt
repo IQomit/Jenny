@@ -43,6 +43,7 @@ internal class NativeProxySourceGenerator(
                     startOfNamespace = input.headerData.namespace.startOfNamespace,
                     simpleClassName = header.classInfo.simpleClassName,
                     headerOnly = proxyConfiguration.headerOnlyProxy,
+                    errorLoggerFunction = proxyConfiguration.errorLoggingFunction,
                     threadSafe = proxyConfiguration.threadSafe,
                 )
             )

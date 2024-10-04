@@ -22,16 +22,18 @@ import gg.jte.resolve.DirectoryCodeResolver
 import java.nio.file.Path
 
 internal object JteTemplate {
+    private var templateEngine: TemplateEngine? = null
     fun createEngine(templatePath: String): TemplateEngine {
+        templateEngine?.run { return this }
         val codeResolver = DirectoryCodeResolver(Path.of(templatePath))
-        val templateEngine = TemplateEngine.create(
+        templateEngine = TemplateEngine.create(
             codeResolver,
             Path.of("$templatePath/build"),
             ContentType.Plain,
             this::class.java.classLoader
         )
-        templateEngine.setTrimControlStructures(true);
-        templateEngine.precompileAll()
-        return templateEngine
+        templateEngine?.setTrimControlStructures(true);
+        templateEngine?.precompileAll()
+        return templateEngine!!
     }
 }

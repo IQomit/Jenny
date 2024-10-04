@@ -116,6 +116,7 @@ internal class NativeProxyHeaderGenerator(
                         startOfNamespace = input.namespace.startOfNamespace,
                         simpleClassName = classInfo.simpleClassName,
                         headerOnly = proxyConfiguration.headerOnlyProxy,
+                        errorLoggerFunction = proxyConfiguration.errorLoggingFunction,
                         threadSafe = proxyConfiguration.threadSafe,
                     )
                 )

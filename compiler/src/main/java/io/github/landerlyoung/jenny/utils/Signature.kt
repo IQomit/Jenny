@@ -22,9 +22,7 @@ import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
 
-internal class Signature(
-    private val jennyElement: JennyElement
-) {
+class Signature(private val jennyElement: JennyElement) {
 
     private fun getSignatureClassName(type: JennyType): String {
         val output = StringBuilder()

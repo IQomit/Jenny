@@ -24,6 +24,7 @@ internal interface JennyProxySourceDefinitionsProvider {
         headerFileName: String,
         startOfNamespace: String,
         simpleClassName: String,
+        errorLoggerFunction:String,
         headerOnly: Boolean,
         threadSafe: Boolean
     ): String

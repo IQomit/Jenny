@@ -30,9 +30,10 @@ internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourc
         get() = Constants.AUTO_GENERATE_NOTICE
 
     override fun generateSourcePreContent(
-        headerFileName:String,
-        startOfNamespace:String,
+        headerFileName: String,
+        startOfNamespace: String,
         simpleClassName: String,
+        errorLoggerFunction:String,
         headerOnly: Boolean,
         threadSafe: Boolean
     ): String = buildString {
@@ -43,40 +44,72 @@ internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourc
                 |
                 |""".trimMargin()
             )
+        if (errorLoggerFunction.isNotEmpty()) {
+            append(
+                """
+                   |
+                   |void ${errorLoggerFunction}(JNIEnv* env, const char* error);
+                   |
+                   |""".trimMargin()
+            )
+        }
+
         append(startOfNamespace)
         append("\n\n")
         val prefix = if (headerOnly) "/*static*/ inline" else "/*static*/"
         append(
             """
-            |${prefix} bool ${simpleClassName}Proxy::initClazz(JNIEnv* env) {
-            |#define JENNY_CHECK_NULL(val)                      \
-            |       do {                                        \
-            |           if ((val) == nullptr) {                 \
-            |               env->ExceptionDescribe();           \
-            |               return false;                       \
-            |           }                                       \
-            |       } while(false)
-            |
-            |    auto& state = getClassInitState();
-            |""".trimMargin()
+                |${prefix} bool ${simpleClassName}Proxy::initClazz(JNIEnv* env) {
+                |#define JENNY_CHECK_NULL(val)                      \
+                |       do {                                        \
+                |           if ((val) == nullptr) {                 \
+                |""".trimMargin()
+        )
+
+        if (errorLoggerFunction.isNotEmpty()) {
+            append(
+                """
+                |               ${errorLoggerFunction}(env, "can't init ${simpleClassName}Proxy::" #val); \
+                |""".trimMargin()
+            )
+        } else {
+            append(
+                """
+                |               env->ExceptionDescribe();           \
+                |""".trimMargin()
+            )
+        }
+
+        append(
+            """
+                |               return false;                       \
+                |           }                                       \
+                |       } while(false)
+                |
+                |""".trimMargin()
+        )
+        append(
+            """
+                |    auto& state = getClassInitState();
+                |""".trimMargin()
         )
 
         if (threadSafe) {
             append(
                 """
-                |    if (!state.sInited) {
-                |        std::lock_guard<std::mutex> lg(state.sInitLock);
+                |   if (!state.sInited) {
+                |       std::lock_guard<std::mutex> lg(state.sInitLock);
                 |""".trimMargin()
             )
         }
         append(
             """
-            |        if (!state.sInited) {
-            |            auto clazz = env->FindClass(FULL_CLASS_NAME);
-            |            JENNY_CHECK_NULL(clazz);
-            |            state.sClazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
-            |            env->DeleteLocalRef(clazz);
-            |            JENNY_CHECK_NULL(state.sClazz);
+            |    if (!state.sInited) {
+            |        auto clazz = env->FindClass(FULL_CLASS_NAME);
+            |        JENNY_CHECK_NULL(clazz);
+            |        state.sClazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
+            |        env->DeleteLocalRef(clazz);
+            |        JENNY_CHECK_NULL(state.sClazz);
             |
             |""".trimMargin()
         )
@@ -96,8 +129,8 @@ internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourc
         }
         append(
             """
-            |            state.sInited = true;
-            |        }
+            |        state.sInited = true;
+            |    }
             |""".trimMargin()
         )
         if (threadSafe) {
@@ -136,8 +169,8 @@ internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourc
 
             append(
                 """
-                |            $name = env->GetMethodID(state.sClazz, "<init>", "$signature");
-                |            JENNY_CHECK_NULL(${name});
+                |        $name = env->GetMethodID(state.sClazz, "<init>", "$signature");
+                |        JENNY_CHECK_NULL(${name});
                 |
                 |""".trimMargin()
             )
@@ -153,8 +186,8 @@ internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourc
             val signature = Signature.getBinaryJennyElementSignature(method)
             append(
                 """
-                |            $name = env->Get${static}MethodID(state.sClazz, "$methodName", "$signature");
-                |            JENNY_CHECK_NULL(${name});
+                |        $name = env->Get${static}MethodID(state.sClazz, "$methodName", "$signature");
+                |        JENNY_CHECK_NULL(${name});
                 |
                 |""".trimMargin()
             )
@@ -170,8 +203,8 @@ internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourc
             val signature = Signature.getBinaryJennyElementSignature(field)
             append(
                 """
-                |            $name = env->Get${static}FieldID(state.sClazz, "$fieldName", "$signature");
-                |            JENNY_CHECK_NULL(${name});
+                |        $name = env->Get${static}FieldID(state.sClazz, "$fieldName", "$signature");
+                |        JENNY_CHECK_NULL(${name});
                 |
                 |""".trimMargin()
             )
