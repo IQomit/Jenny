@@ -37,7 +37,9 @@ class NativeProxyProcessor(outputDirectory: String) : Processor {
         onlyPublicMethod = true
     )
     private val cppFileHelper = CppFileHelper()
-    private val nativeProxyGenerator = NativeProxyGenerator(cppFileHelper, proxyConfiguration, outputDirectory)
+    private val nativeProxyGenerator = NativeProxyGenerator(cppFileHelper, outputDirectory).apply {
+        setConfiguration(proxyConfiguration)
+    }
 
     override fun process(namespace: String, input: Any) {
         cppFileHelper.setNamespace(namespace)

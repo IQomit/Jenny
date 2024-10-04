@@ -22,6 +22,7 @@ import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
 
 internal interface JennyProxyHeaderDefinitionsProvider {
+    val autoGenerateNotice: String
     fun getProxyHeaderInit(
         proxyConfiguration: ProxyConfiguration,
         startOfNamespace: String,
@@ -57,5 +58,4 @@ internal interface JennyProxyHeaderDefinitionsProvider {
     fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String
     fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String
     fun initPostDefinition(endNamespace: String): String
-    fun getAutoGenerateNotice(): String
 }

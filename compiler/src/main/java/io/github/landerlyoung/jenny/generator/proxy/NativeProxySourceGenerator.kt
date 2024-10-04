@@ -16,8 +16,6 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
-import io.github.landerlyoung.jenny.Constants
-import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
@@ -25,34 +23,27 @@ import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxySourceGenerator(
     private val jennyProxySourceDefinitionsProvider: JennyProxySourceDefinitionsProvider,
-    private val threadSafe: Boolean,
-    private val onlyPublicMethod: Boolean
-) : Generator<SourceData, String> {
+    private var proxyConfiguration: ProxyConfiguration = ProxyConfiguration()
+) : ProxyGenerator<SourceData, String> {
+
     private val methodOverloadResolver = JennyMethodOverloadResolver()
 
     override fun generate(input: SourceData): String {
         val header = input.headerData
-        val constructors = header.constructors.visibility(onlyPublicMethod)
-        val methods = header.methods.visibility(onlyPublicMethod)
+        val constructors = header.constructors.visibility(proxyConfiguration.onlyPublicMethod)
+        val methods = header.methods.visibility(proxyConfiguration.onlyPublicMethod)
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
         val resolvedMethods = methodOverloadResolver.resolve(methods)
 
         return buildString {
-            append(Constants.AUTO_GENERATE_NOTICE)
-
-            append(
-                """
-                |#include "${input.headerFileName}"
-                |
-                |""".trimMargin()
-            )
-            append(input.headerData.namespace.startOfNamespace)
-            append("\n\n")
+            append(jennyProxySourceDefinitionsProvider.autoGenerateNotice)
             append(
                 jennyProxySourceDefinitionsProvider.generateSourcePreContent(
-                    header.classInfo.simpleClassName,
-                    headerOnly = false,
-                    threadSafe,
+                    headerFileName = input.headerFileName,
+                    startOfNamespace = input.headerData.namespace.startOfNamespace,
+                    simpleClassName = header.classInfo.simpleClassName,
+                    headerOnly = proxyConfiguration.headerOnlyProxy,
+                    threadSafe = proxyConfiguration.threadSafe,
                 )
             )
             append(jennyProxySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
@@ -62,10 +53,14 @@ internal class NativeProxySourceGenerator(
                 jennyProxySourceDefinitionsProvider.generateSourcePostContent(
                     simpleClassName = header.classInfo.simpleClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
-                    headerOnly = true,
-                    threadSafe,
+                    headerOnly = proxyConfiguration.headerOnlyProxy,
+                    threadSafe = proxyConfiguration.threadSafe,
                 )
             )
         }
+    }
+
+    override fun setConfiguration(configuration: ProxyConfiguration) {
+        proxyConfiguration = configuration
     }
 }

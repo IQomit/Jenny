@@ -17,7 +17,6 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
-import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.provider.proxy.DefaultJennyProxyProxySourceDefinitionsProvider
@@ -30,10 +29,8 @@ import java.io.IOException
 
 internal class NativeProxyGenerator(
     private val cppFileHelper: CppFileHelper,
-    proxyConfiguration: ProxyConfiguration,
     private val outputDirectory: String
-) : Generator<JennyClazzElement, Unit> {
-    private val headerOnlyProxy = proxyConfiguration.headerOnlyProxy
+) : ProxyGenerator<JennyClazzElement, Unit> {
     private val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
     private val jennyHeaderDefinitionsProvider =
         TemplateJennyProxyHeaderDefinitionsProvider(JteTemplate.createEngine(templatesPath))
@@ -41,17 +38,12 @@ internal class NativeProxyGenerator(
 
     private val nativeProxyHeaderGenerator =
         NativeProxyHeaderGenerator(
-            proxyConfiguration = proxyConfiguration,
             jennyProxyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider,
             jennyProxySourceDefinitionsProvider = jennySourceDefinitionsProvider
         )
-    private val nativeProxySourceGenerator =
-        NativeProxySourceGenerator(
-            jennyProxySourceDefinitionsProvider = jennySourceDefinitionsProvider,
-            threadSafe = proxyConfiguration.threadSafe,
-            onlyPublicMethod = proxyConfiguration.onlyPublicMethod
-        )
+    private val nativeProxySourceGenerator = NativeProxySourceGenerator(jennySourceDefinitionsProvider)
 
+    private var headerOnlyProxy = false
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)
         if (!headerOnlyProxy) {
@@ -92,6 +84,12 @@ internal class NativeProxyGenerator(
         } catch (e: IOException) {
             println("Error writing file $fileName: ${e.message}")
         }
+    }
+
+    override fun setConfiguration(configuration: ProxyConfiguration) {
+        headerOnlyProxy = configuration.headerOnlyProxy
+        nativeProxyHeaderGenerator.setConfiguration(configuration)
+        nativeProxySourceGenerator.setConfiguration(configuration)
     }
 
     companion object {

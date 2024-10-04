@@ -30,7 +30,8 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
 
     private val parametersProvider = ParametersProvider()
 
-    override fun getAutoGenerateNotice() = Constants.AUTO_GENERATE_NOTICE
+    override val autoGenerateNotice: String
+        get() = Constants.AUTO_GENERATE_NOTICE
 
     override fun getProxyHeaderInit(
         proxyConfiguration: ProxyConfiguration,

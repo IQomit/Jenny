@@ -29,9 +29,9 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
     JennyProxyHeaderDefinitionsProvider {
 
     private val parametersProvider = ParametersProvider()
-    override fun getAutoGenerateNotice(): String {
-        return getFromTemplate("auto_generate_notice.kte", emptyMap())
-    }
+
+    override val autoGenerateNotice: String
+        get() = getFromTemplate("auto_generate_notice.kte", emptyMap())
 
     override fun getProxyHeaderInit(
         proxyConfiguration: ProxyConfiguration,

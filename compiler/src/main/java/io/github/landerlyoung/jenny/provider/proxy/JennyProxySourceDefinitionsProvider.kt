@@ -19,7 +19,10 @@ import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 
 internal interface JennyProxySourceDefinitionsProvider {
+    val autoGenerateNotice: String
     fun generateSourcePreContent(
+        headerFileName: String,
+        startOfNamespace: String,
         simpleClassName: String,
         headerOnly: Boolean,
         threadSafe: Boolean

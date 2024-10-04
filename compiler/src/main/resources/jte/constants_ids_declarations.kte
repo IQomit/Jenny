@@ -17,7 +17,7 @@
 @param constants:Collection<JennyVarElement>
 @param parametersProvider:ParametersProvider
 
-@for(constant in constructors)
+@for(constant in constants)
 
         parametersProvider.getConstexprStatement(constant)
 @endfor

@@ -17,6 +17,7 @@
 
 package io.github.landerlyoung.jenny.provider.proxy
 
+import io.github.landerlyoung.jenny.Constants
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.utils.JennyNameProvider
@@ -25,11 +26,24 @@ import io.github.landerlyoung.jenny.utils.isStatic
 
 
 internal class DefaultJennyProxyProxySourceDefinitionsProvider : JennyProxySourceDefinitionsProvider {
+    override val autoGenerateNotice: String
+        get() = Constants.AUTO_GENERATE_NOTICE
+
     override fun generateSourcePreContent(
+        headerFileName:String,
+        startOfNamespace:String,
         simpleClassName: String,
         headerOnly: Boolean,
         threadSafe: Boolean
     ): String = buildString {
+        if(!headerOnly)
+            append(
+                """
+                |#include "$headerFileName"
+                |
+                |""".trimMargin()
+            )
+        append(startOfNamespace)
         append("\n\n")
         val prefix = if (headerOnly) "/*static*/ inline" else "/*static*/"
         append(
