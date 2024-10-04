@@ -49,7 +49,10 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
     }
 
     override fun getConstantsIdDeclare(constants: Collection<JennyVarElement>): String {
-        return ""
+        return getFromTemplate(
+            "constants_ids_declarations.kte",
+            mapOf("constants" to constants, "parametersProvider" to parametersProvider)
+        )
     }
 
     override fun getProxyHeaderClazzInit(): String {
