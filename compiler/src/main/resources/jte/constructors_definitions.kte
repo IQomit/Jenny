@@ -13,7 +13,7 @@
 --%>
 
 @import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-@import io.github.landerlyoung.jenny.provider.ParametersProvider
+@import io.github.landerlyoung.jenny.utils.ParametersProvider
 @import io.github.landerlyoung.jenny.utils.print
 @import io.github.landerlyoung.jenny.utils.JennyNameProvider
 

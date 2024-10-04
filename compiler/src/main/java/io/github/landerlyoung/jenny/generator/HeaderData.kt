@@ -29,23 +29,15 @@ internal data class Namespace(
 )
 
 internal data class HeaderData(
-    val classInfo: ClassInfo,
-    val namespace: Namespace,
-    val constructors: Collection<JennyExecutableElement>,
-    val methods: Collection<JennyExecutableElement>,
-    val constants: Collection<JennyVarElement>,
-    val fields: Collection<JennyVarElement>,
+    val classInfo: ClassInfo = ClassInfo(),
+    val namespace: Namespace = Namespace(),
+    val constructors: Collection<JennyExecutableElement> = emptyList(),
+    val methods: Collection<JennyExecutableElement> = emptyList(),
+    val constants: Collection<JennyVarElement> = emptyList(),
+    val fields: Collection<JennyVarElement> = emptyList(),
 ) {
     class Builder {
-        private var classInfo: ClassInfo = ClassInfo("", "", "", "")
-        private var headerData = HeaderData(
-            classInfo = classInfo,
-            constants = emptyList(),
-            fields = emptyList(),
-            methods = emptyList(),
-            constructors = emptyList(),
-            namespace = Namespace()
-        )
+        private var headerData = HeaderData()
 
         fun classInfo(classInfo: ClassInfo) = apply {
             headerData = headerData.copy(classInfo = classInfo)

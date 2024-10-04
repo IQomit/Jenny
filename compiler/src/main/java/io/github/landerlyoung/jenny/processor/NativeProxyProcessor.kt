@@ -21,6 +21,7 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.proxy.NativeProxyGenerator
 import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderType
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
@@ -28,18 +29,23 @@ import kotlin.reflect.KClass
 
 class NativeProxyProcessor(outputDirectory: String) : Processor {
 
-    // todo expose some the configurations
     private val proxyConfiguration = ProxyConfiguration(
-        threadSafe = false,
-        useJniHelper = false,
+        threadSafe = true,
+        useJniHelper = true,
         headerOnlyProxy = false,
         allFields = true,
         onlyPublicMethod = true
     )
+    private val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
     private val cppFileHelper = CppFileHelper()
-    private val nativeProxyGenerator = NativeProxyGenerator(cppFileHelper, outputDirectory).apply {
-        setConfiguration(proxyConfiguration)
-    }
+    private val nativeProxyGenerator =
+        NativeProxyGenerator(
+            type = ProxyProviderType.Template(templatesPath),
+            cppFileHelper = cppFileHelper,
+            outputDirectory = outputDirectory
+        ).apply {
+            setConfiguration(proxyConfiguration)
+        }
 
     override fun process(namespace: String, input: Any) {
         cppFileHelper.setNamespace(namespace)

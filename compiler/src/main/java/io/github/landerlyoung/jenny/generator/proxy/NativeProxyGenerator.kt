@@ -19,22 +19,22 @@ package io.github.landerlyoung.jenny.generator.proxy
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.provider.proxy.TemplateJennyProxyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.provider.proxy.TemplateJennyProxySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyHeaderProviderFactory
+import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderType
+import io.github.landerlyoung.jenny.provider.proxy.factory.ProxySourceProviderFactory
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
-import io.github.landerlyoung.jenny.utils.JteTemplate
 import java.io.File
 import java.io.IOException
 
 internal class NativeProxyGenerator(
+    type: ProxyProviderType,
     private val cppFileHelper: CppFileHelper,
-    private val outputDirectory: String
+    private val outputDirectory: String,
 ) : ProxyGenerator<JennyClazzElement, Unit> {
-    private val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
-    private val jennyHeaderDefinitionsProvider = TemplateJennyProxyHeaderDefinitionsProvider(JteTemplate.createEngine(templatesPath))
-    private val jennySourceDefinitionsProvider = TemplateJennyProxySourceDefinitionsProvider(JteTemplate.createEngine(templatesPath))
-//    private val jennySourceDefinitionsProvider = DefaultJennyProxyProxySourceDefinitionsProvider()
+
+    private val jennyHeaderDefinitionsProvider = ProxyHeaderProviderFactory.createProvider(type)
+    private val jennySourceDefinitionsProvider = ProxySourceProviderFactory.createProvider(type)
 
     private val nativeProxyHeaderGenerator =
         NativeProxyHeaderGenerator(

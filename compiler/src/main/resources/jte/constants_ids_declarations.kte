@@ -12,7 +12,7 @@
     limitations under the License.
 --%>
 @import io.github.landerlyoung.jenny.element.field.JennyVarElement
-@import io.github.landerlyoung.jenny.provider.ParametersProvider
+@import io.github.landerlyoung.jenny.utils.ParametersProvider
 
 @param constants:Collection<JennyVarElement>
 @param parametersProvider:ParametersProvider

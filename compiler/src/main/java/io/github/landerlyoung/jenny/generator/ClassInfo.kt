@@ -17,10 +17,10 @@
 package io.github.landerlyoung.jenny.generator
 
 data class ClassInfo(
-    val simpleClassName: String,
+    val simpleClassName: String = "",
     // package.simpleClassName
-    val className: String,
+    val className: String = "",
     // package/simpleClassName
-    val slashClassName: String,
-    val jniClassName: String
+    val slashClassName: String = "",
+    val jniClassName: String = ""
 )
