@@ -17,15 +17,20 @@
 package io.github.landerlyoung.jenny.provider.proxy
 
 import gg.jte.TemplateEngine
+import gg.jte.output.StringOutput
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.provider.ParametersProvider
+import java.util.*
 
 internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxyHeaderDefinitionsProvider {
-    override fun getConstantsIdDeclare(constants: Collection<JennyVarElement>): String {
-        TODO("Not yet implemented")
+
+    private val parametersProvider = ParametersProvider()
+    override fun getAutoGenerateNotice(): String {
+        return getFromTemplate("auto_generate_notice.kte", emptyMap())
     }
 
     override fun getProxyHeaderInit(
@@ -33,15 +38,22 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
         startOfNamespace: String,
         classInfo: ClassInfo
     ): String {
-        TODO("Not yet implemented")
+        return getFromTemplate(
+            "header_preamble.kte",
+            mapOf(
+                "proxyConfiguration" to proxyConfiguration,
+                "startOfNamespace" to startOfNamespace,
+                "classInfo" to classInfo
+            )
+        )
+    }
+
+    override fun getConstantsIdDeclare(constants: Collection<JennyVarElement>): String {
+        return ""
     }
 
     override fun getProxyHeaderClazzInit(): String {
-        TODO("Not yet implemented")
-    }
-
-    override fun getMethodOverloadPostfix(method: JennyExecutableElement): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("header_initfunctions.kte", emptyMap())
     }
 
     override fun getConstructorsDefinitions(
@@ -49,11 +61,44 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
         constructors: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ): String {
-        TODO("Not yet implemented")
+        val returnType = if (useJniHelper) "$simpleClassName Proxy" else "jobject"
+        return getFromTemplate(
+            "constructors_definitions.kte",
+            mapOf(
+                "simpleClassName" to simpleClassName,
+                "constructors" to constructors,
+                "useJniHelper" to useJniHelper,
+                "returnType" to returnType,
+                "parametersProvider" to parametersProvider,
+                "methodPrologue" to getJniMethodPrologue(useJniHelper),
+            )
+        )
+
+    }
+
+    private fun getJniMethodPrologue(
+        useJniHelper: Boolean,
+        isStatic: Boolean = true
+    ): String {
+        return getFromTemplate(
+            "method_prologue.kte",
+            mapOf(
+                "useJniHelper" to useJniHelper,
+                "isStatic" to isStatic,
+            )
+        )
     }
 
     override fun getMethodsDefinitions(methods: Map<JennyExecutableElement, Int>, useJniHelper: Boolean): String {
-        TODO("Not yet implemented")
+        return getFromTemplate(
+            "methods_definitions.kte",
+            mapOf(
+                "methods" to methods,
+                "useJniHelper" to useJniHelper,
+                "parametersProvider" to parametersProvider,
+                "methodPrologue" to getJniMethodPrologue(useJniHelper),
+            )
+        )
     }
 
     override fun getFieldsDefinitions(
@@ -61,34 +106,66 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
         allMethods: Collection<JennyExecutableElement>,
         useJniHelper: Boolean,
         getterSetterForAllFields: Boolean,
-        generateGetterForFields: Boolean,
-        generateSetterForFields: Boolean
+        generateGetterForField: (JennyVarElement) -> Boolean,
+        generateSetterForField: (JennyVarElement) -> Boolean
     ): String {
-        TODO("Not yet implemented")
+        fun hasGetterSetter(field: JennyVarElement): EnumSet<FieldSetterGetterFinder.GetterSetter> {
+            return FieldSetterGetterFinder.hasGetterSetter(
+                field,
+                allMethods,
+                generateGetterForField(field),
+                generateSetterForField(field),
+                getterSetterForAllFields
+            )
+        }
+
+        val hasGetter: (JennyVarElement) -> Boolean = { field ->
+            hasGetterSetter(field).contains(FieldSetterGetterFinder.GetterSetter.GETTER)
+        }
+
+        val hasSetter: (JennyVarElement) -> Boolean = { field ->
+            hasGetterSetter(field).contains(FieldSetterGetterFinder.GetterSetter.SETTER)
+        }
+        return getFromTemplate(
+            "fields_definitions.kte",
+            mapOf(
+                "fields" to fields,
+                "hasGetter" to hasGetter,
+                "hasSetter" to hasSetter,
+                "useJniHelper" to useJniHelper,
+                "methodPrologue" to getJniMethodPrologue(useJniHelper),
+                "parametersProvider" to parametersProvider
+            )
+        )
     }
 
     override fun generateForJniHelper(simpleClassName: String): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("jni_helper.kte", mapOf("simpleClassName" to simpleClassName))
     }
 
     override fun initPreDefinition(isThreadSafe: Boolean): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("header_initvars.kte", mapOf("isThreadSafe" to isThreadSafe))
     }
 
     override fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("constructors_ids_declarations.kte", mapOf("constructors" to constructors))
     }
 
     override fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("methods_ids_declarations.kte", mapOf("methods" to methods))
     }
 
     override fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("fields_ids_declarations.kte", mapOf("fields" to fields))
     }
 
     override fun initPostDefinition(endNamespace: String): String {
-        TODO("Not yet implemented")
+        return getFromTemplate("header_postamble.kte", mapOf("endNamespace" to endNamespace))
     }
 
+    private fun getFromTemplate(templateName: String, mapOfVariables: Map<String, Any>): String {
+        val templateOutput = StringOutput()
+        templateEngine.render(templateName, mapOfVariables, templateOutput)
+        return templateOutput.toString()
+    }
 }

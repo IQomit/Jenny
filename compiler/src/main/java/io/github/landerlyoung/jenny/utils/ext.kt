@@ -71,7 +71,7 @@ fun JennyType.needWrapLocalRef(): Boolean {
     return (!isPrimitive() && jennyKind != JennyKind.VOID)
 }
 
-internal fun String.toCamelCase() =
+fun String.toCamelCase() =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 
 fun JennyElement.isStatic() = JennyModifier.STATIC in modifiers

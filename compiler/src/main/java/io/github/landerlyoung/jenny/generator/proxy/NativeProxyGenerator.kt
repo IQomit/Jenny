@@ -20,10 +20,11 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.provider.proxy.DefaultJennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.provider.proxy.DefaultJennyProxyProxySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.TemplateJennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
+import io.github.landerlyoung.jenny.utils.JteTemplate
 import java.io.File
 import java.io.IOException
 
@@ -33,7 +34,9 @@ internal class NativeProxyGenerator(
     private val outputDirectory: String
 ) : Generator<JennyClazzElement, Unit> {
     private val headerOnlyProxy = proxyConfiguration.headerOnlyProxy
-    private val jennyHeaderDefinitionsProvider = DefaultJennyProxyHeaderDefinitionsProvider()
+    private val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
+    private val jennyHeaderDefinitionsProvider =
+        TemplateJennyProxyHeaderDefinitionsProvider(JteTemplate.createEngine(templatesPath))
     private val jennySourceDefinitionsProvider = DefaultJennyProxyProxySourceDefinitionsProvider()
 
     private val nativeProxyHeaderGenerator =

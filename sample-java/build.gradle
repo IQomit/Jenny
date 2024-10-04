@@ -33,3 +33,4 @@ repositories {
 kotlin {
     jvmToolchain(8)
 }
+tasks.register("prepareKotlinBuildScriptModel"){}
