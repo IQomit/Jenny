@@ -55,7 +55,7 @@ class ProcessorAPIImpl(outputDirectory: String, templatesPath: String? = null) :
     override fun setProxyConfiguration(configuration: JennyProxyConfiguration) {
         this.configuration = this.configuration.copy(
             proxyNamespace = configuration.namespace,
-            threadSafe = true,
+            threadSafe = configuration.threadSafe,
             useJniHelper = configuration.useJniHelper,
             headerOnlyProxy = configuration.headerOnlyProxy,
             allFields = configuration.allFields,
