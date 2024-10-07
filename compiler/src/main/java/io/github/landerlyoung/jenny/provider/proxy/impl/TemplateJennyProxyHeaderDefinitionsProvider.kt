@@ -21,7 +21,7 @@ import gg.jte.output.StringOutput
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.ClassInfo
-import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.ParametersProvider
 import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder
@@ -36,14 +36,14 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
         get() = getFromTemplate("auto_generate_notice.kte", emptyMap())
 
     override fun getProxyHeaderInit(
-        proxyConfiguration: ProxyConfiguration,
+        jennyProxyConfiguration: JennyProxyConfiguration,
         startOfNamespace: String,
         classInfo: ClassInfo
     ): String {
         return getFromTemplate(
             "header_preamble.kte",
             mapOf(
-                "proxyConfiguration" to proxyConfiguration,
+                "proxyConfiguration" to jennyProxyConfiguration,
                 "startOfNamespace" to startOfNamespace,
                 "classInfo" to classInfo
             )

@@ -35,10 +35,8 @@ internal class NativeGlueGenerator(
     private val jennyGlueHeaderDefinitionsProvider = DefaultJennyGlueHeaderDefinitionsProvider()
 
     // Generators
-    private val nativeGlueHeaderGenerator =
-        NativeGlueHeaderGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
-    private val nativeSourceGenerator =
-        NativeGlueSourceGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
+    private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
+    private val nativeSourceGenerator = NativeGlueSourceGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
 
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)

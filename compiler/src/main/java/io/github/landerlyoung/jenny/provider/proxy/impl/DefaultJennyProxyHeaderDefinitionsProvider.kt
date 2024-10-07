@@ -22,9 +22,8 @@ import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.generator.ClassInfo
-import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.utils.ParametersProvider
 import io.github.landerlyoung.jenny.utils.*
 
 internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefinitionsProvider {
@@ -35,7 +34,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         get() = Constants.AUTO_GENERATE_NOTICE
 
     override fun getProxyHeaderInit(
-        proxyConfiguration: ProxyConfiguration,
+        jennyProxyConfiguration: JennyProxyConfiguration,
         startOfNamespace: String,
         classInfo: ClassInfo
     ) =
@@ -48,7 +47,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             |#include <assert.h>                        
             |""".trimMargin()
             )
-            if (proxyConfiguration.threadSafe)
+            if (jennyProxyConfiguration.threadSafe)
                 append(
                     """
                 |#include <atomic>
@@ -56,7 +55,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                 |""".trimMargin()
                 )
 
-            if (proxyConfiguration.useJniHelper) {
+            if (jennyProxyConfiguration.useJniHelper) {
                 append(
                     """
                 |#include "jnihelper.h"

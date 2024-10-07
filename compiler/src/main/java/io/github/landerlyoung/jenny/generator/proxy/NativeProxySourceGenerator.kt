@@ -23,15 +23,15 @@ import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxySourceGenerator(
     private val jennyProxySourceDefinitionsProvider: JennyProxySourceDefinitionsProvider,
-    private var proxyConfiguration: ProxyConfiguration = ProxyConfiguration()
+    private var jennyProxyConfiguration: JennyProxyConfiguration = JennyProxyConfiguration()
 ) : ProxyGenerator<SourceData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
 
     override fun generate(input: SourceData): String {
         val header = input.headerData
-        val constructors = header.constructors.visibility(proxyConfiguration.onlyPublicMethod)
-        val methods = header.methods.visibility(proxyConfiguration.onlyPublicMethod)
+        val constructors = header.constructors.visibility(jennyProxyConfiguration.onlyPublicMethod)
+        val methods = header.methods.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
         val resolvedMethods = methodOverloadResolver.resolve(methods)
 
@@ -42,9 +42,9 @@ internal class NativeProxySourceGenerator(
                     headerFileName = input.headerFileName,
                     startOfNamespace = input.headerData.namespace.startOfNamespace,
                     simpleClassName = header.classInfo.simpleClassName,
-                    headerOnly = proxyConfiguration.headerOnlyProxy,
-                    errorLoggerFunction = proxyConfiguration.errorLoggingFunction,
-                    threadSafe = proxyConfiguration.threadSafe,
+                    headerOnly = jennyProxyConfiguration.headerOnlyProxy,
+                    errorLoggerFunction = jennyProxyConfiguration.errorLoggingFunction,
+                    threadSafe = jennyProxyConfiguration.threadSafe,
                 )
             )
             append(jennyProxySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
@@ -54,14 +54,14 @@ internal class NativeProxySourceGenerator(
                 jennyProxySourceDefinitionsProvider.generateSourcePostContent(
                     simpleClassName = header.classInfo.simpleClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
-                    headerOnly = proxyConfiguration.headerOnlyProxy,
-                    threadSafe = proxyConfiguration.threadSafe,
+                    headerOnly = jennyProxyConfiguration.headerOnlyProxy,
+                    threadSafe = jennyProxyConfiguration.threadSafe,
                 )
             )
         }
     }
 
-    override fun setConfiguration(configuration: ProxyConfiguration) {
-        proxyConfiguration = configuration
+    override fun applyConfiguration(configuration: JennyProxyConfiguration) {
+        jennyProxyConfiguration = configuration
     }
 }

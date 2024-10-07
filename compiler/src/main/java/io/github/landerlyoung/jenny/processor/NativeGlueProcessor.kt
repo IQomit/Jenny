@@ -29,9 +29,12 @@ class NativeGlueProcessor(outputDirectory: String) : Processor {
     private val cppFileHelper = CppFileHelper()
     private val nativeGlueGenerator = NativeGlueGenerator(cppFileHelper, outputDirectory)
 
-    override fun process(namespace: String, input: Any) {
-        cppFileHelper.setNamespace(namespace)
+    override fun process(input: Any) {
         nativeGlueGenerator.generate(makeJennyClazz(input))
+    }
+
+    fun setNamespace(namespace: String) {
+        cppFileHelper.setNamespace(namespace)
     }
 
     private fun makeJennyClazz(input: Any): JennyClazzElement {
@@ -42,4 +45,6 @@ class NativeGlueProcessor(outputDirectory: String) : Processor {
             else -> throw IllegalArgumentException("${input.javaClass.name} input type is not supported")
         }
     }
+
+
 }

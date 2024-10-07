@@ -11,10 +11,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 --%>
-@import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+@import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 @import io.github.landerlyoung.jenny.generator.ClassInfo
 
-@param proxyConfiguration:ProxyConfiguration
+@param proxyConfiguration:JennyProxyConfiguration
 @param classInfo: ClassInfo
 @param startOfNamespace: String
 #pragma once

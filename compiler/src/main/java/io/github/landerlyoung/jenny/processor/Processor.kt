@@ -16,6 +16,6 @@
 
 package io.github.landerlyoung.jenny.processor
 
-interface Processor {
-    fun process(namespace: String, input: Any)
+interface Processor  {
+    fun process(input: Any)
 }

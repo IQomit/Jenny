@@ -19,17 +19,19 @@ package io.github.landerlyoung.jenny.processor
 import io.github.landerlyoung.jenny.element.clazz.JennyClassElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
+import io.github.landerlyoung.jenny.generator.Configurator
+import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.generator.proxy.NativeProxyGenerator
-import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderType
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
 
 
-class NativeProxyProcessor(outputDirectory: String) : Processor {
+class NativeProxyProcessor(outputDirectory: String) : Processor, Configurator<JennyProxyConfiguration> {
 
-    private val proxyConfiguration = ProxyConfiguration(
+    private val jennyProxyConfiguration = JennyProxyConfiguration(
+        namespace = "sDfsd::dsfs",
         threadSafe = true,
         useJniHelper = true,
         headerOnlyProxy = false,
@@ -44,12 +46,16 @@ class NativeProxyProcessor(outputDirectory: String) : Processor {
             cppFileHelper = cppFileHelper,
             outputDirectory = outputDirectory
         ).apply {
-            setConfiguration(proxyConfiguration)
+            applyConfiguration(jennyProxyConfiguration)
         }
 
-    override fun process(namespace: String, input: Any) {
-        cppFileHelper.setNamespace(namespace)
+    override fun process(input: Any) {
         nativeProxyGenerator.generate(makeJennyClazz(input))
+    }
+
+    override fun applyConfiguration(configuration: JennyProxyConfiguration) {
+        cppFileHelper.setNamespace(configuration.namespace)
+        nativeProxyGenerator.applyConfiguration(configuration)
     }
 
     private fun makeJennyClazz(input: Any): JennyClazzElement {
@@ -60,6 +66,4 @@ class NativeProxyProcessor(outputDirectory: String) : Processor {
             else -> throw IllegalArgumentException("${input.javaClass.name} input type is not supported")
         }
     }
-
-
 }

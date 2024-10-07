@@ -19,12 +19,12 @@ package io.github.landerlyoung.jenny.provider.proxy
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.ClassInfo
-import io.github.landerlyoung.jenny.generator.proxy.ProxyConfiguration
+import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 
 internal interface JennyProxyHeaderDefinitionsProvider {
     val autoGenerateNotice: String
     fun getProxyHeaderInit(
-        proxyConfiguration: ProxyConfiguration,
+        jennyProxyConfiguration: JennyProxyConfiguration,
         startOfNamespace: String,
         classInfo: ClassInfo
     ): String

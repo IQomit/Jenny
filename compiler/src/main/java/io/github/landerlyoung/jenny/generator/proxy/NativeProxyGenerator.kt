@@ -86,10 +86,11 @@ internal class NativeProxyGenerator(
         }
     }
 
-    override fun setConfiguration(configuration: ProxyConfiguration) {
+    override fun applyConfiguration(configuration: JennyProxyConfiguration) {
         headerOnlyProxy = configuration.headerOnlyProxy
-        nativeProxyHeaderGenerator.setConfiguration(configuration)
-        nativeProxySourceGenerator.setConfiguration(configuration)
+        cppFileHelper.setNamespace(configuration.namespace)
+        nativeProxyHeaderGenerator.applyConfiguration(configuration)
+        nativeProxySourceGenerator.applyConfiguration(configuration)
     }
 
     companion object {

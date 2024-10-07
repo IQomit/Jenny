@@ -15,6 +15,7 @@
  */
 package io.github.landerlyoung.jenny
 
+import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.processor.NativeGlueProcessor
 import io.github.landerlyoung.jenny.processor.NativeProxyProcessor
 import javax.annotation.processing.AbstractProcessor
@@ -80,7 +81,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         return roundEnv.getElementsAnnotatedWith(NativeClass::class.java)
             .filterIsInstance<TypeElement>()
             .forEach {
-                nativeGlueProcessor.process("", it)
+                nativeGlueProcessor.process(it)
             }
     }
 
@@ -93,7 +94,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                         ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java))
                 )
 //                NativeProxyGenerator(env, it as TypeElement, config).doGenerate()
-                nativeProxyProcessor.process(config.namespace, it as TypeElement)
+                nativeProxyProcessor.process(it as TypeElement)
             }
 
         (roundEnv.getElementsAnnotatedWith(NativeProxyForClasses::class.java)
@@ -117,7 +118,16 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                     val config = NativeProxyGenerator.NativeProxyConfig(
                         allMethods = true, allFields = true, namespace = annotation.namespace, onlyPublic = true
                     )
-                    nativeProxyProcessor.process(annotation.namespace, clazz)
+                    nativeProxyProcessor.apply {
+                        applyConfiguration(
+                            JennyProxyConfiguration(
+                                namespace = annotation.namespace,
+                                allFields = true,
+                                onlyPublicMethod = true
+                            )
+                        )
+                        process(clazz)
+                    }
 //                    NativeProxyGenerator(env, clazz, config).doGenerate()
                 }
             }
