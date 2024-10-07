@@ -51,6 +51,10 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
     override val declaringClass: JennyElement?
         get() = if (isNestedClass) JennyClassTypeElement(clazz.enclosingElement as TypeElement) else null
 
+    override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+        return clazz.getAnnotation(annotationClass)
+    }
+
     override val constructors: List<JennyExecutableElement>
         get() = clazz.enclosedElements
             .filterIsInstance<ExecutableElement>()

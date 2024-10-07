@@ -26,4 +26,6 @@ interface JennyElement : JennyDescribableElement<String> {
     val annotations: List<String>
     val modifiers: Set<JennyModifier>
     val declaringClass: JennyElement?
+
+    fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T?
 }

@@ -47,6 +47,10 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
     override val declaringClass: JennyElement?
         get() = clazz.declaringClass?.let { JennyClassElement(it) }
 
+    override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+        return clazz.getAnnotation(annotationClass)
+    }
+
     override val constructors: List<JennyExecutableElement>
         get() = clazz.constructors.map { JennyExecutableReflectElement(it) }
 

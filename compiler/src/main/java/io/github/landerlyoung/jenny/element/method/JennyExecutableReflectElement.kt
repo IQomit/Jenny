@@ -32,6 +32,7 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
     private constructor(executable: Executable, customName: String) : this(executable) {
         this.customName = customName
     }
+
     private var customName: String? = null
 
     override fun isConstructor() = executable is Constructor<*>
@@ -61,6 +62,10 @@ internal class JennyExecutableReflectElement(private val executable: Executable)
 
     override val declaringClass: JennyElement
         get() = JennyClassElement(executable.declaringClass)
+
+    override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+        return executable.getAnnotation(annotationClass)
+    }
 
     override val parameters: List<JennyParameter>
         get() = executable.parameters.map { JennyParameter(it.name, JennyReflectType(it.type)) }

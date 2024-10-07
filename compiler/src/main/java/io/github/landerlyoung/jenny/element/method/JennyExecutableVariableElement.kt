@@ -62,6 +62,10 @@ internal class JennyExecutableVariableElement(
     override val declaringClass: JennyElement
         get() = JennyClassTypeElement(method.enclosingElement as TypeElement)
 
+    override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+        return method.getAnnotation(annotationClass)
+    }
+
     override val parameters: List<JennyParameter>
         get() = method.parameters.map {
             JennyParameter(it.simpleName.toString(), JennyMirrorType(it.asType()))
