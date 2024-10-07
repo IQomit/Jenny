@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2024 The Qt Company Ltd.
  * Copyright 2016 landerlyoung@gmail.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +17,8 @@
 package io.github.landerlyoung.jenny
 
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
-import io.github.landerlyoung.jenny.processor.NativeGlueProcessor
-import io.github.landerlyoung.jenny.processor.NativeProxyProcessor
+import io.github.landerlyoung.jenny.processor.ProcessorAPI
+import io.github.landerlyoung.jenny.processor.ProcessorAPIImpl
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -35,8 +36,7 @@ import javax.tools.Diagnostic
 class JennyAnnotationProcessor : AbstractProcessor() {
     private lateinit var environment: Environment
 
-    private lateinit var nativeGlueProcessor: NativeGlueProcessor
-    private lateinit var nativeProxyProcessor: NativeProxyProcessor
+    private lateinit var jennyProcessor: ProcessorAPI<Any>
 
     @Synchronized
     override fun init(processingEnv: ProcessingEnvironment) {
@@ -50,8 +50,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         )
 
         environment.messager.printMessage(Diagnostic.Kind.NOTE, "Jenny configured with:${environment.configurations}")
-        nativeGlueProcessor = NativeGlueProcessor(environment.configurations.outputDirectory!!)
-        nativeProxyProcessor = NativeProxyProcessor(environment.configurations.outputDirectory!!)
+        jennyProcessor = ProcessorAPIImpl(outputDirectory = environment.configurations.outputDirectory!!)
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -81,7 +80,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         return roundEnv.getElementsAnnotatedWith(NativeClass::class.java)
             .filterIsInstance<TypeElement>()
             .forEach {
-                nativeGlueProcessor.process(it)
+                jennyProcessor.processForGlue(it)
             }
     }
 
@@ -94,7 +93,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                         ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java))
                 )
 //                NativeProxyGenerator(env, it as TypeElement, config).doGenerate()
-                nativeProxyProcessor.process(it as TypeElement)
+                jennyProcessor.processForProxy(it as TypeElement)
             }
 
         (roundEnv.getElementsAnnotatedWith(NativeProxyForClasses::class.java)
@@ -113,22 +112,20 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                 } catch (e: MirroredTypesException) {
                     e.typeMirrors
                 }.map {
-                    val clazz = env.typeUtils.asElement(it) as TypeElement
+//                    val clazz = env.typeUtils.asElement(it) as TypeElement
+//
+//                    val config = NativeProxyGenerator.NativeProxyConfig(
+//                        allMethods = true, allFields = true, namespace = annotation.namespace, onlyPublic = true
+//                    )
 
-                    val config = NativeProxyGenerator.NativeProxyConfig(
-                        allMethods = true, allFields = true, namespace = annotation.namespace, onlyPublic = true
-                    )
-                    nativeProxyProcessor.apply {
-                        applyConfiguration(
-                            JennyProxyConfiguration(
-                                namespace = annotation.namespace,
-                                allFields = true,
-                                onlyPublicMethod = true
-                            )
+                    jennyProcessor.setProxyConfiguration(
+                        JennyProxyConfiguration(
+                            namespace = annotation.namespace,
+                            allFields = true,
+                            onlyPublicMethod = true
                         )
-                        process(clazz)
-                    }
-//                    NativeProxyGenerator(env, clazz, config).doGenerate()
+                    )
+                    jennyProcessor.processForProxy(it as TypeElement)
                 }
             }
 

@@ -15,7 +15,10 @@
  */
 package io.github.landerlyoung.jenny.generator
 
-
-internal interface Configurator <Config>{
-    fun applyConfiguration(configuration: Config)
+interface OutputTargetConfigurator {
+    /**
+     * Sets the output path for the generated files.
+     * @param outputPath the directory where output files will be written.
+     */
+    fun setOutputTargetPath(outputPath: String)
 }

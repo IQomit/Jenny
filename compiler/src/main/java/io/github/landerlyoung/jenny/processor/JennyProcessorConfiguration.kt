@@ -1,6 +1,5 @@
 /**
  * Copyright (C) 2024 The Qt Company Ltd.
- * Copyright 2016 landerlyoung@gmail.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +14,31 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.generator.proxy
+package io.github.landerlyoung.jenny.processor
 
-data class JennyProxyConfiguration(
-    val namespace:String = "Jenny::Default",
+import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
+
+data class JennyProcessorConfiguration(
+    val templatesPath: String?,
+    val outputDirectory: String,
+    val glueNamespace: String = "Glue::Jenny",
+    val proxyNamespace: String = "Proxy::Jenny",
     val threadSafe: Boolean = true,
     val useJniHelper: Boolean = false,
     val headerOnlyProxy: Boolean = false,
     val allFields: Boolean = true,
     val onlyPublicMethod: Boolean = true,
-    val errorLoggingFunction:String = ""
-)
+    val errorLoggingFunction: String = ""
+) {
+    fun provideProxyConfiguration(): JennyProxyConfiguration {
+        return JennyProxyConfiguration(
+            namespace = proxyNamespace,
+            threadSafe = threadSafe,
+            useJniHelper = useJniHelper,
+            headerOnlyProxy = headerOnlyProxy,
+            allFields = allFields,
+            onlyPublicMethod = onlyPublicMethod,
+            errorLoggingFunction = errorLoggingFunction
+        )
+    }
+}

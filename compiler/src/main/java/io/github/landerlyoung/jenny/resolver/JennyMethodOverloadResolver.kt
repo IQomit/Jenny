@@ -26,6 +26,8 @@ internal class JennyMethodOverloadResolver(
     private val resolver: MethodParameterResolver = MethodParameterResolver()
 ) : Resolver<Collection<JennyExecutableElement>, Map<JennyExecutableElement, Int>> {
 
+    private val reservedWords = Constants.CPP_RESERVED_WORS
+
     override fun resolve(
         input: Collection<JennyExecutableElement>
     ): Map<JennyExecutableElement, Int> {
@@ -45,7 +47,7 @@ internal class JennyMethodOverloadResolver(
 
             val paramSignature = resolver.resolve(method)
             val isOverloaded = overloadMap[paramSignature] == true
-            val isCppReserved = Constants.CPP_RESERVED_WORS.contains(method.name)
+            val isCppReserved = reservedWords.contains(method.name)
             val updatedMethod = if (isOverloaded || isCppReserved) {
                 val postfix = getMethodOverloadPostfix(method)
                 JennyExecutableElement.createWithNewName(method, "${methodName}_${postfix}")

@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.landerlyoung.jenny.generator
 
+package io.github.landerlyoung.jenny.processor.jenny
 
-internal interface GenerationConfigurator<Config> {
-    fun setConfiguration(configuration: Config)
+import io.github.landerlyoung.jenny.generator.OutputTargetConfigurator
+
+internal interface Processor : OutputTargetConfigurator {
+    fun process(input: Any)
 }

@@ -1,6 +1,5 @@
 /**
  * Copyright (C) 2024 The Qt Company Ltd.
- * Copyright 2016 landerlyoung@gmail.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.generator.proxy
+package io.github.landerlyoung.jenny.generator
 
-data class ProxyConfiguration(
-    val threadSafe: Boolean = true,
-    val useJniHelper: Boolean = false,
-    val headerOnlyProxy: Boolean = false,
-    val allFields: Boolean = true,
-    val onlyPublicMethod: Boolean = true,
-    val errorLoggingFunction:String = ""
-)
+import io.github.landerlyoung.jenny.generator.proxy.ProxyGenerator
+
+internal interface NativeGenerator<in Input, out Output> : Generator<Input, Output>, OutputTargetConfigurator
+
+
+internal interface INativeProxyGenerator<in Input, out Output> : ProxyGenerator<Input, Output>, OutputTargetConfigurator

@@ -18,6 +18,7 @@ package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.INativeProxyGenerator
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyHeaderProviderFactory
 import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderType
@@ -30,8 +31,8 @@ import java.io.IOException
 internal class NativeProxyGenerator(
     type: ProxyProviderType,
     private val cppFileHelper: CppFileHelper,
-    private val outputDirectory: String,
-) : ProxyGenerator<JennyClazzElement, Unit> {
+    private var outputDirectory: String,
+) : INativeProxyGenerator<JennyClazzElement, Unit> {
 
     private val jennyHeaderDefinitionsProvider = ProxyHeaderProviderFactory.createProvider(type)
     private val jennySourceDefinitionsProvider = ProxySourceProviderFactory.createProvider(type)
@@ -84,6 +85,10 @@ internal class NativeProxyGenerator(
         } catch (e: IOException) {
             println("Error writing file $fileName: ${e.message}")
         }
+    }
+
+    override fun setOutputTargetPath(outputPath: String) {
+        outputDirectory = outputPath
     }
 
     override fun applyConfiguration(configuration: JennyProxyConfiguration) {

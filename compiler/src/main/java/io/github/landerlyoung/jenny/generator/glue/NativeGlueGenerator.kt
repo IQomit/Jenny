@@ -17,8 +17,8 @@
 package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
-import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.NativeGenerator
 import io.github.landerlyoung.jenny.generator.SourceData
 import io.github.landerlyoung.jenny.provider.glue.DefaultJennyGlueHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
@@ -29,14 +29,16 @@ import java.io.IOException
 
 internal class NativeGlueGenerator(
     private val cppFileHelper: CppFileHelper,
-    private val outputDirectory: String
-) : Generator<JennyClazzElement, Unit> {
+    private var outputDirectory: String
+) : NativeGenerator<JennyClazzElement, Unit> {
 
     private val jennyGlueHeaderDefinitionsProvider = DefaultJennyGlueHeaderDefinitionsProvider()
 
     // Generators
-    private val nativeGlueHeaderGenerator = NativeGlueHeaderGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
-    private val nativeSourceGenerator = NativeGlueSourceGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
+    private val nativeGlueHeaderGenerator =
+        NativeGlueHeaderGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
+    private val nativeGlueSourceGenerator =
+        NativeGlueSourceGenerator(jennyGlueHeaderDefinitionsProvider = jennyGlueHeaderDefinitionsProvider)
 
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)
@@ -53,7 +55,7 @@ internal class NativeGlueGenerator(
     private fun generateSourceFile(input: JennyClazzElement) {
         val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
         val headerData = createHeaderData(input)
-        val sourceContent = nativeSourceGenerator.generate(SourceData(headerFileName, headerData))
+        val sourceContent = nativeGlueSourceGenerator.generate(SourceData(headerFileName, headerData))
         val sourceFileName = cppFileHelper.provideSourceFile(className = input.name)
         writeFileContent(sourceContent, sourceFileName)
     }
@@ -81,5 +83,9 @@ internal class NativeGlueGenerator(
 
     companion object {
         private const val JENNY_GEN_DIR_GLUE = "jenny.glue"
+    }
+
+    override fun setOutputTargetPath(outputDirPath: String) {
+        outputDirectory = outputDirPath
     }
 }
