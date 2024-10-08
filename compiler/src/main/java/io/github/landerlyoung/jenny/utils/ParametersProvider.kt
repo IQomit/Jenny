@@ -108,7 +108,7 @@ class ParametersProvider {
             is String -> "u8\"$constValue\""
             else -> "Unknown type: $constValue (${constValue?.javaClass})"
         }
-        return "static constexpr $nativeType ${property.name} = $value;"
+        return "static constexpr $nativeType ${property.name} = $value;\n"
     }
 
     fun returnTypeNeedCast(jniReturnType: String): Boolean {
