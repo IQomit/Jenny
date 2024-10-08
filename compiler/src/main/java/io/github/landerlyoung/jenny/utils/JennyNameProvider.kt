@@ -19,7 +19,6 @@ package io.github.landerlyoung.jenny.utils
 
 import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.stripNonASCII
 
 object JennyNameProvider {
 

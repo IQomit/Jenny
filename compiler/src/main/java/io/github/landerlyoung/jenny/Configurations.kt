@@ -87,10 +87,5 @@ data class Configurations(
             options[USE_JNI_HELPER] == true.toString(),
             options[USE_TEMPLATES] == true.toString()
         )
-
-        @JvmStatic
-        fun main(args: Array<String>) {
-            ALL_OPTIONS.forEach { println(it) }
-        }
     }
 }

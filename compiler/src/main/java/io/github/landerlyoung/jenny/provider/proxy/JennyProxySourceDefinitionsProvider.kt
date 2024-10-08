@@ -17,14 +17,15 @@ package io.github.landerlyoung.jenny.provider.proxy
 
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
+import io.github.landerlyoung.jenny.provider.Provider
 
-internal interface JennyProxySourceDefinitionsProvider {
+internal interface JennyProxySourceDefinitionsProvider : Provider {
     val autoGenerateNotice: String
     fun generateSourcePreContent(
         headerFileName: String,
         startOfNamespace: String,
         simpleClassName: String,
-        errorLoggerFunction:String,
+        errorLoggerFunction: String,
         headerOnly: Boolean,
         threadSafe: Boolean
     ): String

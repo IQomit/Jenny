@@ -17,9 +17,11 @@
 package io.github.landerlyoung.jenny
 
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
-import io.github.landerlyoung.jenny.processor.ProcessorAPI
-import io.github.landerlyoung.jenny.processor.ProcessorAPIImpl
+import io.github.landerlyoung.jenny.utils.AnnotationResolver
+import io.github.landerlyoung.jenny.utils.FileHandler
+import java.io.File
 import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -35,29 +37,29 @@ import javax.tools.Diagnostic
  * Life with passion. Code with creativity!
  */
 class JennyAnnotationProcessor : AbstractProcessor() {
-    private lateinit var environment: Environment
 
     private lateinit var jennyProcessor: ProcessorAPI<Any>
+
+    private lateinit var messager: Messager
+    private lateinit var typeUtils: Types
+
+    private lateinit var outputDirectory: String
 
     @Synchronized
     override fun init(processingEnv: ProcessingEnvironment) {
         super.init(processingEnv)
-        environment = Environment(
-            processingEnv.messager,
-            processingEnv.typeUtils,
-            processingEnv.elementUtils,
-            processingEnv.filer,
-            Configurations.fromOptions(processingEnv.options)
-        )
-
-        environment.messager.printMessage(
+        messager = processingEnv.messager
+        typeUtils = processingEnv.typeUtils
+        val configurations = Configurations.fromOptions(processingEnv.options)
+        outputDirectory = configurations.outputDirectory!!
+        messager.printMessage(
             Diagnostic.Kind.NOTE,
-            "Jenny configured with:${environment.configurations}"
+            "Jenny configured with:${configurations}"
         )
         val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
         jennyProcessor =
             ProcessorAPIImpl(
-                outputDirectory = environment.configurations.outputDirectory!!,
+                outputDirectory = outputDirectory,
                 templatesPath = templatesPath
             )
     }
@@ -71,11 +73,11 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         try {
 
             generateNativeGlueCode(roundEnv)
-            generateNativeProxy(roundEnv, environment.typeUtils)
-//            generateFusionProxyHeader(environment, proxyClasses)
-            generateJniHelper(environment)
+            generateNativeProxy(roundEnv)
+//            generateFusionProxyHeader(proxyClasses)
+            generateJniHelper()
         } catch (e: Throwable) {
-            environment.messager.printMessage(
+            messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "Jenny failed to process ${e.javaClass.name} ${e.message}"
             )
@@ -93,7 +95,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             }
     }
 
-    private fun generateNativeProxy(roundEnv: RoundEnvironment, typesUtils: Types) {
+    private fun generateNativeProxy(roundEnv: RoundEnvironment) {
 
         roundEnv.getElementsAnnotatedWith(NativeProxy::class.java)
             .map {
@@ -137,19 +139,22 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                             onlyPublicMethod = true,
                         )
                     )
-                    jennyProcessor.processForProxy(typesUtils.asElement(it) as TypeElement)
+                    jennyProcessor.processForProxy(typeUtils.asElement(it) as TypeElement)
                 }
             }
     }
 
-    private fun generateJniHelper(env: Environment) {
-        env.createOutputFile(Constants.JENNY_GEN_DIR_PROXY, Constants.JENNY_JNI_HELPER_H_NAME).use {
+    private fun generateJniHelper() {
+        FileHandler.createOutputFile(
+            outputDirectory,
+            Constants.JENNY_GEN_DIR_PROXY + File.separatorChar + Constants.JENNY_JNI_HELPER_H_NAME
+        ).use {
             it.write(Constants.JENNY_JNI_HELPER_H_CONTENT.toByteArray(Charsets.UTF_8))
         }
     }
 
-    private fun generateFusionProxyHeader(env: Environment, proxyClasses: Collection<CppClass>) {
-        FusionProxyGenerator(env, proxyClasses).generate()
+    private fun generateFusionProxyHeader(name: String, proxyClasses: Collection<CppClass>) {
+        FusionProxyGenerator(name, proxyClasses.sorted()).generate()
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {

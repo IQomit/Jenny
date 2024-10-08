@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny
+package io.github.landerlyoung.jenny.provider
 
-import javax.lang.model.element.VariableElement
-
-
-data class FieldIdDeclaration(
-    val helper: HandyHelper,
-    val listOfFields: List<VariableElement>
-)
+internal interface Provider

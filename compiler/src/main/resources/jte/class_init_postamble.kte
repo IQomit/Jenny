@@ -12,11 +12,7 @@
     limitations under the License.
 --%>
 
-@import io.github.landerlyoung.jenny.JteData
 @import io.github.landerlyoung.jenny.Constants
-@import io.github.landerlyoung.jenny.HandyHelper
-@import io.github.landerlyoung.jenny.MethodOverloadResolver.MethodRecord
-@import javax.lang.model.type.TypeKind
 
 @param endNamespace: String
 @param simpleClassName: String

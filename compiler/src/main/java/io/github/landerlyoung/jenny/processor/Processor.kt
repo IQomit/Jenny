@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.landerlyoung.jenny
 
-data class MethodIdDeclaration(
-    val helper: HandyHelper,
-    val listOfMethods: List<MethodOverloadResolver.MethodRecord>
-)
+package io.github.landerlyoung.jenny.processor
+
+import io.github.landerlyoung.jenny.generator.OutputTargetConfigurator
+
+internal interface Processor : OutputTargetConfigurator {
+    fun process(input: Any)
+}

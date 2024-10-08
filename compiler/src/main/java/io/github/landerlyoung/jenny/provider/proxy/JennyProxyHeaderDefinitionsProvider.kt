@@ -20,8 +20,9 @@ import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
+import io.github.landerlyoung.jenny.provider.Provider
 
-internal interface JennyProxyHeaderDefinitionsProvider {
+internal interface JennyProxyHeaderDefinitionsProvider : Provider {
     val autoGenerateNotice: String
     fun getProxyHeaderInit(
         jennyProxyConfiguration: JennyProxyConfiguration,

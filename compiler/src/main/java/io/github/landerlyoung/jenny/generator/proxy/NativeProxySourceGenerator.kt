@@ -22,7 +22,7 @@ import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxySourceGenerator(
-    private val jennyProxySourceDefinitionsProvider: JennyProxySourceDefinitionsProvider,
+    private val sourceProvider: JennyProxySourceDefinitionsProvider,
     private var jennyProxyConfiguration: JennyProxyConfiguration = JennyProxyConfiguration()
 ) : ProxyGenerator<SourceData, String> {
 
@@ -36,9 +36,9 @@ internal class NativeProxySourceGenerator(
         val resolvedMethods = methodOverloadResolver.resolve(methods)
 
         return buildString {
-            append(jennyProxySourceDefinitionsProvider.autoGenerateNotice)
+            append(sourceProvider.autoGenerateNotice)
             append(
-                jennyProxySourceDefinitionsProvider.generateSourcePreContent(
+                sourceProvider.generateSourcePreContent(
                     headerFileName = input.headerFileName,
                     startOfNamespace = input.headerData.namespace.startOfNamespace,
                     simpleClassName = header.classInfo.simpleClassName,
@@ -47,11 +47,11 @@ internal class NativeProxySourceGenerator(
                     threadSafe = jennyProxyConfiguration.threadSafe,
                 )
             )
-            append(jennyProxySourceDefinitionsProvider.getConstructorIdInit(resolvedConstructors))
-            append(jennyProxySourceDefinitionsProvider.getMethodIdInit(resolvedMethods))
-            append(jennyProxySourceDefinitionsProvider.getFieldIdInit(header.fields))
+            append(sourceProvider.getConstructorIdInit(resolvedConstructors))
+            append(sourceProvider.getMethodIdInit(resolvedMethods))
+            append(sourceProvider.getFieldIdInit(header.fields))
             append(
-                jennyProxySourceDefinitionsProvider.generateSourcePostContent(
+                sourceProvider.generateSourcePostContent(
                     simpleClassName = header.classInfo.simpleClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
                     headerOnly = jennyProxyConfiguration.headerOnlyProxy,

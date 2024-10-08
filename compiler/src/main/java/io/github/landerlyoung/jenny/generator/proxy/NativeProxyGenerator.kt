@@ -20,9 +20,10 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.INativeProxyGenerator
 import io.github.landerlyoung.jenny.generator.SourceData
-import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyHeaderProviderFactory
+import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderFactory
 import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderType
-import io.github.landerlyoung.jenny.provider.proxy.factory.ProxySourceProviderFactory
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
 import java.io.File
@@ -34,13 +35,13 @@ internal class NativeProxyGenerator(
     private var outputDirectory: String,
 ) : INativeProxyGenerator<JennyClazzElement, Unit> {
 
-    private val jennyHeaderDefinitionsProvider = ProxyHeaderProviderFactory.createProvider(type)
-    private val jennySourceDefinitionsProvider = ProxySourceProviderFactory.createProvider(type)
+    private val jennyHeaderDefinitionsProvider = ProxyProviderFactory.createProvider(true, type) as JennyProxyHeaderDefinitionsProvider
+    private val jennySourceDefinitionsProvider = ProxyProviderFactory.createProvider(false, type) as JennyProxySourceDefinitionsProvider
 
     private val nativeProxyHeaderGenerator =
         NativeProxyHeaderGenerator(
-            jennyProxyHeaderDefinitionsProvider = jennyHeaderDefinitionsProvider,
-            jennyProxySourceDefinitionsProvider = jennySourceDefinitionsProvider
+            headerProvider = jennyHeaderDefinitionsProvider ,
+            sourceProvider = jennySourceDefinitionsProvider
         )
     private val nativeProxySourceGenerator = NativeProxySourceGenerator(jennySourceDefinitionsProvider)
 
@@ -62,7 +63,8 @@ internal class NativeProxyGenerator(
     private fun generateSourceFile(input: JennyClazzElement) {
         val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
         val headerData = createHeaderData(input)
-        val sourceContent = nativeProxySourceGenerator.generate(SourceData(headerFileName, headerData))
+        val sourceContent =
+            nativeProxySourceGenerator.generate(SourceData(headerFileName, headerData))
         val sourceFileName = cppFileHelper.provideSourceFile(className = input.name)
         writeFileContent(sourceContent, sourceFileName)
     }

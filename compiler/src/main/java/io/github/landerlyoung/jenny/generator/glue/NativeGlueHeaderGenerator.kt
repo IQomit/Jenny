@@ -23,7 +23,7 @@ import io.github.landerlyoung.jenny.provider.glue.JennyGlueHeaderDefinitionsProv
 
 internal class NativeGlueHeaderGenerator(
     private val registerJniMethods: Boolean = true,
-    private val jennyGlueHeaderDefinitionsProvider: JennyGlueHeaderDefinitionsProvider
+    private val provider: JennyGlueHeaderDefinitionsProvider
 ) : Generator<HeaderData, String> {
 
     override fun generate(input: HeaderData) = createHeader(input)
@@ -32,26 +32,26 @@ internal class NativeGlueHeaderGenerator(
         val classInfo = input.classInfo
         return buildString {
             append(Constants.AUTO_GENERATE_NOTICE)
-            append(jennyGlueHeaderDefinitionsProvider.getHeaderInitForGlue(classInfo, input.namespace.startOfNamespace))
+            append(provider.getHeaderInitForGlue(classInfo, input.namespace.startOfNamespace))
             if (registerJniMethods) {
-                append(jennyGlueHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
-                append(jennyGlueHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
-                append(jennyGlueHeaderDefinitionsProvider.getJniRegister(input.methods))
+                append(provider.getConstantsIdDeclare(input.constants))
+                append(provider.getNativeMethodsDefinitions(classInfo, input.methods))
+                append(provider.getJniRegister(input.methods))
                 append(
-                    jennyGlueHeaderDefinitionsProvider.getEndNameSpace(
+                    provider.getEndNameSpace(
                         className = classInfo.simpleClassName,
                         endNamespace = input.namespace.endOfNameSpace
                     )
                 )
             } else {
-                append(jennyGlueHeaderDefinitionsProvider.getConstantsIdDeclare(input.constants))
+                append(provider.getConstantsIdDeclare(input.constants))
                 append(
-                    jennyGlueHeaderDefinitionsProvider.getEndNameSpace(
+                    provider.getEndNameSpace(
                         className = classInfo.simpleClassName,
                         endNamespace = input.namespace.endOfNameSpace
                     )
                 )
-                append(jennyGlueHeaderDefinitionsProvider.getNativeMethodsDefinitions(classInfo, input.methods))
+                append(provider.getNativeMethodsDefinitions(classInfo, input.methods))
             }
         }
     }

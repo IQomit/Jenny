@@ -1,4 +1,23 @@
+/**
+ * Copyright (C) 2024 The Qt Company Ltd.
+ * Copyright 2016 landerlyoung@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.landerlyoung.jenny
+
+import io.github.landerlyoung.jenny.utils.FileHandler
 
 /*
  * ```
@@ -10,38 +29,41 @@ package io.github.landerlyoung.jenny
  */
 
 class FusionProxyGenerator(
-        private val env: Environment,
-        _proxyClasses: Collection<CppClass>) {
-
-    private val proxyClasses: List<CppClass> = _proxyClasses.sorted()
-
+    private val name: String,
+    private val proxyClasses: Collection<CppClass>
+) {
     fun generate() {
-        env.createOutputFile(Constants.JENNY_GEN_DIR_PROXY, env.configurations.fusionProxyHeaderName).use { out ->
+        FileHandler.createOutputFile(Constants.JENNY_GEN_DIR_PROXY, name).use {
             buildString {
                 generateSourceContent()
             }.let { content ->
-                out.write(content.toByteArray(Charsets.UTF_8))
+                it.write(content.toByteArray(Charsets.UTF_8))
             }
         }
     }
 
     private fun StringBuilder.generateSourceContent() {
         append(Constants.AUTO_GENERATE_NOTICE)
-        append("""
+        append(
+            """
                 |#pragma once
                 |
                 |#include <jni.h>
                 |
-                |""".trimMargin())
+                |""".trimMargin()
+        )
 
         proxyClasses.forEach {
-            append("""
+            append(
+                """
                 |#include "${it.headerFileName}"
                 |
-            """.trimMargin())
+            """.trimMargin()
+            )
         }
 
-        append("""
+        append(
+            """
             |
             |namespace jenny {
             |
@@ -49,20 +71,23 @@ class FusionProxyGenerator(
             |
             |   bool success = 
             |
-        """.trimMargin())
+        """.trimMargin()
+        )
 
         append(proxyClasses.joinToString(" &&\n") {
             "        " + it.namespace + "::" + it.name + "::initClazz(env)"
         })
         append(";")
 
-        append("""
+        append(
+            """
             |
             |   return success;
             |}
             |
             |} // end of namespace jenny
             |
-        """.trimMargin())
+        """.trimMargin()
+        )
     }
 }
