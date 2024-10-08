@@ -56,7 +56,7 @@ internal data class HeaderData(
         }
 
         fun fields(fields: Collection<JennyVarElement>) = apply {
-            headerData = headerData.copy(constants = fields)
+            headerData = headerData.copy(fields = fields)
         }
 
         fun namespace(namespace: Namespace) = apply {
@@ -65,10 +65,10 @@ internal data class HeaderData(
 
         fun jennyClazz(clazz: JennyClazzElement) = apply {
             classInfo(extractClassInfo(clazz))
-            constants(clazz.fields.filter { it.isConstant() })
             constructors(clazz.constructors)
             methods(clazz.methods)
-            fields(clazz.fields)
+            fields(clazz.fields.filter { !it.isConstant() })
+            constants(clazz.fields.filter { it.isConstant() })
         }
 
         fun build(): HeaderData {

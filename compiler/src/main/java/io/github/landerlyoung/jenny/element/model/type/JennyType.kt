@@ -24,4 +24,5 @@ interface JennyType {
     fun isArray(): Boolean
 
     val componentType: JennyType? // in case of an array
+    fun getNonGenericType(): JennyType
 }

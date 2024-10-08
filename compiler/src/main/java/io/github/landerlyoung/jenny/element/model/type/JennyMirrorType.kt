@@ -17,8 +17,11 @@
 package io.github.landerlyoung.jenny.element.model.type
 
 import javax.lang.model.type.ArrayType
+import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
+import javax.lang.model.type.TypeVariable
+import javax.lang.model.type.WildcardType
 
 internal class JennyMirrorType(private val mirrorType: TypeMirror) : JennyType {
     override val typeName: String
@@ -38,4 +41,24 @@ internal class JennyMirrorType(private val mirrorType: TypeMirror) : JennyType {
             null
         }
 
+    override fun getNonGenericType(): JennyType {
+        return when (mirrorType) {
+            is TypeVariable -> {
+                val upperBound = mirrorType.upperBound
+                val resolvedType = if (upperBound is IntersectionType) {
+                    upperBound.bounds.first()
+                } else {
+                    upperBound
+                }
+                JennyMirrorType(resolvedType).getNonGenericType()
+            }
+
+            is WildcardType -> {
+                mirrorType.extendsBound?.let {
+                    JennyMirrorType(it).getNonGenericType()
+                } ?: this
+            }
+            else -> this
+        }
+    }
 }

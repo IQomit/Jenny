@@ -49,8 +49,12 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             Configurations.fromOptions(processingEnv.options)
         )
 
-        environment.messager.printMessage(Diagnostic.Kind.NOTE, "Jenny configured with:${environment.configurations}")
-        jennyProcessor = ProcessorAPIImpl(outputDirectory = environment.configurations.outputDirectory!!)
+        environment.messager.printMessage(
+            Diagnostic.Kind.NOTE,
+            "Jenny configured with:${environment.configurations}"
+        )
+        jennyProcessor =
+            ProcessorAPIImpl(outputDirectory = environment.configurations.outputDirectory!!)
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -92,7 +96,6 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                     (it.getAnnotation(NativeProxy::class.java)
                         ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java))
                 )
-//                NativeProxyGenerator(env, it as TypeElement, config).doGenerate()
                 jennyProcessor.processForProxy(it as TypeElement)
             }
 
@@ -102,7 +105,9 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                 +
                 roundEnv.getElementsAnnotatedWith(NativeProxyForClasses.RepeatContainer::class.java)
                     .asSequence()
-                    .flatMap { it.getAnnotationsByType(NativeProxyForClasses::class.java).asSequence() }
+                    .flatMap {
+                        it.getAnnotationsByType(NativeProxyForClasses::class.java).asSequence()
+                    }
                 )
             .toCollection(mutableSetOf())
             .flatMap { annotation ->
@@ -112,11 +117,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                 } catch (e: MirroredTypesException) {
                     e.typeMirrors
                 }.map {
-//                    val clazz = env.typeUtils.asElement(it) as TypeElement
-//
-//                    val config = NativeProxyGenerator.NativeProxyConfig(
-//                        allMethods = true, allFields = true, namespace = annotation.namespace, onlyPublic = true
-//                    )
+                    val clazz = env.typeUtils.asElement(it) as TypeElement
 
                     jennyProcessor.setProxyConfiguration(
                         JennyProxyConfiguration(
@@ -125,10 +126,9 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                             onlyPublicMethod = true
                         )
                     )
-                    jennyProcessor.processForProxy(it as TypeElement)
+                    jennyProcessor.processForProxy(clazz)
                 }
             }
-
     }
 
     private fun generateJniHelper(env: Environment) {

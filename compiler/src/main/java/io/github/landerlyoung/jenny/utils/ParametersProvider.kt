@@ -5,10 +5,15 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.JennyParameter
+import io.github.landerlyoung.jenny.element.model.type.JennyKind
 
 class ParametersProvider {
 
-    fun makeParameter(element: JennyElement, useJniHelper: Boolean, forceStatic: Boolean = false): String =
+    fun makeParameter(
+        element: JennyElement,
+        useJniHelper: Boolean,
+        forceStatic: Boolean = false
+    ): String =
         buildString {
             if (!useJniHelper) {
                 append("JNIEnv* env")
@@ -78,7 +83,21 @@ class ParametersProvider {
     }
 
     fun getConstexprStatement(property: JennyVarElement): String {
-        val constValue = property.call()
+        val constValue = try {
+            property.call()
+        } catch (e: Exception) {
+            println("Warning: Failed to retrieve constant value for property '${property.name}': ${e.message}")
+            when (property.type.jennyKind) {
+                JennyKind.BOOLEAN -> false
+                JennyKind.BYTE, JennyKind.INT -> 0
+                JennyKind.SHORT -> 0.toShort()
+                JennyKind.LONG -> 0L
+                JennyKind.FLOAT -> 0f
+                JennyKind.CHAR -> '\u0000'
+                JennyKind.DOUBLE -> 0.0
+                else -> "/* Unknown type for '${property.name}' */" // Default for unknown types
+            }
+        }
         val jniType = property.type.toJniReturnTypeString()
         val nativeType = if (jniType == "jstring") "auto" else jniType
 
@@ -87,7 +106,7 @@ class ParametersProvider {
             is Number -> constValue.toString()
             is Char -> "'${constValue}'"
             is String -> "u8\"$constValue\""
-            else -> throw IllegalArgumentException("Unknown type: $constValue (${constValue?.javaClass})")
+            else -> "Unknown type: $constValue (${constValue?.javaClass})"
         }
         return "static constexpr $nativeType ${property.name} = $value;"
     }

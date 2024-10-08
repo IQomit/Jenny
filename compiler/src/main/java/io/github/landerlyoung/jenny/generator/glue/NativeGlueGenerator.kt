@@ -81,11 +81,13 @@ internal class NativeGlueGenerator(
         }
     }
 
+    override fun setOutputTargetPath(outputPath: String) {
+        outputDirectory = outputPath
+    }
+
     companion object {
         private const val JENNY_GEN_DIR_GLUE = "jenny.glue"
     }
 
-    override fun setOutputTargetPath(outputDirPath: String) {
-        outputDirectory = outputDirPath
-    }
+
 }

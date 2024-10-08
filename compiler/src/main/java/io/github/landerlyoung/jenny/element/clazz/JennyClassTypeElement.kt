@@ -24,6 +24,7 @@ import io.github.landerlyoung.jenny.element.method.JennyExecutableVariableElemen
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
+import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
@@ -70,5 +71,13 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
     override val fields: List<JennyVarElement>
         get() = clazz.enclosedElements
             .filterIsInstance<VariableElement>()
+            .filter { it.kind == ElementKind.FIELD &&
+                    !isCompanionField(it)  }
             .map { JennyVariableElement(it) }
+
+    private fun isCompanionField(element: Element): Boolean {
+        return element.simpleName.toString() == "Companion" ||
+                (element.enclosingElement is TypeElement &&
+                        element.enclosingElement.simpleName.toString() == "Companion")
+    }
 }

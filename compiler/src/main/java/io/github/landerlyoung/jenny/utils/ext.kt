@@ -21,7 +21,7 @@ import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
-import java.util.*
+import java.util.Locale
 
 fun JennyType.toJniReturnTypeString(): String {
     val locale = Locale.US
@@ -75,7 +75,7 @@ fun String.toCamelCase() =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 
 fun JennyElement.isStatic() = JennyModifier.STATIC in modifiers
-internal fun JennyElement.isConstant() = isStatic() && JennyModifier.FINAL in modifiers
+internal fun JennyElement.isConstant() = (isStatic() && JennyModifier.FINAL in modifiers)
 internal fun JennyElement.isNative() = JennyModifier.NATIVE in modifiers
 internal fun JennyElement.isPublic() = JennyModifier.PUBLIC in modifiers
 

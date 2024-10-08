@@ -17,7 +17,10 @@
 package io.github.landerlyoung.jenny.element.model.type
 
 import java.lang.reflect.GenericArrayType
+import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
+import java.lang.reflect.TypeVariable
+import java.lang.reflect.WildcardType
 
 internal class JennyReflectType(private val type: Type) : JennyType {
 
@@ -43,4 +46,16 @@ internal class JennyReflectType(private val type: Type) : JennyType {
             is GenericArrayType -> JennyReflectType(type.genericComponentType)
             else -> null
         }
+
+    override fun getNonGenericType(): JennyType {
+        return when (type) {
+            is ParameterizedType -> JennyReflectType(type.rawType as Class<*>)
+            is TypeVariable<*> -> {
+                val bounds = type.bounds
+                JennyReflectType(bounds.firstOrNull() ?: Any::class.java)
+            }
+            is WildcardType -> JennyReflectType(type.upperBounds.firstOrNull() ?: Any::class.java)
+            else -> this
+        }
+    }
 }

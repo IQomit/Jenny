@@ -43,7 +43,11 @@ class Signature(private val jennyElement: JennyElement) {
             JennyKind.FLOAT -> output.append('F')
             JennyKind.DOUBLE -> output.append('D')
             JennyKind.VOID -> output.append('V')
-            else -> output.append('L' + type.typeName.replace('.', '/')).append(';')
+            else -> output.append(
+                'L' + type.getNonGenericType().typeName
+                    .substringBefore("<")
+                    .replace('.', '/')
+            ).append(';')
         }
         return output.toString()
     }
@@ -73,6 +77,7 @@ class Signature(private val jennyElement: JennyElement) {
     }
 
     companion object {
-        fun getBinaryJennyElementSignature(element: JennyElement): String = Signature(element).toString()
+        fun getBinaryJennyElementSignature(element: JennyElement): String =
+            Signature(element).toString()
     }
 }
