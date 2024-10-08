@@ -19,5 +19,5 @@
 
 @for(constant in constants)
 
-        parametersProvider.getConstexprStatement(constant)
+    ${parametersProvider.getConstexprStatement(constant)}
 @endfor

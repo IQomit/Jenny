@@ -53,8 +53,12 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             Diagnostic.Kind.NOTE,
             "Jenny configured with:${environment.configurations}"
         )
+        val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
         jennyProcessor =
-            ProcessorAPIImpl(outputDirectory = environment.configurations.outputDirectory!!)
+            ProcessorAPIImpl(
+                outputDirectory = environment.configurations.outputDirectory!!,
+                templatesPath = templatesPath
+            )
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -84,6 +88,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         return roundEnv.getElementsAnnotatedWith(NativeClass::class.java)
             .filterIsInstance<TypeElement>()
             .forEach {
+                jennyProcessor.setGlueNamespace("")
                 jennyProcessor.processForGlue(it)
             }
     }

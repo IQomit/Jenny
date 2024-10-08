@@ -36,5 +36,3 @@ class ${classInfo.simpleClassName}Proxy {
 
 public:
     static constexpr auto FULL_CLASS_NAME = "${classInfo.slashClassName}";
-
-
