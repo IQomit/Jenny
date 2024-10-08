@@ -21,8 +21,8 @@ import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.generator.ClassInfo
-import io.github.landerlyoung.jenny.utils.ParametersProvider
 import io.github.landerlyoung.jenny.utils.JennyNameProvider
+import io.github.landerlyoung.jenny.utils.ParametersProvider
 import io.github.landerlyoung.jenny.utils.Signature
 import io.github.landerlyoung.jenny.utils.print
 import io.github.landerlyoung.jenny.utils.toJniReturnTypeString
@@ -80,13 +80,13 @@ internal class DefaultJennyGlueHeaderDefinitionsProvider : JennyGlueHeaderDefini
 
         methods.forEach { method ->
             val javaModifiers = method.modifiers.print()
-            val javaReturnType = method.type.typeName
+            val javaReturnType = method.returnType.typeName
             val javaMethodName = method.name
             val javaParameters = parametersProvider.getJavaMethodParameters(method)
             val javaMethodSignature = Signature.getBinaryJennyElementSignature(method)
             val export = if (isSource) "" else "JNIEXPORT "
             val jniCall = if (isSource) "" else "JNICALL "
-            val jniReturnType = method.type.toJniReturnTypeString()
+            val jniReturnType = method.returnType.toJniReturnTypeString()
             val nativeMethodName =
                 if (isSource)
                     classInfo.simpleClassName + "::" + JennyNameProvider.getNativeMethodName(

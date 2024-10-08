@@ -22,7 +22,8 @@ data class JennyProxyConfiguration(
     val threadSafe: Boolean = true,
     val useJniHelper: Boolean = false,
     val headerOnlyProxy: Boolean = false,
-    val allFields: Boolean = true,
+    val allFields: Boolean = false,
+    val allMethods: Boolean = false,
     val onlyPublicMethod: Boolean = true,
     val errorLoggingFunction:String = ""
 )

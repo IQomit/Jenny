@@ -26,7 +26,8 @@ data class JennyProcessorConfiguration(
     val threadSafe: Boolean = true,
     val useJniHelper: Boolean = false,
     val headerOnlyProxy: Boolean = false,
-    val allFields: Boolean = true,
+    val allFields: Boolean = false,
+    val allMethods: Boolean = false,
     val onlyPublicMethod: Boolean = true,
     val errorLoggingFunction: String = ""
 ) {
@@ -37,6 +38,7 @@ data class JennyProcessorConfiguration(
             useJniHelper = useJniHelper,
             headerOnlyProxy = headerOnlyProxy,
             allFields = allFields,
+            allMethods =allMethods ,
             onlyPublicMethod = onlyPublicMethod,
             errorLoggingFunction = errorLoggingFunction
         )

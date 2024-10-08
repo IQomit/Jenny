@@ -59,6 +59,7 @@ class ProcessorAPIImpl(outputDirectory: String, templatesPath: String? = null) :
             useJniHelper = configuration.useJniHelper,
             headerOnlyProxy = configuration.headerOnlyProxy,
             allFields = configuration.allFields,
+            allMethods = configuration.allMethods,
             onlyPublicMethod = configuration.onlyPublicMethod,
             errorLoggingFunction = configuration.errorLoggingFunction
         )

@@ -92,9 +92,16 @@ class JennyAnnotationProcessor : AbstractProcessor() {
 
         roundEnv.getElementsAnnotatedWith(NativeProxy::class.java)
             .map {
-                val config = NativeProxyGenerator.NativeProxyConfig(
-                    (it.getAnnotation(NativeProxy::class.java)
-                        ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java))
+                val annotation = it.getAnnotation(NativeProxy::class.java)
+                    ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java)
+
+                jennyProcessor.setProxyConfiguration(
+                    JennyProxyConfiguration(
+                        namespace = annotation.namespace,
+                        allFields = annotation.allFields,
+                        allMethods = annotation.allMethods,
+                        onlyPublicMethod = false
+                    )
                 )
                 jennyProcessor.processForProxy(it as TypeElement)
             }
@@ -117,16 +124,15 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                 } catch (e: MirroredTypesException) {
                     e.typeMirrors
                 }.map {
-                    val clazz = env.typeUtils.asElement(it) as TypeElement
-
                     jennyProcessor.setProxyConfiguration(
                         JennyProxyConfiguration(
                             namespace = annotation.namespace,
                             allFields = true,
-                            onlyPublicMethod = true
+                            allMethods = true,
+                            onlyPublicMethod = true,
                         )
                     )
-                    jennyProcessor.processForProxy(clazz)
+                    jennyProcessor.processForProxy(env.typeUtils.asElement(it) as TypeElement)
                 }
             }
     }
