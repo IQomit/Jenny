@@ -33,7 +33,8 @@ internal class NativeProxyProcessor(
     templatesPath: String? = null,
     private val cppFileHelper: CppFileHelper = CppFileHelper()
 ) : Processor, Configurator<JennyProxyConfiguration> {
-    private val providerType = templatesPath?.let { ProxyProviderType.Template(it) } ?: ProxyProviderType.Default
+    private val providerType =
+        templatesPath?.let { ProxyProviderType.Template(it) } ?: ProxyProviderType.Default
     private val nativeProxyGenerator = NativeProxyGenerator(
         type = providerType,
         cppFileHelper = cppFileHelper,
@@ -44,9 +45,8 @@ internal class NativeProxyProcessor(
         nativeProxyGenerator.setOutputTargetPath(outputPath)
     }
 
-    override fun process(input: Any) {
-        nativeProxyGenerator.generate(makeJennyClazz(input))
-    }
+    override fun process(input: Any) = nativeProxyGenerator.generate(makeJennyClazz(input))
+
 
     override fun applyConfiguration(configuration: JennyProxyConfiguration) {
         cppFileHelper.setNamespace(configuration.namespace)

@@ -18,8 +18,6 @@ package io.github.landerlyoung.jenny
 
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.utils.AnnotationResolver
-import io.github.landerlyoung.jenny.utils.FileHandler
-import java.io.File
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
@@ -75,7 +73,6 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             generateNativeGlueCode(roundEnv)
             generateNativeProxy(roundEnv)
 //            generateFusionProxyHeader(proxyClasses)
-            generateJniHelper()
         } catch (e: Throwable) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
@@ -144,14 +141,6 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             }
     }
 
-    private fun generateJniHelper() {
-        FileHandler.createOutputFile(
-            outputDirectory,
-            Constants.JENNY_GEN_DIR_PROXY + File.separatorChar + Constants.JENNY_JNI_HELPER_H_NAME
-        ).use {
-            it.write(Constants.JENNY_JNI_HELPER_H_CONTENT.toByteArray(Charsets.UTF_8))
-        }
-    }
 
     private fun generateFusionProxyHeader(name: String, proxyClasses: Collection<CppClass>) {
         FusionProxyGenerator(name, proxyClasses.sorted()).generate()

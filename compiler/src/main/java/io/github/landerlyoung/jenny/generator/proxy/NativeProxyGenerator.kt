@@ -20,6 +20,7 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.HeaderData
 import io.github.landerlyoung.jenny.generator.INativeProxyGenerator
 import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.generator.jnihelper.JNIHelperGenerator
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderFactory
@@ -35,21 +36,37 @@ internal class NativeProxyGenerator(
     private var outputDirectory: String,
 ) : INativeProxyGenerator<JennyClazzElement, Unit> {
 
-    private val jennyHeaderDefinitionsProvider = ProxyProviderFactory.createProvider(true, type) as JennyProxyHeaderDefinitionsProvider
-    private val jennySourceDefinitionsProvider = ProxyProviderFactory.createProvider(false, type) as JennyProxySourceDefinitionsProvider
+    private val jennyHeaderDefinitionsProvider =
+        ProxyProviderFactory.createProvider(true, type) as JennyProxyHeaderDefinitionsProvider
+    private val jennySourceDefinitionsProvider =
+        ProxyProviderFactory.createProvider(false, type) as JennyProxySourceDefinitionsProvider
 
     private val nativeProxyHeaderGenerator =
         NativeProxyHeaderGenerator(
-            headerProvider = jennyHeaderDefinitionsProvider ,
+            headerProvider = jennyHeaderDefinitionsProvider,
             sourceProvider = jennySourceDefinitionsProvider
         )
-    private val nativeProxySourceGenerator = NativeProxySourceGenerator(jennySourceDefinitionsProvider)
+    private val nativeProxySourceGenerator =
+        NativeProxySourceGenerator(jennySourceDefinitionsProvider)
 
     private var headerOnlyProxy = false
+    private var generateJniHelper = false
+    private var jniHelperGenerated = false
+
+    private val jniHelperGenerator =
+        JNIHelperGenerator(
+            outputDirectory = outputDirectory,
+            jniHelperName = cppFileHelper.jniHelperDefaultName
+        )
+
     override fun generate(input: JennyClazzElement) {
         generateHeaderFile(input)
         if (!headerOnlyProxy) {
             generateSourceFile(input)
+        }
+        if (generateJniHelper && !jniHelperGenerated) {
+            jniHelperGenerator.generate(Unit)
+            jniHelperGenerated = true  // Mark as generated
         }
     }
 
@@ -95,6 +112,7 @@ internal class NativeProxyGenerator(
 
     override fun applyConfiguration(configuration: JennyProxyConfiguration) {
         headerOnlyProxy = configuration.headerOnlyProxy
+        generateJniHelper = configuration.useJniHelper
         cppFileHelper.setNamespace(configuration.namespace)
         nativeProxyHeaderGenerator.applyConfiguration(configuration)
         nativeProxySourceGenerator.applyConfiguration(configuration)
