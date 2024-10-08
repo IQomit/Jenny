@@ -50,9 +50,14 @@ internal class JennyMethodOverloadResolver(
             val isCppReserved = reservedWords.contains(method.name)
             val updatedMethod = if (isOverloaded || isCppReserved) {
                 val postfix = getMethodOverloadPostfix(method)
-                JennyExecutableElement.createWithNewName(method, "${methodName}_${postfix}")
+                JennyExecutableElement.createWithNewName(
+                    method,
+                    if (method.isConstructor()) "newInstance${postfix}" else "${methodName}_${postfix}"
+                )
             } else {
-                method
+                if (method.isConstructor())
+                    JennyExecutableElement.createWithNewName(method, "newInstance")
+                else method
             }
             resultMap[updatedMethod] = currentCount
         }
@@ -62,7 +67,8 @@ internal class JennyMethodOverloadResolver(
 
     private fun getMethodOverloadPostfix(method: JennyExecutableElement): String {
         val signature = Signature.getBinaryJennyElementSignature(method)
-        val paramSig = signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
+        val paramSig =
+            signature.subSequence(signature.indexOf('(') + 1, signature.indexOf(")")).toString()
         return "__" + paramSig.replace("_", "_1")
             .replace("/", "_")
             .replace(";", "_2")

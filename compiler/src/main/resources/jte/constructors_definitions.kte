@@ -28,7 +28,7 @@
     !{val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor, forceStatic = true)}
     !{val javaParameters = parametersProvider.getJavaMethodParameters(constructor)}
         // construct: ${constructor.modifiers.print()} ${simpleClassName}(${javaParameters})
-        static ${returnType} newInstance(${jniParameters}) {
+        static ${returnType} ${constructor.name}(${jniParameters}) {
             ${methodPrologue}
             return env->NewObject(${JennyNameProvider.getClassState()}, ${JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(count))}${parametersProvider.getJniMethodParamVal(constructor, useJniHelper)});
         }

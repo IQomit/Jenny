@@ -25,6 +25,7 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypesException
+import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 
 /**
@@ -70,7 +71,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         try {
 
             generateNativeGlueCode(roundEnv)
-            generateNativeProxy(roundEnv, environment)
+            generateNativeProxy(roundEnv, environment.typeUtils)
 //            generateFusionProxyHeader(environment, proxyClasses)
             generateJniHelper(environment)
         } catch (e: Throwable) {
@@ -84,7 +85,6 @@ class JennyAnnotationProcessor : AbstractProcessor() {
     }
 
     private fun generateNativeGlueCode(roundEnv: RoundEnvironment) {
-        // classify annotations by class
         return roundEnv.getElementsAnnotatedWith(NativeClass::class.java)
             .filterIsInstance<TypeElement>()
             .forEach {
@@ -93,7 +93,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             }
     }
 
-    private fun generateNativeProxy(roundEnv: RoundEnvironment, env: Environment) {
+    private fun generateNativeProxy(roundEnv: RoundEnvironment, typesUtils: Types) {
 
         roundEnv.getElementsAnnotatedWith(NativeProxy::class.java)
             .map {
@@ -137,7 +137,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                             onlyPublicMethod = true,
                         )
                     )
-                    jennyProcessor.processForProxy(env.typeUtils.asElement(it) as TypeElement)
+                    jennyProcessor.processForProxy(typesUtils.asElement(it) as TypeElement)
                 }
             }
     }

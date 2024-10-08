@@ -24,7 +24,15 @@ import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.generator.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.utils.*
+import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder
+import io.github.landerlyoung.jenny.utils.JennyNameProvider
+import io.github.landerlyoung.jenny.utils.ParametersProvider
+import io.github.landerlyoung.jenny.utils.isStatic
+import io.github.landerlyoung.jenny.utils.needWrapLocalRef
+import io.github.landerlyoung.jenny.utils.print
+import io.github.landerlyoung.jenny.utils.toCamelCase
+import io.github.landerlyoung.jenny.utils.toJniCall
+import io.github.landerlyoung.jenny.utils.toJniReturnTypeString
 
 internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefinitionsProvider {
 
@@ -115,7 +123,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             append(
                 """
                     |    // construct: ${constructor.modifiers.print()} ${simpleClassName}($javaParameters)
-                    |    static $returnType newInstance(${jniParameters}) {
+                    |    static $returnType ${constructor.name}(${jniParameters}) {
                     |           $methodPrologue
                     |        return env->NewObject(${JennyNameProvider.getClassState()}, ${
                     JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(count))
