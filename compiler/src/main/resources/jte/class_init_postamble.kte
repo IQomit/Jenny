@@ -12,7 +12,7 @@
     limitations under the License.
 --%>
 
-@import io.github.landerlyoung.jenny.Constants
+@import io.github.landerlyoung.jenny.utils.Constants
 
 @param endNamespace: String
 @param simpleClassName: String

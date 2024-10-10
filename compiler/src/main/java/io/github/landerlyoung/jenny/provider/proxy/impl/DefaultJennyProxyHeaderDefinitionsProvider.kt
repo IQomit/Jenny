@@ -17,11 +17,11 @@
 
 package io.github.landerlyoung.jenny.provider.proxy.impl
 
-import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
-import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.generator.model.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder

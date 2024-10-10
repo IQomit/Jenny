@@ -15,7 +15,7 @@
  */
 package io.github.landerlyoung.jenny.generator.jnihelper
 
-import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.OutputTargetConfigurator
 import io.github.landerlyoung.jenny.utils.FileHandler
@@ -25,8 +25,7 @@ import java.io.IOException
 internal class JNIHelperGenerator(
     private var outputDirectory: String,
     private val jniHelperName: String,
-) : Generator<Unit, Unit>,
-    OutputTargetConfigurator {
+) : Generator<Unit, Unit>, OutputTargetConfigurator {
 
     override fun generate(input: Unit) {
         writeFileContent(Constants.JENNY_JNI_HELPER_H_CONTENT, jniHelperName)
@@ -34,7 +33,7 @@ internal class JNIHelperGenerator(
 
     private fun writeFileContent(content: String, fileName: String) {
         try {
-            FileHandler.createOutputFile(
+            FileHandler.createOutputStreamFrom(
                 outputDirectory,
                 JENNY_GEN_DIR_PROXY + File.separatorChar + fileName
             ).use {

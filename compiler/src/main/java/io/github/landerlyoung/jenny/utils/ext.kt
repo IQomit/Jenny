@@ -21,6 +21,9 @@ import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.element.model.type.JennyType
+import java.io.File
+import java.io.OutputStream
+import java.nio.charset.Charset
 import java.util.Locale
 
 fun JennyType.toJniReturnTypeString(): String {
@@ -84,6 +87,23 @@ internal fun <T> Collection<T>.visibility(onlyPublic: Boolean): Collection<T> wh
         this.filter { it.isPublic() }
     } else {
         this
+    }
+}
+
+internal inline fun File.use(action: (OutputStream) -> Unit) {
+    outputStream().use { outputStream ->
+        action(outputStream)
+    }
+}
+fun File.writeText(text: String, charset: Charset = Charsets.UTF_8) {
+    this.use {
+        it.write(text.toByteArray(charset))
+    }
+}
+
+fun File.appendText(text: String, charset: Charset = Charsets.UTF_8) {
+    this.outputStream().use { outputStream ->
+        outputStream.write(text.toByteArray(charset))
     }
 }
 

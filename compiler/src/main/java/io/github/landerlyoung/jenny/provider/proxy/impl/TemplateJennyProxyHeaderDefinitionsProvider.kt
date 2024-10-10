@@ -20,7 +20,7 @@ import gg.jte.TemplateEngine
 import gg.jte.output.StringOutput
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.generator.model.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.ParametersProvider

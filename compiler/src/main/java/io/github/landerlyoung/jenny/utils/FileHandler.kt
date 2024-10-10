@@ -16,7 +16,11 @@
 
 package io.github.landerlyoung.jenny.utils
 
-import java.io.*
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+import java.io.OutputStream
 
 internal class FileHandler(private val file: File) {
     constructor(filePath: String) : this(File(filePath))
@@ -109,7 +113,7 @@ internal class FileHandler(private val file: File) {
     }
 
     companion object {
-        fun createOutputFile(path: String): OutputStream {
+        fun createOutputStreamFrom(path: String): OutputStream {
             return try {
                 File(path).apply { parentFile.mkdirs() }.outputStream().buffered()
             } catch (e: IOException) {
@@ -118,9 +122,26 @@ internal class FileHandler(private val file: File) {
             }
         }
 
-        fun createOutputFile(parent: String, name: String): OutputStream {
+        fun createOutputStreamFrom(parent: String, name: String): OutputStream {
             return try {
                 File(parent, name).apply { parentFile.mkdirs() }.outputStream().buffered()
+            } catch (e: IOException) {
+                println("Error creating output stream: ${e.message}")
+                throw e
+            }
+        }
+
+        fun createOutputFile(parent: String, name: String, overwrite: Boolean = false): File {
+            return try {
+                val file = File(parent, name)
+                file.parentFile.mkdirs()
+                if (file.exists() && overwrite) {
+                    file.delete()
+                }
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                file
             } catch (e: IOException) {
                 println("Error creating output stream: ${e.message}")
                 throw e

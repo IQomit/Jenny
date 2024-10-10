@@ -20,7 +20,7 @@ import io.github.landerlyoung.jenny.NativeFieldProxy
 import io.github.landerlyoung.jenny.NativeMethodProxy
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.model.HeaderData
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
@@ -29,7 +29,7 @@ import io.github.landerlyoung.jenny.utils.visibility
 internal class NativeProxyHeaderGenerator(
     private val headerProvider: JennyProxyHeaderDefinitionsProvider,
     private val sourceProvider: JennyProxySourceDefinitionsProvider,
-    private var jennyProxyConfiguration: JennyProxyConfiguration = JennyProxyConfiguration()
+    private var jennyProxyConfiguration: JennyProxyConfiguration
 ) : ProxyGenerator<HeaderData, String> {
 
     private val generateGetterForField: (JennyVarElement) -> Boolean = { field ->

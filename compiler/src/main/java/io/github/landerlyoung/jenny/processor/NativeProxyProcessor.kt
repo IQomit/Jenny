@@ -30,15 +30,17 @@ import kotlin.reflect.KClass
 
 internal class NativeProxyProcessor(
     outputDirectory: String,
-    templatesPath: String? = null,
-    private val cppFileHelper: CppFileHelper = CppFileHelper()
+    useTemplates: Boolean,
+    private val cppFileHelper: CppFileHelper = CppFileHelper(),
+    proxyConfiguration: JennyProxyConfiguration
 ) : Processor, Configurator<JennyProxyConfiguration> {
-    private val providerType =
-        templatesPath?.let { ProxyProviderType.Template(it) } ?: ProxyProviderType.Default
+
+    private val providerType = if (useTemplates) ProxyProviderType.Template() else ProxyProviderType.Default
     private val nativeProxyGenerator = NativeProxyGenerator(
-        type = providerType,
+        providerType = providerType,
         cppFileHelper = cppFileHelper,
-        outputDirectory = outputDirectory
+        outputDirectory = outputDirectory,
+        proxyConfiguration = proxyConfiguration
     )
 
     override fun setOutputTargetPath(outputPath: String) {
@@ -46,7 +48,6 @@ internal class NativeProxyProcessor(
     }
 
     override fun process(input: Any) = nativeProxyGenerator.generate(makeJennyClazz(input))
-
 
     override fun applyConfiguration(configuration: JennyProxyConfiguration) {
         cppFileHelper.setNamespace(configuration.namespace)

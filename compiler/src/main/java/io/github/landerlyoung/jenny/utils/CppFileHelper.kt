@@ -16,13 +16,16 @@
 
 package io.github.landerlyoung.jenny.utils
 
-import io.github.landerlyoung.jenny.generator.Namespace
+import io.github.landerlyoung.jenny.generator.model.Namespace
 
 internal class CppFileHelper  {
+    private val namespaceHelper = NamespaceHelper()
+
     val jniHelperDefaultName:String
         get() = "jnihelper.h"
 
-    private val namespaceHelper = NamespaceHelper()
+    val namespaceNotation :String
+        get() = namespaceHelper.namespaceNotation
     fun provideHeaderFile(className: String) = "${namespaceHelper.fileNamePrefix}$className.h"
     fun provideSourceFile(className: String) = "${namespaceHelper.fileNamePrefix}$className.cpp"
     fun provideNamespace(): Namespace {

@@ -15,8 +15,6 @@
 @param hasGetter:(JennyVarElement)->Boolean
 @param hasSetter:(JennyVarElement)->Boolean
 @param parametersProvider: ParametersProvider
-
-
 @for((index, field)  in fields.withIndex())
     !{val getterIsFound = hasGetter(field) }
     !{val setterIsFound = hasSetter(field) }
@@ -37,26 +35,22 @@
         !{val jniReturn = if (useJniHelper && field.type.needWrapLocalRef()) "$jniReturnType(" else ""}
         !{val cast = if (parametersProvider.returnTypeNeedCast(jniReturnType)) "reinterpret_cast<${jniReturnType}>(" else ""}
         !{val rField = "${jniEnv}->Get${static}${typeForJniCall}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)})"}
-        !{val content = """
-                            $comment
-                            ${staticMod}${jniReturnType} get${camelCase}(${parameters}) ${constMod}{
-                                $methodPrologue
-                                return $jniReturn$cast$rField
-                               }
-                               """}
+        !{val content = """$comment
+    ${staticMod}${jniReturnType} get${camelCase}(${parameters}) ${constMod}{
+        $methodPrologue
+        return $jniReturn$cast$rField
+    }"""}
         @template.content_display(content = content)
     @endif
     @if(setterIsFound)
         !{val fieldJniType = if (useJniHelper && field.type.needWrapLocalRef()) "::jenny::LocalRef<$jniReturnType>" else jniReturnType}
         !{val parameters = parametersProvider.makeParameter(field, useJniHelper) + fieldJniType}
         !{val passedParam = if (useJniHelper && field.type.needWrapLocalRef()) "${field.name}.get()" else field.name}
-        !{val content =  """
-                            $comment
-                            ${staticMod}void set${camelCase}(${parameters}) ${constMod}{
-                               $methodPrologue
-                               ${jniEnv}->Set${static}${typeForJniCall}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)}, ${passedParam});
-                            }
-                        """}
+        !{val content =  """ $comment
+    ${staticMod}void set${camelCase}(${parameters}) ${constMod}{
+        $methodPrologue
+        ${jniEnv}->Set${static}${typeForJniCall}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)}, ${passedParam});
+    }"""}
         @template.content_display(content = content)
     @endif
 @endfor

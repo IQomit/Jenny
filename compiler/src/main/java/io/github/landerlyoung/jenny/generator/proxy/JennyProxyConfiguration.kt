@@ -18,12 +18,13 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 data class JennyProxyConfiguration(
-    val namespace:String = "Jenny::Default",
-    val threadSafe: Boolean = true,
-    val useJniHelper: Boolean = false,
-    val headerOnlyProxy: Boolean = false,
-    val allFields: Boolean = false,
-    val allMethods: Boolean = false,
-    val onlyPublicMethod: Boolean = true,
-    val errorLoggingFunction:String = ""
+    val namespace: String,
+    val threadSafe: Boolean ,
+    val useJniHelper: Boolean ,
+    val headerOnlyProxy: Boolean,
+    val allFields: Boolean,
+    val allMethods: Boolean,
+    val onlyPublicMethod: Boolean,
+    val errorLoggingFunction: String,
+    val fusionProxyHeaderName:String
 )

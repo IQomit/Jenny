@@ -16,9 +16,9 @@
 
 package io.github.landerlyoung.jenny.generator.glue
 
-import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.generator.Generator
-import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.generator.model.SourceData
 import io.github.landerlyoung.jenny.provider.glue.JennyGlueHeaderDefinitionsProvider
 
 internal class NativeGlueSourceGenerator(private val provider: JennyGlueHeaderDefinitionsProvider) :

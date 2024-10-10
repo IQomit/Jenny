@@ -17,9 +17,9 @@
 package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
-import io.github.landerlyoung.jenny.generator.HeaderData
+import io.github.landerlyoung.jenny.generator.model.HeaderData
 import io.github.landerlyoung.jenny.generator.NativeGenerator
-import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.generator.model.SourceData
 import io.github.landerlyoung.jenny.provider.glue.DefaultJennyGlueHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import io.github.landerlyoung.jenny.utils.FileHandler
@@ -68,7 +68,7 @@ internal class NativeGlueGenerator(
 
     private fun writeFileContent(content: String, fileName: String) {
         try {
-            FileHandler.createOutputFile(
+            FileHandler.createOutputStreamFrom(
                 outputDirectory,
                 JENNY_GEN_DIR_GLUE + File.separatorChar + fileName
             ).use {

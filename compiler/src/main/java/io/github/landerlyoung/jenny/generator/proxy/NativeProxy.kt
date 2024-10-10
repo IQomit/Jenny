@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package io.github.landerlyoung.jenny.provider.proxy.factory
+package io.github.landerlyoung.jenny.generator.proxy
 
-internal sealed interface ProxyProviderType {
-    data object Default : ProxyProviderType
-    data class Template(
-        val pathOfTemplate: String = System.getProperty("user.dir") + "/compiler/src/main/resources/jte",
-        val pathOfTemplatesBuildFolder: String? = null
-    ) : ProxyProviderType
-}
+import io.github.landerlyoung.jenny.generator.OutputTargetConfigurator
+
+internal interface NativeProxy<in Input, out Output> : ProxyGenerator<Input, Output>, OutputTargetConfigurator

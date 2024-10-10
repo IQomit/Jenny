@@ -16,9 +16,4 @@
 
 package io.github.landerlyoung.jenny.generator
 
-import io.github.landerlyoung.jenny.generator.proxy.ProxyGenerator
-
 internal interface NativeGenerator<in Input, out Output> : Generator<Input, Output>, OutputTargetConfigurator
-
-
-internal interface INativeProxyGenerator<in Input, out Output> : ProxyGenerator<Input, Output>, OutputTargetConfigurator

@@ -2,7 +2,7 @@ package io.github.landerlyoung.jenny.provider.glue
 
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
-import io.github.landerlyoung.jenny.generator.ClassInfo
+import io.github.landerlyoung.jenny.generator.model.ClassInfo
 import io.github.landerlyoung.jenny.provider.Provider
 
 internal interface JennyGlueHeaderDefinitionsProvider : Provider {

@@ -17,7 +17,7 @@
 
 package io.github.landerlyoung.jenny.resolver
 
-import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.utils.Signature
 import io.github.landerlyoung.jenny.utils.stripNonASCII

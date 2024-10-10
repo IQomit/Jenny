@@ -16,14 +16,14 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
-import io.github.landerlyoung.jenny.generator.SourceData
+import io.github.landerlyoung.jenny.generator.model.SourceData
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
 import io.github.landerlyoung.jenny.utils.visibility
 
 internal class NativeProxySourceGenerator(
     private val sourceProvider: JennyProxySourceDefinitionsProvider,
-    private var jennyProxyConfiguration: JennyProxyConfiguration = JennyProxyConfiguration()
+    private var jennyProxyConfiguration: JennyProxyConfiguration
 ) : ProxyGenerator<SourceData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()

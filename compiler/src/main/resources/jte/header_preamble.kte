@@ -12,7 +12,7 @@
     limitations under the License.
 --%>
 @import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
-@import io.github.landerlyoung.jenny.generator.ClassInfo
+@import io.github.landerlyoung.jenny.generator.model.ClassInfo
 
 @param proxyConfiguration:JennyProxyConfiguration
 @param classInfo: ClassInfo

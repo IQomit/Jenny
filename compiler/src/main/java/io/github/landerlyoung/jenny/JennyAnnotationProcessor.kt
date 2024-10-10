@@ -16,7 +16,6 @@
  */
 package io.github.landerlyoung.jenny
 
-import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.utils.AnnotationResolver
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Messager
@@ -28,38 +27,24 @@ import javax.lang.model.type.MirroredTypesException
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 
-/**
- * Author: landerlyoung@gmail.com
- * Date:   2014-12-16
- * Time:   19:42
- * Life with passion. Code with creativity!
- */
 class JennyAnnotationProcessor : AbstractProcessor() {
 
-    private lateinit var jennyProcessor: ProcessorAPI<Any>
+    private lateinit var jennyProcessor: GenerationProcessorAPI<Any>
+    private lateinit var jennyConfigurations: JennyProcessorConfiguration
 
     private lateinit var messager: Messager
     private lateinit var typeUtils: Types
-
-    private lateinit var outputDirectory: String
 
     @Synchronized
     override fun init(processingEnv: ProcessingEnvironment) {
         super.init(processingEnv)
         messager = processingEnv.messager
         typeUtils = processingEnv.typeUtils
-        val configurations = Configurations.fromOptions(processingEnv.options)
-        outputDirectory = configurations.outputDirectory!!
-        messager.printMessage(
-            Diagnostic.Kind.NOTE,
-            "Jenny configured with:${configurations}"
-        )
-        val templatesPath = System.getProperty("user.dir") + "/compiler/src/main/resources/jte"
-        jennyProcessor =
-            ProcessorAPIImpl(
-                outputDirectory = outputDirectory,
-                templatesPath = templatesPath
-            )
+        jennyConfigurations = JennyProcessorConfiguration.fromOptions(processingEnv.options)
+
+        messager.printMessage(Diagnostic.Kind.NOTE, "Jenny configured with:${jennyConfigurations}")
+
+        jennyProcessor = GenerationProcessorAPIImpl(jennyConfigurations)
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -69,10 +54,8 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         ) return false
 
         try {
-
             generateNativeGlueCode(roundEnv)
             generateNativeProxy(roundEnv)
-//            generateFusionProxyHeader(proxyClasses)
         } catch (e: Throwable) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
@@ -87,7 +70,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
         return roundEnv.getElementsAnnotatedWith(NativeClass::class.java)
             .filterIsInstance<TypeElement>()
             .forEach {
-                jennyProcessor.setGlueNamespace("")
+                jennyProcessor.setGlueNamespace(jennyConfigurations.glueNamespace)
                 jennyProcessor.processForGlue(it)
             }
     }
@@ -95,18 +78,17 @@ class JennyAnnotationProcessor : AbstractProcessor() {
     private fun generateNativeProxy(roundEnv: RoundEnvironment) {
 
         roundEnv.getElementsAnnotatedWith(NativeProxy::class.java)
-            .map {
+            .forEach {
                 val annotation = it.getAnnotation(NativeProxy::class.java)
                     ?: AnnotationResolver.getDefaultImplementation(NativeProxy::class.java)
 
-                jennyProcessor.setProxyConfiguration(
-                    JennyProxyConfiguration(
-                        namespace = annotation.namespace,
-                        allFields = annotation.allFields,
-                        allMethods = annotation.allMethods,
-                        onlyPublicMethod = false
-                    )
+                val proxyConfiguration = jennyConfigurations.provideProxyConfiguration().copy(
+                    namespace = annotation.namespace,
+                    allFields = annotation.allFields,
+                    allMethods = annotation.allMethods,
+                    onlyPublicMethod = false,
                 )
+                jennyProcessor.setProxyConfiguration(proxyConfiguration)
                 jennyProcessor.processForProxy(it as TypeElement)
             }
 
@@ -121,29 +103,25 @@ class JennyAnnotationProcessor : AbstractProcessor() {
                     }
                 )
             .toCollection(mutableSetOf())
-            .flatMap { annotation ->
+            .forEach { annotation ->
                 try {
                     annotation.classes
                     throw AssertionError("unreachable")
                 } catch (e: MirroredTypesException) {
                     e.typeMirrors
-                }.map {
-                    jennyProcessor.setProxyConfiguration(
-                        JennyProxyConfiguration(
-                            namespace = annotation.namespace,
-                            allFields = true,
-                            allMethods = true,
-                            onlyPublicMethod = true,
-                        )
+                }.forEach {
+
+                    val proxyConfiguration = jennyConfigurations.provideProxyConfiguration().copy(
+                        namespace = annotation.namespace,
+                        allFields = true,
+                        allMethods = true,
+                        onlyPublicMethod = true
                     )
+
+                    jennyProcessor.setProxyConfiguration(proxyConfiguration)
                     jennyProcessor.processForProxy(typeUtils.asElement(it) as TypeElement)
                 }
             }
-    }
-
-
-    private fun generateFusionProxyHeader(name: String, proxyClasses: Collection<CppClass>) {
-        FusionProxyGenerator(name, proxyClasses.sorted()).generate()
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
@@ -155,7 +133,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedOptions(): Set<String> {
-        return Configurations.ALL_OPTIONS
+        return JennyProcessorConfiguration.configurationOptions
     }
 
     companion object {

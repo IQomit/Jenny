@@ -22,11 +22,12 @@ import gg.jte.resolve.DirectoryCodeResolver
 import java.nio.file.Path
 
 internal object JteTemplate {
-    fun createEngine(templatePath: String): TemplateEngine {
+    //todo handle path exception
+    fun createEngine(templatePath: String, templateBuildFolder: String? = null): TemplateEngine {
         val codeResolver = DirectoryCodeResolver(Path.of(templatePath))
         val templateEngine = TemplateEngine.create(
             codeResolver,
-            Path.of("$templatePath/build"),
+            Path.of(templateBuildFolder?:"$templatePath/build"),
             ContentType.Plain,
             this::class.java.classLoader
         )

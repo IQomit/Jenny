@@ -24,39 +24,33 @@ import io.github.landerlyoung.jenny.provider.proxy.impl.TemplateJennyProxyHeader
 import io.github.landerlyoung.jenny.provider.proxy.impl.TemplateJennyProxySourceDefinitionsProvider
 
 internal object ProxyProviderFactory {
-    fun createProvider(isHeader: Boolean, type: ProxyProviderType): Provider {
-        if(isHeader)
-            return ProxyHeaderProviderFactory.createProvider(type)
-        return ProxySourceProviderFactory.createProvider(type)
-    }
-}
-
-internal interface ProviderFactory {
-    fun createProvider(type: ProxyProviderType): Provider
-}
-
-internal object ProxyHeaderProviderFactory : ProviderFactory {
-    override fun createProvider(type: ProxyProviderType): JennyProxyHeaderDefinitionsProvider {
-        return when (type) {
-            ProxyProviderType.Default -> DefaultJennyProxyHeaderDefinitionsProvider()
-            is ProxyProviderType.Template -> TemplateJennyProxyHeaderDefinitionsProvider(
-                JteTemplate.createEngine(
-                    type.pathOfTemplate
-                )
-            )
+     inline fun <reified T:Provider> createProvider(type: ProxyProviderType): T {
+        return when(T::class){
+            JennyProxyHeaderDefinitionsProvider::class ->ProxyHeaderProviderFactory.createProvider(type) as T
+            JennyProxySourceDefinitionsProvider::class ->ProxySourceProviderFactory.createProvider(type) as T
+            else -> throw Exception("${T::class.simpleName} not supported")
         }
     }
 }
 
-internal object ProxySourceProviderFactory : ProviderFactory {
+internal interface ProviderFactory <T:Provider> {
+    fun createProvider(type: ProxyProviderType): T
+}
+
+internal object ProxyHeaderProviderFactory : ProviderFactory<JennyProxyHeaderDefinitionsProvider> {
+    override fun createProvider(type: ProxyProviderType): JennyProxyHeaderDefinitionsProvider {
+        return when (type) {
+            ProxyProviderType.Default -> DefaultJennyProxyHeaderDefinitionsProvider()
+            is ProxyProviderType.Template -> TemplateJennyProxyHeaderDefinitionsProvider(JteTemplate.createEngine(type.pathOfTemplate, type.pathOfTemplatesBuildFolder))
+        }
+    }
+}
+
+internal object ProxySourceProviderFactory : ProviderFactory<JennyProxySourceDefinitionsProvider> {
     override fun createProvider(type: ProxyProviderType): JennyProxySourceDefinitionsProvider {
         return when (type) {
             ProxyProviderType.Default -> DefaultJennyProxySourceDefinitionsProvider()
-            is ProxyProviderType.Template -> TemplateJennyProxySourceDefinitionsProvider(
-                JteTemplate.createEngine(
-                    type.pathOfTemplate
-                )
-            )
+            is ProxyProviderType.Template -> TemplateJennyProxySourceDefinitionsProvider(JteTemplate.createEngine(type.pathOfTemplate, type.pathOfTemplatesBuildFolder))
         }
     }
 }

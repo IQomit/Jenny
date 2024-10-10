@@ -17,7 +17,7 @@
 
 package io.github.landerlyoung.jenny.provider.proxy.impl
 
-import io.github.landerlyoung.jenny.Constants
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
