@@ -12,7 +12,7 @@
     limitations under the License.
 --%>
 
-@param simpleClassName:String
+@param cppClassName:String
 
 // ====== jni helper ======
 private:
@@ -34,14 +34,14 @@ public:
         }
 
         // jni helper constructors
-        ${simpleClassName}Proxy(jobject ref, bool owned = false): _local(ref, owned) {
+        ${cppClassName}(jobject ref, bool owned = false): _local(ref, owned) {
             assertInited(::jenny::Env().get());
         }
 
-        ${simpleClassName}Proxy(::jenny::LocalRef<jobject> ref): _local(std::move(ref)) {
+        ${cppClassName}(::jenny::LocalRef<jobject> ref): _local(std::move(ref)) {
             assertInited(::jenny::Env().get());
         }
 
-        ${simpleClassName}Proxy(::jenny::GlobalRef<jobject> ref): _global(std::move(ref)) {
+        ${cppClassName}(::jenny::GlobalRef<jobject> ref): _global(std::move(ref)) {
             assertInited(::jenny::Env().get());
         }

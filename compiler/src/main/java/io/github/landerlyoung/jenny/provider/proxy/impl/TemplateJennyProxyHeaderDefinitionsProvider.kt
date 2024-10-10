@@ -25,7 +25,7 @@ import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder
 import io.github.landerlyoung.jenny.utils.ParametersProvider
-import java.util.EnumSet
+import java.util.*
 
 internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxyHeaderDefinitionsProvider {
@@ -146,8 +146,8 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
         )
     }
 
-    override fun generateForJniHelper(simpleClassName: String): String {
-        return getFromTemplate("jni_helper.kte", mapOf("simpleClassName" to simpleClassName))
+    override fun generateForJniHelper(cppClassName: String): String {
+        return getFromTemplate("jni_helper.kte", mapOf("cppClassName" to cppClassName))
     }
 
     override fun initPreDefinition(isThreadSafe: Boolean): String {

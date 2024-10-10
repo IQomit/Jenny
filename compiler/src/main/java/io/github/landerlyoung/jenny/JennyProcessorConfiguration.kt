@@ -26,7 +26,7 @@ data class JennyProcessorConfiguration(
     val threadSafe: Boolean = true,
     val useJniHelper: Boolean = false,
     val headerOnlyProxy: Boolean = false,
-    val errorLoggingFunction: String = "",
+    val errorLoggerFunction: String = "",
     val fusionProxyHeaderName: String = "JennyFusionProxy.h",
 ) {
     fun provideProxyConfiguration(): JennyProxyConfiguration {
@@ -38,7 +38,7 @@ data class JennyProcessorConfiguration(
             allFields = true,
             allMethods = true,
             onlyPublicMethod = true,
-            errorLoggingFunction = errorLoggingFunction,
+            errorLoggingFunction = errorLoggerFunction,
             fusionProxyHeaderName = fusionProxyHeaderName
         )
     }
@@ -51,7 +51,7 @@ data class JennyProcessorConfiguration(
          * external error log function
          * void (function_type)(JNIEnv* env, const char* error);
          */
-        private val ERROR_LOGGER_FUNCTION = PREFIX + JennyProcessorConfiguration::errorLoggingFunction.name
+        private val ERROR_LOGGER_FUNCTION = PREFIX + JennyProcessorConfiguration::errorLoggerFunction.name
 
         private val OUTPUT_DIRECTORY = PREFIX + JennyProcessorConfiguration::outputDirectory.name
 
@@ -79,7 +79,7 @@ data class JennyProcessorConfiguration(
             threadSafe = options[THREAD_SAFE] == true.toString(),
             useJniHelper = options[USE_JNI_HELPER] == true.toString(),
             headerOnlyProxy = options[HEADER_ONLY_PROXY] == true.toString(),
-            errorLoggingFunction = options[ERROR_LOGGER_FUNCTION] ?: "",
+            errorLoggerFunction = options[ERROR_LOGGER_FUNCTION] ?: "",
             fusionProxyHeaderName = options[FUSION_PROXY_HEADER_NAME] ?: "JennyFusionProxy.h"
         )
     }
