@@ -31,61 +31,79 @@ internal data class Namespace(
 internal data class HeaderData(
     val classInfo: ClassInfo = ClassInfo(),
     val namespace: Namespace = Namespace(),
-    val constructors: Collection<JennyExecutableElement> = emptyList(),
-    val methods: Collection<JennyExecutableElement> = emptyList(),
-    val constants: Collection<JennyVarElement> = emptyList(),
-    val fields: Collection<JennyVarElement> = emptyList(),
+    val constructors: List<JennyExecutableElement> = emptyList(),
+    val methods: List<JennyExecutableElement> = emptyList(),
+    val constants: List<JennyVarElement> = emptyList(),
+    val fields: List<JennyVarElement> = emptyList(),
 ) {
     class Builder {
-        private var headerData = HeaderData()
+        private var classInfo: ClassInfo = ClassInfo()
+        private var namespace: Namespace = Namespace()
+        private var constructors: List<JennyExecutableElement> = emptyList()
+        private var methods: List<JennyExecutableElement> = emptyList()
+        private var constants: List<JennyVarElement> = emptyList()
+        private var fields: List<JennyVarElement> = emptyList()
+        private var defaultCppName: String = ""
 
         fun classInfo(classInfo: ClassInfo) = apply {
-            headerData = headerData.copy(classInfo = classInfo)
+            this.classInfo = classInfo
         }
 
-        fun constructors(constructors: Collection<JennyExecutableElement>) = apply {
-            headerData = headerData.copy(constructors = constructors)
+        fun constructors(constructors: List<JennyExecutableElement>) = apply {
+            this.constructors = constructors
         }
 
-        fun methods(methods: Collection<JennyExecutableElement>) = apply {
-            headerData = headerData.copy(methods = methods)
+        fun methods(methods: List<JennyExecutableElement>) = apply {
+            this.methods = methods
         }
 
-        fun constants(constants: Collection<JennyVarElement>) = apply {
-            headerData = headerData.copy(constants = constants)
+        fun constants(constants: List<JennyVarElement>) = apply {
+            this.constants = constants
         }
 
-        fun fields(fields: Collection<JennyVarElement>) = apply {
-            headerData = headerData.copy(fields = fields)
+        fun fields(fields: List<JennyVarElement>) = apply {
+            this.fields = fields
         }
 
         fun namespace(namespace: Namespace) = apply {
-            headerData = headerData.copy(namespace = namespace)
+            this.namespace = namespace
+        }
+
+        fun defaultCppName(defaultCppName: String) = apply {
+            this.defaultCppName = defaultCppName
         }
 
         fun jennyClazz(clazz: JennyClazzElement) = apply {
-            classInfo(extractClassInfo(clazz))
-            constructors(clazz.constructors)
-            methods(clazz.methods)
-            fields(clazz.fields.filter { !it.isConstant() })
-            constants(clazz.fields.filter { it.isConstant() })
+            this.classInfo = extractClassInfo(clazz, defaultCppName)
+            this.constructors = clazz.constructors.toList()
+            this.methods = clazz.methods.toList()
+            this.fields = clazz.fields.filter { !it.isConstant() }
+            this.constants = clazz.fields.filter { it.isConstant() }
         }
 
-        fun build(): HeaderData {
-            return headerData
-        }
+        fun build() = HeaderData(
+            classInfo = classInfo,
+            namespace = namespace,
+            constructors = constructors,
+            methods = methods,
+            constants = constants,
+            fields = fields
+        )
 
-        private fun extractClassInfo(input: JennyClazzElement): ClassInfo {
+        private fun extractClassInfo(
+            input: JennyClazzElement,
+            defaultCppName: String = ""
+        ): ClassInfo {
             val className = input.fullClassName
-            val simpleClassName = input.name
-            val slashClassName = className.replace('.', '/')
             val jniClassName = className.replace("_", "_1")
                 .replace(".", "_")
                 .stripNonASCII()
+
             return ClassInfo(
-                simpleClassName = simpleClassName,
+                simpleClassName = input.name,
+                cppClassName = input.name + defaultCppName,
                 className = className,
-                slashClassName = slashClassName,
+                slashClassName = className.replace('.', '/'),
                 jniClassName = jniClassName
             )
         }

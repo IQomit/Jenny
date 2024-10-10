@@ -73,6 +73,7 @@ internal class NativeProxyHeaderGenerator(
             append(
                 headerProvider.getConstructorsDefinitions(
                     classInfo.simpleClassName,
+                    classInfo.cppClassName,
                     resolvedConstructors,
                     false
                 )
@@ -94,10 +95,11 @@ internal class NativeProxyHeaderGenerator(
                 )
             )
             if (jennyProxyConfiguration.useJniHelper) {
-                append(headerProvider.generateForJniHelper(classInfo.simpleClassName))
+                append(headerProvider.generateForJniHelper(classInfo.cppClassName))
                 append(
                     headerProvider.getConstructorsDefinitions(
                         classInfo.simpleClassName,
+                        classInfo.cppClassName,
                         resolvedConstructors,
                         jennyProxyConfiguration.useJniHelper
                     )
@@ -132,7 +134,7 @@ internal class NativeProxyHeaderGenerator(
                     sourceProvider.generateSourcePreContent(
                         headerFileName = "",
                         startOfNamespace = input.namespace.startOfNamespace,
-                        simpleClassName = classInfo.simpleClassName,
+                        cppClassName = classInfo.cppClassName,
                         headerOnly = jennyProxyConfiguration.headerOnlyProxy,
                         errorLoggerFunction = jennyProxyConfiguration.errorLoggingFunction,
                         threadSafe = jennyProxyConfiguration.threadSafe,
@@ -143,7 +145,7 @@ internal class NativeProxyHeaderGenerator(
                 append(sourceProvider.getFieldIdInit(fields))
                 append(
                     sourceProvider.generateSourcePostContent(
-                        simpleClassName = classInfo.simpleClassName,
+                        cppClassName = classInfo.cppClassName,
                         endNamespace = input.namespace.endOfNameSpace,
                         headerOnly = jennyProxyConfiguration.headerOnlyProxy,
                         threadSafe = jennyProxyConfiguration.threadSafe,

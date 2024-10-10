@@ -61,24 +61,25 @@ internal class NativeProxyGenerator(
     }
 
     private fun generateHeaderFile(input: JennyClazzElement): CppClass {
-        val headerData = createHeaderData(input)
+        val headerData = buildHeaderData(input)
         val headerContent = headerGenerator.generate(headerData)
         val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
         writeFileContent(headerContent, headerFileName)
-        return CppClass(input.name+"Proxy", cppFileHelper.namespaceNotation, headerFileName)
+        return CppClass(headerData.classInfo.cppClassName, cppFileHelper.namespaceNotation, headerFileName)
     }
 
     private fun generateSourceFile(input: JennyClazzElement) {
         val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
-        val headerData = createHeaderData(input)
+        val headerData = buildHeaderData(input)
         val sourceContent = sourceGenerator.generate(SourceData(headerFileName, headerData))
         val sourceFileName = cppFileHelper.provideSourceFile(className = input.name)
         writeFileContent(sourceContent, sourceFileName)
     }
 
-    private fun createHeaderData(input: JennyClazzElement): HeaderData {
+    private fun buildHeaderData(input: JennyClazzElement): HeaderData {
         return HeaderData.Builder()
             .namespace(cppFileHelper.provideNamespace())
+            .defaultCppName("Proxy")
             .jennyClazz(input)
             .build()
     }

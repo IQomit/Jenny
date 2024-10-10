@@ -39,7 +39,7 @@ internal class DefaultJennyGlueHeaderDefinitionsProvider : JennyGlueHeaderDefini
                 |#include <jni.h>
                 |
                 |${startOfNamespace}
-                |namespace ${classInfo.simpleClassName} {
+                |namespace ${classInfo.cppClassName} {
                 |
                 |// DO NOT modify
                 |static constexpr auto FULL_CLASS_NAME = u8"$${classInfo.slashClassName}";

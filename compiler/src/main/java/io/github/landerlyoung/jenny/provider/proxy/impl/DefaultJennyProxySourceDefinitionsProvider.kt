@@ -17,10 +17,10 @@
 
 package io.github.landerlyoung.jenny.provider.proxy.impl
 
-import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.utils.JennyNameProvider
 import io.github.landerlyoung.jenny.utils.Signature
 import io.github.landerlyoung.jenny.utils.isStatic
@@ -33,7 +33,7 @@ internal class DefaultJennyProxySourceDefinitionsProvider : JennyProxySourceDefi
     override fun generateSourcePreContent(
         headerFileName: String,
         startOfNamespace: String,
-        simpleClassName: String,
+        cppClassName: String,
         errorLoggerFunction:String,
         headerOnly: Boolean,
         threadSafe: Boolean
@@ -60,7 +60,7 @@ internal class DefaultJennyProxySourceDefinitionsProvider : JennyProxySourceDefi
         val prefix = if (headerOnly) "/*static*/ inline" else "/*static*/"
         append(
             """
-                |${prefix} bool ${simpleClassName}Proxy::initClazz(JNIEnv* env) {
+                |${prefix} bool ${cppClassName}::initClazz(JNIEnv* env) {
                 |#define JENNY_CHECK_NULL(val)                      \
                 |       do {                                        \
                 |           if ((val) == nullptr) {                 \
@@ -70,7 +70,7 @@ internal class DefaultJennyProxySourceDefinitionsProvider : JennyProxySourceDefi
         if (errorLoggerFunction.isNotEmpty()) {
             append(
                 """
-                |               ${errorLoggerFunction}(env, "can't init ${simpleClassName}Proxy::" #val); \
+                |               ${errorLoggerFunction}(env, "can't init ${cppClassName}::" #val); \
                 |""".trimMargin()
             )
         } else {
@@ -117,7 +117,7 @@ internal class DefaultJennyProxySourceDefinitionsProvider : JennyProxySourceDefi
     }
 
     override fun generateSourcePostContent(
-        simpleClassName: String,
+        cppClassName: String,
         endNamespace: String,
         headerOnly: Boolean,
         threadSafe: Boolean
@@ -144,7 +144,7 @@ internal class DefaultJennyProxySourceDefinitionsProvider : JennyProxySourceDefi
             |   return true;
             |}
             |
-            |${prefix} void ${simpleClassName}Proxy::releaseClazz(JNIEnv* env) {
+            |${prefix} void ${cppClassName}Proxy::releaseClazz(JNIEnv* env) {
             |    auto& state = getClassInitState();
             |    if (state.sInited) {
             |        $lockGuard

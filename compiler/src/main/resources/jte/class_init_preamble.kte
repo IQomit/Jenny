@@ -16,7 +16,7 @@
 
 @param headerFileName: String
 @param startOfNamespace: String
-@param simpleClassName: String
+@param cppClassName: String
 @param errorLoggerFunction: String
 @param headerOnly: Boolean
 @param threadSafe: Boolean
@@ -33,13 +33,13 @@ ${startOfNamespace}
 
 !{val prefix = if (headerOnly) "/*static*/ inline" else "/*static*/"}
 
-${prefix} bool ${simpleClassName}Proxy::initClazz(JNIEnv* env) {
+${prefix} bool ${cppClassName}::initClazz(JNIEnv* env) {
 #define JENNY_CHECK_NULL(val)
     do {
         if ((val) == nullptr) {
 @if(errorLoggerFunction.isNotEmpty())
 
-            ${errorLoggerFunction}(env, "can't init ${simpleClassName}Proxy::" #val);
+            ${errorLoggerFunction}(env, "can't init ${cppClassName}::" #val);
 @else
 
             env->ExceptionDescribe();

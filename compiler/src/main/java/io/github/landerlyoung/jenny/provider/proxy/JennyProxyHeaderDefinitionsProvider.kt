@@ -35,6 +35,7 @@ internal interface JennyProxyHeaderDefinitionsProvider : Provider {
     fun getProxyHeaderClazzInit(): String
     fun getConstructorsDefinitions(
         simpleClassName: String,
+        cppClassName:String,
         constructors: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ): String
@@ -53,7 +54,7 @@ internal interface JennyProxyHeaderDefinitionsProvider : Provider {
         generateSetterForField: (JennyVarElement) -> Boolean
     ): String
 
-    fun generateForJniHelper(simpleClassName: String): String
+    fun generateForJniHelper(cppClassName: String): String
     fun initPreDefinition(isThreadSafe: Boolean): String
     fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String
     fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String

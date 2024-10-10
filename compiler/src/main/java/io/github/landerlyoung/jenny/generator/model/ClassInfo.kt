@@ -17,6 +17,7 @@
 package io.github.landerlyoung.jenny.generator.model
 
 data class ClassInfo(
+    val cppClassName: String = "",
     val simpleClassName: String = "",
     // package.simpleClassName
     val className: String = "",

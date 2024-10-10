@@ -16,10 +16,10 @@
 
 package io.github.landerlyoung.jenny.generator.glue
 
-import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.model.HeaderData
 import io.github.landerlyoung.jenny.provider.glue.JennyGlueHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.Constants
 
 internal class NativeGlueHeaderGenerator(
     private val registerJniMethods: Boolean = true,
@@ -39,7 +39,7 @@ internal class NativeGlueHeaderGenerator(
                 append(provider.getJniRegister(input.methods))
                 append(
                     provider.getEndNameSpace(
-                        className = classInfo.simpleClassName,
+                        className = classInfo.cppClassName,
                         endNamespace = input.namespace.endOfNameSpace
                     )
                 )
@@ -47,7 +47,7 @@ internal class NativeGlueHeaderGenerator(
                 append(provider.getConstantsIdDeclare(input.constants))
                 append(
                     provider.getEndNameSpace(
-                        className = classInfo.simpleClassName,
+                        className = classInfo.cppClassName,
                         endNamespace = input.namespace.endOfNameSpace
                     )
                 )

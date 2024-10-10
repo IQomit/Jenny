@@ -24,14 +24,14 @@ internal interface JennyProxySourceDefinitionsProvider : Provider {
     fun generateSourcePreContent(
         headerFileName: String,
         startOfNamespace: String,
-        simpleClassName: String,
+        cppClassName: String,
         errorLoggerFunction: String,
         headerOnly: Boolean,
         threadSafe: Boolean
     ): String
 
     fun generateSourcePostContent(
-        simpleClassName: String,
+        cppClassName: String,
         endNamespace: String,
         headerOnly: Boolean,
         threadSafe: Boolean

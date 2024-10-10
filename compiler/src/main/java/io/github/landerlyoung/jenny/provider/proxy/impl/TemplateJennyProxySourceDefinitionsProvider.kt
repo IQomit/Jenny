@@ -29,7 +29,7 @@ class TemplateJennyProxySourceDefinitionsProvider(private val templateEngine: Te
     override fun generateSourcePreContent(
         headerFileName: String,
         startOfNamespace: String,
-        simpleClassName: String,
+        cppClassName: String,
         errorLoggerFunction: String,
         headerOnly: Boolean,
         threadSafe: Boolean
@@ -39,7 +39,7 @@ class TemplateJennyProxySourceDefinitionsProvider(private val templateEngine: Te
             mapOf(
                 "headerFileName" to headerFileName,
                 "startOfNamespace" to startOfNamespace,
-                "simpleClassName" to simpleClassName,
+                "cppClassName" to cppClassName,
                 "errorLoggerFunction" to errorLoggerFunction,
                 "headerOnly" to headerOnly,
                 "threadSafe" to threadSafe,
@@ -48,7 +48,7 @@ class TemplateJennyProxySourceDefinitionsProvider(private val templateEngine: Te
     }
 
     override fun generateSourcePostContent(
-        simpleClassName: String,
+        cppClassName: String,
         endNamespace: String,
         headerOnly: Boolean,
         threadSafe: Boolean
@@ -56,7 +56,7 @@ class TemplateJennyProxySourceDefinitionsProvider(private val templateEngine: Te
         return getFromTemplate(
             "class_init_postamble.kte",
             mapOf(
-                "simpleClassName" to simpleClassName,
+                "cppClassName" to cppClassName,
                 "endNamespace" to endNamespace,
                 "headerOnly" to headerOnly,
                 "threadSafe" to threadSafe,

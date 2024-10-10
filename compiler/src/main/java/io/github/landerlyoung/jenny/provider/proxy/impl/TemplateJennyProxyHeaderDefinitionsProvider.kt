@@ -23,9 +23,9 @@ import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.model.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.utils.ParametersProvider
 import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder
-import java.util.*
+import io.github.landerlyoung.jenny.utils.ParametersProvider
+import java.util.EnumSet
 
 internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxyHeaderDefinitionsProvider {
@@ -45,7 +45,8 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
             mapOf(
                 "proxyConfiguration" to jennyProxyConfiguration,
                 "startOfNamespace" to startOfNamespace,
-                "classInfo" to classInfo
+                "cppClassName" to classInfo.cppClassName,
+                "slashClassName" to classInfo.slashClassName,
             )
         )
     }
@@ -63,10 +64,11 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
 
     override fun getConstructorsDefinitions(
         simpleClassName: String,
+        cppClassName: String,
         constructors: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ): String {
-        val returnType = if (useJniHelper) "$simpleClassName Proxy" else "jobject"
+        val returnType = if (useJniHelper) cppClassName else "jobject"
         return getFromTemplate(
             "constructors_definitions.kte",
             mapOf(

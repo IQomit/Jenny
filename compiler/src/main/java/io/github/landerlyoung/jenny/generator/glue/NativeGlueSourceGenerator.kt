@@ -16,10 +16,10 @@
 
 package io.github.landerlyoung.jenny.generator.glue
 
-import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.generator.Generator
 import io.github.landerlyoung.jenny.generator.model.SourceData
 import io.github.landerlyoung.jenny.provider.glue.JennyGlueHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.Constants
 
 internal class NativeGlueSourceGenerator(private val provider: JennyGlueHeaderDefinitionsProvider) :
     Generator<SourceData, String> {
@@ -45,7 +45,7 @@ internal class NativeGlueSourceGenerator(private val provider: JennyGlueHeaderDe
             )
             append(
                 provider.getEndNameSpace(
-                    className = input.headerData.classInfo.simpleClassName,
+                    className = input.headerData.classInfo.cppClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
                     isSource = true
                 )

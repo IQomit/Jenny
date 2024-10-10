@@ -41,7 +41,7 @@ internal class NativeProxySourceGenerator(
                 sourceProvider.generateSourcePreContent(
                     headerFileName = input.headerFileName,
                     startOfNamespace = input.headerData.namespace.startOfNamespace,
-                    simpleClassName = header.classInfo.simpleClassName,
+                    cppClassName = header.classInfo.cppClassName,
                     headerOnly = jennyProxyConfiguration.headerOnlyProxy,
                     errorLoggerFunction = jennyProxyConfiguration.errorLoggingFunction,
                     threadSafe = jennyProxyConfiguration.threadSafe,
@@ -52,7 +52,7 @@ internal class NativeProxySourceGenerator(
             append(sourceProvider.getFieldIdInit(header.fields))
             append(
                 sourceProvider.generateSourcePostContent(
-                    simpleClassName = header.classInfo.simpleClassName,
+                    cppClassName = header.classInfo.cppClassName,
                     endNamespace = input.headerData.namespace.endOfNameSpace,
                     headerOnly = jennyProxyConfiguration.headerOnlyProxy,
                     threadSafe = jennyProxyConfiguration.threadSafe,

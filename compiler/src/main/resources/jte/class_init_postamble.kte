@@ -15,7 +15,7 @@
 @import io.github.landerlyoung.jenny.utils.Constants
 
 @param endNamespace: String
-@param simpleClassName: String
+@param cppClassName: String
 @param headerOnly: Boolean
 @param threadSafe: Boolean
 
@@ -32,7 +32,7 @@
     return true;
 }
 
-${prefix} void ${simpleClassName}Proxy::releaseClazz(JNIEnv* env) {
+${prefix} void ${cppClassName}::releaseClazz(JNIEnv* env) {
     auto& state = getClassInitState();
     if (state.sInited) {
         ${lockGuard}

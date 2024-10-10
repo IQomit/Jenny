@@ -17,13 +17,13 @@
 
 package io.github.landerlyoung.jenny.provider.proxy.impl
 
-import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.element.model.type.JennyKind
 import io.github.landerlyoung.jenny.generator.model.ClassInfo
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.utils.Constants
 import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder
 import io.github.landerlyoung.jenny.utils.JennyNameProvider
 import io.github.landerlyoung.jenny.utils.ParametersProvider
@@ -74,7 +74,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             append(
                 """
                 |${startOfNamespace}
-                |class ${classInfo.simpleClassName}Proxy {
+                |class ${classInfo.cppClassName} {
                 |
                 |public:
                 |    static constexpr auto FULL_CLASS_NAME = "${classInfo.slashClassName}";
@@ -111,10 +111,11 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
 
     override fun getConstructorsDefinitions(
         simpleClassName: String,
+        cppClassName: String,
         constructors: Map<JennyExecutableElement, Int>,
         useJniHelper: Boolean
     ) = buildString {
-        val returnType = if (useJniHelper) simpleClassName + "Proxy" else "jobject"
+        val returnType = if (useJniHelper) cppClassName else "jobject"
 
         constructors.forEach { (constructor, count) ->
             val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor, forceStatic = true)
@@ -300,7 +301,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
     }
 
 
-    override fun generateForJniHelper(simpleClassName: String): String = buildString {
+    override fun generateForJniHelper(cppClassName: String): String = buildString {
         append(
             """
             |    // ====== jni helper ======
@@ -324,15 +325,15 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             |    }
             |
             |    // jni helper constructors
-            |    ${simpleClassName}Proxy(jobject ref, bool owned = false): _local(ref, owned) {
+            |    ${cppClassName}(jobject ref, bool owned = false): _local(ref, owned) {
             |       assertInited(::jenny::Env().get());
             |    }
             |   
-            |    ${simpleClassName}Proxy(::jenny::LocalRef<jobject> ref): _local(std::move(ref)) {
+            |    ${cppClassName}(::jenny::LocalRef<jobject> ref): _local(std::move(ref)) {
             |       assertInited(::jenny::Env().get());
             |    }
             |   
-            |    ${simpleClassName}Proxy(::jenny::GlobalRef<jobject> ref): _global(std::move(ref)) {
+            |    ${cppClassName}(::jenny::GlobalRef<jobject> ref): _global(std::move(ref)) {
             |       assertInited(::jenny::Env().get());
             |    }
             |   

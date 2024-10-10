@@ -15,8 +15,9 @@
 @import io.github.landerlyoung.jenny.generator.model.ClassInfo
 
 @param proxyConfiguration:JennyProxyConfiguration
-@param classInfo: ClassInfo
 @param startOfNamespace: String
+@param cppClassName: String
+@param slashClassName: String
 #pragma once
 
 #include <jni.h>
@@ -32,7 +33,7 @@
 @endif
 
 ${startOfNamespace}
-class ${classInfo.simpleClassName}Proxy {
+class ${cppClassName} {
 
 public:
-    static constexpr auto FULL_CLASS_NAME = "${classInfo.slashClassName}";
+    static constexpr auto FULL_CLASS_NAME = "${slashClassName}";
