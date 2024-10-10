@@ -285,6 +285,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                     if (useJniHelper && field.type.needWrapLocalRef()) "${field.name}.get()" else field.name
                 append(
                     """
+                        |    
                         |    $comment
                         |    ${staticMod}void set${camelCase}(${param}) ${constMod}{
                         |        $methodPrologue

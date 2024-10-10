@@ -72,9 +72,8 @@ class Signature(private val jennyElement: JennyElement) {
             append(')')
             append(getSignatureClassName(jennyElement.returnType))
         } else {
-            getSignatureClassName(jennyElement.type)
+            append(getSignatureClassName(jennyElement.type))
         }
-
     }
 
     companion object {
