@@ -30,7 +30,7 @@ internal class NativeProxyHeaderGenerator(
     private val headerProvider: JennyProxyHeaderDefinitionsProvider,
     private val sourceProvider: JennyProxySourceDefinitionsProvider,
     private var jennyProxyConfiguration: JennyProxyConfiguration
-) : ProxyGenerator<HeaderData, String> {
+) : ConfigurableProxyGenerator<HeaderData, String> {
 
     private val generateGetterForField: (JennyVarElement) -> Boolean = { field ->
         val annotation = field.getAnnotation(NativeFieldProxy::class.java)

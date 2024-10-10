@@ -24,7 +24,7 @@ import io.github.landerlyoung.jenny.utils.visibility
 internal class NativeProxySourceGenerator(
     private val sourceProvider: JennyProxySourceDefinitionsProvider,
     private var jennyProxyConfiguration: JennyProxyConfiguration
-) : ProxyGenerator<SourceData, String> {
+) : ConfigurableProxyGenerator<SourceData, String> {
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
 

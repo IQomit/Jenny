@@ -17,6 +17,7 @@
 package io.github.landerlyoung.jenny.generator.proxy
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
+import io.github.landerlyoung.jenny.generator.OutputTargetConfigurator
 import io.github.landerlyoung.jenny.generator.jnihelper.JNIHelperGenerator
 import io.github.landerlyoung.jenny.generator.model.HeaderData
 import io.github.landerlyoung.jenny.generator.model.SourceData
@@ -35,7 +36,7 @@ internal class NativeProxyGenerator(
     private var proxyConfiguration: JennyProxyConfiguration,
     private val cppFileHelper: CppFileHelper,
     private var outputDirectory: String,
-) : NativeProxy<JennyClazzElement, Unit> {
+) : ConfigurableProxyGenerator<JennyClazzElement, Unit>,OutputTargetConfigurator {
 
     private val headerProvider = ProxyProviderFactory.createProvider<JennyProxyHeaderDefinitionsProvider>(providerType)
     private val sourceProvider = ProxyProviderFactory.createProvider<JennyProxySourceDefinitionsProvider>(providerType)

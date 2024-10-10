@@ -17,8 +17,9 @@
 package io.github.landerlyoung.jenny.generator.glue
 
 import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
+import io.github.landerlyoung.jenny.generator.Generator
+import io.github.landerlyoung.jenny.generator.OutputTargetConfigurator
 import io.github.landerlyoung.jenny.generator.model.HeaderData
-import io.github.landerlyoung.jenny.generator.NativeGenerator
 import io.github.landerlyoung.jenny.generator.model.SourceData
 import io.github.landerlyoung.jenny.provider.glue.DefaultJennyGlueHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.CppFileHelper
@@ -30,7 +31,7 @@ import java.io.IOException
 internal class NativeGlueGenerator(
     private val cppFileHelper: CppFileHelper,
     private var outputDirectory: String
-) : NativeGenerator<JennyClazzElement, Unit> {
+) : Generator<JennyClazzElement, Unit>, OutputTargetConfigurator {
 
     private val jennyGlueHeaderDefinitionsProvider = DefaultJennyGlueHeaderDefinitionsProvider()
 

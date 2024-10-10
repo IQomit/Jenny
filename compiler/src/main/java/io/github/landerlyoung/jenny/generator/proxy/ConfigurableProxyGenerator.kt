@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.landerlyoung.jenny.generator.proxy
 
-package io.github.landerlyoung.jenny.generator
+import io.github.landerlyoung.jenny.generator.Configurator
+import io.github.landerlyoung.jenny.generator.Generator
 
-internal interface NativeGenerator<in Input, out Output> : Generator<Input, Output>, OutputTargetConfigurator
+internal interface ConfigurableProxyGenerator<in Input, out Output> : Generator<Input, Output>, Configurator<JennyProxyConfiguration>
