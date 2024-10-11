@@ -86,7 +86,7 @@ internal class NativeProxyHeaderGenerator(
             )
             append(
                 headerProvider.getFieldsDefinitions(
-                    fields = input.fields,
+                    fields = fields,
                     allMethods = methods,
                     useJniHelper = false,
                     getterSetterForAllFields = jennyProxyConfiguration.allFields,
@@ -112,7 +112,7 @@ internal class NativeProxyHeaderGenerator(
                 )
                 append(
                     headerProvider.getFieldsDefinitions(
-                        fields = input.fields,
+                        fields = fields,
                         allMethods = methods,
                         useJniHelper = jennyProxyConfiguration.useJniHelper,
                         getterSetterForAllFields = jennyProxyConfiguration.allFields,

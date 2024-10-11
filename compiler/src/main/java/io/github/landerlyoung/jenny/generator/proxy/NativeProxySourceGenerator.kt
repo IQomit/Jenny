@@ -39,6 +39,7 @@ internal class NativeProxySourceGenerator(
         val header = input.headerData
         val constructors = header.constructors.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val methods = header.methods.visibility(jennyProxyConfiguration.onlyPublicMethod)
+        val fields = header.fields.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
         val resolvedMethods = methodOverloadResolver.resolve(methods.filter { generateForMethod(it) })
 
@@ -56,7 +57,7 @@ internal class NativeProxySourceGenerator(
             )
             append(sourceProvider.getConstructorIdInit(resolvedConstructors))
             append(sourceProvider.getMethodIdInit(resolvedMethods))
-            append(sourceProvider.getFieldIdInit(header.fields))
+            append(sourceProvider.getFieldIdInit(fields))
             append(
                 sourceProvider.generateSourcePostContent(
                     cppClassName = header.classInfo.cppClassName,
