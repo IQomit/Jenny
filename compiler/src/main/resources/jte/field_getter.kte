@@ -42,5 +42,5 @@
     ${comment}
     ${staticMod}${jniReturnType} get${field.name.toCamelCase()}(${parameters}) ${constMod}{
         @template.method_prologue(useJniHelper = useJniHelper,isStatic = isStatic)
-        return ${jniReturn}${cast}${rField}${if(needCast) ")" else ""}${if (needWrap) "$jniReturnType(" else ""};
+        return ${jniReturn}${cast}${rField}${if(needCast) ")" else ""}${if (needWrap) ")" else ""};
     }
