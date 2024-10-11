@@ -34,20 +34,20 @@ ${startOfNamespace}
 !{val prefix = if (headerOnly) "/*static*/ inline" else "/*static*/"}
 
 ${prefix} bool ${cppClassName}::initClazz(JNIEnv* env) {
-#define JENNY_CHECK_NULL(val)
-    do {
-        if ((val) == nullptr) {
+#define JENNY_CHECK_NULL(val)       \
+    do {                            \
+        if ((val) == nullptr) {     \
 @if(errorLoggerFunction.isNotEmpty())
 
-            ${errorLoggerFunction}(env, "can't init ${cppClassName}::" #val);
+            ${errorLoggerFunction}(env, "can't init ${cppClassName}::" #val);\
 @else
 
-            env->ExceptionDescribe();
+            env->ExceptionDescribe();\
 @endif
 
-            return false;
-        }
-    } while(false)
+            return false;             \
+        }                             \
+    } while(false)                     \
 
 
     auto& state = getClassInitState();
