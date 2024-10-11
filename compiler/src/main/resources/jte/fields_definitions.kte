@@ -1,3 +1,16 @@
+<%--
+    Copyright (C) 2024 The Qt Company Ltd.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    See the License for the specific language governing permissions and
+    limitations under the License.
+--%>
 @import io.github.landerlyoung.jenny.element.field.JennyVarElement
 @import io.github.landerlyoung.jenny.utils.toJniReturnTypeString
 @import io.github.landerlyoung.jenny.utils.needWrapLocalRef
@@ -9,48 +22,20 @@
 @import io.github.landerlyoung.jenny.element.model.type.JennyKind
 @import io.github.landerlyoung.jenny.utils.JennyNameProvider
 
+
 @param useJniHelper:Boolean
-@param methodPrologue:String
 @param fields:Collection<JennyVarElement>
 @param hasGetter:(JennyVarElement)->Boolean
 @param hasSetter:(JennyVarElement)->Boolean
 @param parametersProvider: ParametersProvider
 @for((index, field)  in fields.withIndex())
-    !{val getterIsFound = hasGetter(field) }
-    !{val setterIsFound = hasSetter(field) }
-    !{val isStatic = field.isStatic() }
-    !{val camelCase = field.name.toCamelCase() }
     !{val fieldId = JennyNameProvider.getElementName(field,index) }
-    !{val typeForJniCall = field.type.toJniCall() }
-    !{val static = if (isStatic) "Static" else "" }
-    !{val staticMod = if (isStatic || !useJniHelper) "static " else ""}
-    !{val constMod = if (isStatic || !useJniHelper) "" else "const "}
-    !{val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"}
-    !{val jniEnv = "env"}
-    !{val jniReturnType = field.type.toJniReturnTypeString()}
     !{val jniComment = "// field: ${field.modifiers.print()} ${field.type.typeName} ${field.name}"}
     !{val comment = if(!useJniHelper)jniComment  else "    // for jni helper\n    $jniComment"}
-    @if(getterIsFound)
-        !{val parameters = parametersProvider.makeParameter(field, useJniHelper)}
-        !{val jniReturn = if (useJniHelper && field.type.needWrapLocalRef()) "$jniReturnType(" else ""}
-        !{val cast = if (parametersProvider.returnTypeNeedCast(jniReturnType)) "reinterpret_cast<${jniReturnType}>(" else ""}
-        !{val rField = "${jniEnv}->Get${static}${typeForJniCall}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)})"}
-        !{val content = """$comment
-    ${staticMod}${jniReturnType} get${camelCase}(${parameters}) ${constMod}{
-        $methodPrologue
-        return $jniReturn$cast$rField
-    }"""}
-        @template.content_display(content = content)
+    @if(hasGetter(field))
+        @template.field_getter(field = field, fieldId = fieldId, parametersProvider = parametersProvider, useJniHelper = useJniHelper, comment = comment)
     @endif
-    @if(setterIsFound)
-        !{val fieldJniType = if (useJniHelper && field.type.needWrapLocalRef()) "::jenny::LocalRef<$jniReturnType>" else jniReturnType}
-        !{val parameters = parametersProvider.makeParameter(field, useJniHelper) + fieldJniType}
-        !{val passedParam = if (useJniHelper && field.type.needWrapLocalRef()) "${field.name}.get()" else field.name}
-        !{val content =  """ $comment
-    ${staticMod}void set${camelCase}(${parameters}) ${constMod}{
-        $methodPrologue
-        ${jniEnv}->Set${static}${typeForJniCall}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)}, ${passedParam});
-    }"""}
-        @template.content_display(content = content)
+    @if(hasSetter(field))
+        @template.field_setter(field = field, fieldId = fieldId, parametersProvider = parametersProvider, useJniHelper = useJniHelper, comment = comment)
     @endif
 @endfor

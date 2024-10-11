@@ -15,9 +15,12 @@
 @param isStatic:Boolean
 @if (useJniHelper)
     @if (isStatic)
-::jenny::Env env; assertInited(env.get());
+        ::jenny::Env env;
+                assertInited(env.get());
     @else
-::jenny::Env env; ::jenny::LocalRef<jobject> jennyLocalRef = getThis(false); jobject thiz = jennyLocalRef.get();
+        ::jenny::Env env;
+                ::jenny::LocalRef<jobject> jennyLocalRef = getThis(false);
+                jobject thiz = jennyLocalRef.get();
     @endif
 @else
 assertInited(env);

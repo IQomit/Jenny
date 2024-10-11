@@ -21,15 +21,14 @@
 @param parametersProvider:ParametersProvider
 @param simpleClassName:String
 @param returnType:String
-@param methodPrologue:String
 @param useJniHelper:Boolean
 
 @for((constructor,count) in constructors)
-    !{val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor, forceStatic = true)}
+    !{val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor,useJniHelper=useJniHelper)}
     !{val javaParameters = parametersProvider.getJavaMethodParameters(constructor)}
         // construct: ${constructor.modifiers.print()} ${simpleClassName}(${javaParameters})
         static ${returnType} ${constructor.name}(${jniParameters}) {
-            ${methodPrologue}
+            @template.method_prologue(useJniHelper = useJniHelper,isStatic = true)
             return env->NewObject(${JennyNameProvider.getClassState()}, ${JennyNameProvider.getClassState(JennyNameProvider.getConstructorName(count))}${parametersProvider.getJniMethodParamVal(constructor, useJniHelper)});
         }
 @endfor

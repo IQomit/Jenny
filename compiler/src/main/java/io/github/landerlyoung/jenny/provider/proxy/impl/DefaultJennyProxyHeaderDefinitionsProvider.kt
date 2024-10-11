@@ -118,7 +118,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
         val returnType = if (useJniHelper) cppClassName else "jobject"
 
         constructors.forEach { (constructor, count) ->
-            val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor, forceStatic = true)
+            val jniParameters = parametersProvider.getJennyElementJniParams(element = constructor,useJniHelper)
             val javaParameters = parametersProvider.getJavaMethodParameters(constructor)
             val methodPrologue = getJniMethodPrologue(useJniHelper, isStatic = true)
             append(
@@ -139,7 +139,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
 
     private fun getJniMethodPrologue(
         useJniHelper: Boolean,
-        isStatic: Boolean = true
+        isStatic: Boolean
     ): String {
         return if (useJniHelper) {
             if (isStatic) {
@@ -169,8 +169,8 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             val constMod = if (isStatic || !useJniHelper) "" else "const "
             val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"
             val static = if (isStatic) "Static" else ""
-            val jniParam = parametersProvider.getJennyElementJniParams(element = method)
-            val methodPrologue = getJniMethodPrologue(useJniHelper)
+            val jniParam = parametersProvider.getJennyElementJniParams(element = method,useJniHelper)
+            val methodPrologue = getJniMethodPrologue(useJniHelper,isStatic)
             if (useJniHelper)
                 append("    // for jni helper\n")
 
@@ -242,7 +242,7 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
             val constMod = if (isStatic || !useJniHelper) "" else "const "
             val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"
             val jniEnv = "env"
-            val methodPrologue = getJniMethodPrologue(useJniHelper)
+            val methodPrologue = getJniMethodPrologue(useJniHelper,isStatic)
             val jniReturnType = field.type.toJniReturnTypeString()
             var comment = "// field: ${field.modifiers.print()} ${field.type.typeName} ${field.name}"
             if (useJniHelper) {
@@ -270,8 +270,9 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                         JennyNameProvider.getClassState(
                             fieldId
                         )
-                    })"
+                    });"
                 )
+                append("\n}")
             }
 
             if (hasGetterSetter.contains(FieldSetterGetterFinder.GetterSetter.SETTER)) {
@@ -280,14 +281,17 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                         "::jenny::LocalRef<$jniReturnType>"
                     else
                         jniReturnType
-                val param = parametersProvider.makeParameter(field, useJniHelper) + fieldJniType
+                val parameter = parametersProvider.makeParameter(field, useJniHelper)
+
+                val preparameters =  if(parameter.isEmpty()) parameter else "$parameter, "
+                val parameters =  preparameters + fieldJniType+ " ${field.name}"
                 val passedParam =
                     if (useJniHelper && field.type.needWrapLocalRef()) "${field.name}.get()" else field.name
                 append(
                     """
                         |    
                         |    $comment
-                        |    ${staticMod}void set${camelCase}(${param}) ${constMod}{
+                        |    ${staticMod}void set${camelCase}(${parameters}) ${constMod}{
                         |        $methodPrologue
                         |        ${jniEnv}->Set${static}${typeForJniCall}Field(${classOrObj}, ${
                         JennyNameProvider.getClassState(fieldId)

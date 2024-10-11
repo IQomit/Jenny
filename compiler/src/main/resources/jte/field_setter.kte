@@ -1,0 +1,45 @@
+<%--
+    Copyright (C) 2024 The Qt Company Ltd.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    See the License for the specific language governing permissions and
+    limitations under the License.
+--%>
+@import io.github.landerlyoung.jenny.utils.ParametersProvider
+@import io.github.landerlyoung.jenny.utils.JennyNameProvider
+@import io.github.landerlyoung.jenny.element.field.JennyVarElement
+@import io.github.landerlyoung.jenny.utils.toJniReturnTypeString
+@import io.github.landerlyoung.jenny.utils.needWrapLocalRef
+@import io.github.landerlyoung.jenny.utils.toJniCall
+@import io.github.landerlyoung.jenny.utils.isStatic
+@import io.github.landerlyoung.jenny.utils.toCamelCase
+@import io.github.landerlyoung.jenny.utils.print
+
+@param field: JennyVarElement
+@param fieldId: String
+@param parametersProvider: ParametersProvider
+@param useJniHelper:Boolean
+@param comment:String
+
+!{val isStatic = field.isStatic()}
+!{val classOrObj = if (isStatic) JennyNameProvider.getClassState() else "thiz"}
+!{val static = if (isStatic) "Static" else "" }
+!{val staticMod = if (isStatic || !useJniHelper) "static " else ""}
+!{val constMod = if (isStatic || !useJniHelper) "" else " const"}
+!{val jniReturnType = field.type.toJniReturnTypeString()}
+!{val fieldJniType = if (useJniHelper && field.type.needWrapLocalRef()) "::jenny::LocalRef<$jniReturnType>" else jniReturnType}
+!{val parameter = parametersProvider.makeParameter(field, useJniHelper)}
+!{val preparameters =  if(parameter.isEmpty()) parameter else "$parameter, "}
+!{val parameters =  preparameters + fieldJniType+ " ${field.name}"}
+!{val passedParam = if (useJniHelper && field.type.needWrapLocalRef()) "${field.name}.get()" else field.name}
+    ${comment}
+    ${staticMod}void set${field.name.toCamelCase()}(${parameters}) ${constMod}{
+        @template.method_prologue(useJniHelper = useJniHelper,isStatic = isStatic)
+        env->Set${static}${field.type.toJniCall()}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)}, ${passedParam});
+    }

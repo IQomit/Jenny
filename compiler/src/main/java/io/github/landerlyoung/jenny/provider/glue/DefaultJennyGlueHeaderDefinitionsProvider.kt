@@ -95,7 +95,7 @@ internal class DefaultJennyGlueHeaderDefinitionsProvider : JennyGlueHeaderDefini
                     )
                 else
                     JennyNameProvider.getNativeMethodName(classInfo.jniClassName, method)
-            val nativeParameters = parametersProvider.getJennyElementJniParams(element = method)
+            val nativeParameters = parametersProvider.getJennyElementJniParams(element = method, useJniHelper = false)
 
             append(
                 """

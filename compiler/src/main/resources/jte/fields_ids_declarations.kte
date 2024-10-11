@@ -17,5 +17,6 @@
 @param fields:Collection<JennyVarElement>
 
 @for((index, field)  in fields.withIndex())
+
         jfieldID ${JennyNameProvider.getElementName(field, index)} = nullptr;
 @endfor

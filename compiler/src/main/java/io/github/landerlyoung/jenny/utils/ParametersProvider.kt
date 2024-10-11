@@ -28,46 +28,58 @@ class ParametersProvider {
     fun makeParameter(
         element: JennyElement,
         useJniHelper: Boolean,
-        forceStatic: Boolean = false
-    ): String =
-        buildString {
-            if (!useJniHelper) {
-                append("JNIEnv* env")
-                if (element.isStatic() || forceStatic) {
+    ): String = buildString {
+        if (!useJniHelper) {
+            append("JNIEnv* env")
+            val isConstructor = if (element is JennyExecutableElement) element.isConstructor() else false
+            if (!isConstructor) {
+                if (element.isStatic()) {
                     append(", jclass clazz")
                 } else {
                     append(", jobject thiz")
                 }
             }
         }
+    }
 
     fun getJennyElementJniParams(
         element: JennyElement,
-        useJniHelper: Boolean = false,
-        forceStatic: Boolean = false
+        useJniHelper: Boolean,
     ): String = buildString {
-        append(makeParameter(element, useJniHelper, forceStatic))
+        val params = mutableListOf<String>()
+
+        val baseParams = makeParameter(element, useJniHelper)
+        if (baseParams.isNotEmpty()) {
+            params.add(baseParams)
+        }
 
         element.declaringClass?.let {
-            if ((it as JennyClazzElement).isNestedClass) {
-                append(it.type.toJniReturnTypeString())
-                append(" ")
-                append("enclosingClass")
+            val clazzElement = it as? JennyClazzElement
+            if (clazzElement?.isNestedClass == true) {
+                params.add("${clazzElement.type.toJniReturnTypeString()} enclosingClass")
             }
         }
 
-        if (element is JennyExecutableElement)
-            append(getJniParameters(element.parameters))
+        if (element is JennyExecutableElement) {
+            val execParams = getJniParameters(element.parameters, useJniHelper)
+            if (execParams.isNotEmpty()) {
+                params.add(execParams)
+            }
+        }
+
+        append(params.joinToString(", "))
     }
 
-    private fun getJniParameters(parameters: List<JennyParameter>): String = buildString {
-        parameters.forEach { param ->
-            append(", ")
-            append(param.type.toJniReturnTypeString())
-            append(' ')
-            append(param.name)
+    private fun getJniParameters(parameters: List<JennyParameter>, useJniHelper: Boolean): String =
+        buildString {
+            parameters.forEach { param ->
+                if (isNotEmpty()) append(", ")
+                append(param.type.toJniTypeString(useJniHelper))
+                append(' ')
+                append(param.name)
+            }
         }
-    }
+
 
     fun getJavaMethodParameters(method: JennyExecutableElement): String {
         return method.parameters

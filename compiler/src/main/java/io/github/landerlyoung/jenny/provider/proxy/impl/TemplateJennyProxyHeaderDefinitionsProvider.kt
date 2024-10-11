@@ -25,7 +25,7 @@ import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.utils.FieldSetterGetterFinder
 import io.github.landerlyoung.jenny.utils.ParametersProvider
-import java.util.*
+import java.util.EnumSet
 
 internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxyHeaderDefinitionsProvider {
@@ -77,23 +77,9 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
                 "useJniHelper" to useJniHelper,
                 "returnType" to returnType,
                 "parametersProvider" to parametersProvider,
-                "methodPrologue" to getJniMethodPrologue(useJniHelper),
             )
         )
 
-    }
-
-    private fun getJniMethodPrologue(
-        useJniHelper: Boolean,
-        isStatic: Boolean = true
-    ): String {
-        return getFromTemplate(
-            "method_prologue.kte",
-            mapOf(
-                "useJniHelper" to useJniHelper,
-                "isStatic" to isStatic,
-            )
-        )
     }
 
     override fun getMethodsDefinitions(methods: Map<JennyExecutableElement, Int>, useJniHelper: Boolean): String {
@@ -103,7 +89,6 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
                 "methods" to methods,
                 "useJniHelper" to useJniHelper,
                 "parametersProvider" to parametersProvider,
-                "methodPrologue" to getJniMethodPrologue(useJniHelper),
             )
         )
     }
@@ -140,7 +125,6 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
                 "hasGetter" to hasGetter,
                 "hasSetter" to hasSetter,
                 "useJniHelper" to useJniHelper,
-                "methodPrologue" to getJniMethodPrologue(useJniHelper),
                 "parametersProvider" to parametersProvider
             )
         )

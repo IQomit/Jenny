@@ -51,6 +51,14 @@ fun JennyType.toJniReturnTypeString(): String {
         else -> "jobject"
     }
 }
+fun JennyType.toJniTypeString(useJniHelper:Boolean):String {
+    val jniType = toJniReturnTypeString()
+    return if (useJniHelper && this.needWrapLocalRef()) {
+        "const ::jenny::LocalRef<$jniType>&"
+    } else {
+        jniType
+    }
+}
 
 fun JennyType.toJniCall(): String {
     val result = if (this.isPrimitive() || this.jennyKind == JennyKind.VOID) {
