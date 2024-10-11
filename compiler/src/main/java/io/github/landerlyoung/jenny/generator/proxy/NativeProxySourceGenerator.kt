@@ -16,6 +16,8 @@
 
 package io.github.landerlyoung.jenny.generator.proxy
 
+import io.github.landerlyoung.jenny.NativeMethodProxy
+import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.generator.model.SourceData
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.resolver.JennyMethodOverloadResolver
@@ -28,12 +30,17 @@ internal class NativeProxySourceGenerator(
 
     private val methodOverloadResolver = JennyMethodOverloadResolver()
 
+    val generateForMethod: (JennyExecutableElement) -> Boolean = { method ->
+        val annotation = method.getAnnotation(NativeMethodProxy::class.java)
+        annotation?.enabled ?: jennyProxyConfiguration.allMethods
+    }
+
     override fun generate(input: SourceData): String {
         val header = input.headerData
         val constructors = header.constructors.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val methods = header.methods.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
-        val resolvedMethods = methodOverloadResolver.resolve(methods)
+        val resolvedMethods = methodOverloadResolver.resolve(methods.filter { generateForMethod(it) })
 
         return buildString {
             append(sourceProvider.autoGenerateNotice)
