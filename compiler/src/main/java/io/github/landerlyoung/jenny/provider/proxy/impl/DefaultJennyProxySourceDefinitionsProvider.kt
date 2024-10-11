@@ -144,7 +144,7 @@ internal class DefaultJennyProxySourceDefinitionsProvider : JennyProxySourceDefi
             |   return true;
             |}
             |
-            |${prefix} void ${cppClassName}Proxy::releaseClazz(JNIEnv* env) {
+            |${prefix} void ${cppClassName}::releaseClazz(JNIEnv* env) {
             |    auto& state = getClassInitState();
             |    if (state.sInited) {
             |        $lockGuard

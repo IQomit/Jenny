@@ -34,11 +34,13 @@
 !{val constMod = if (isStatic || !useJniHelper) "" else " const"}
 !{val parameters = parametersProvider.makeParameter(field, useJniHelper)}
 !{val jniReturnType = field.type.toJniReturnTypeString()}
-!{val cast = if (parametersProvider.returnTypeNeedCast(jniReturnType)) "reinterpret_cast<${jniReturnType}>(" else ""}
+!{val needCast = parametersProvider.returnTypeNeedCast(jniReturnType)}
+!{val cast = if (needCast) "reinterpret_cast<${jniReturnType}>(" else ""}
 !{val rField = "env->Get${static}${field.type.toJniCall()}Field(${classOrObj}, ${JennyNameProvider.getClassState(fieldId)})"}
-!{val jniReturn = if (useJniHelper && field.type.needWrapLocalRef()) "$jniReturnType(" else ""}
+!{val needWrap = (useJniHelper && field.type.needWrapLocalRef())}
+!{val jniReturn = if (needWrap) "$jniReturnType(" else ""}
     ${comment}
     ${staticMod}${jniReturnType} get${field.name.toCamelCase()}(${parameters}) ${constMod}{
         @template.method_prologue(useJniHelper = useJniHelper,isStatic = isStatic)
-        return ${jniReturn}${cast}${rField};
+        return ${jniReturn}${cast}${rField}${if(needCast) ")" else ""}${if (needWrap) "$jniReturnType(" else ""};
     }

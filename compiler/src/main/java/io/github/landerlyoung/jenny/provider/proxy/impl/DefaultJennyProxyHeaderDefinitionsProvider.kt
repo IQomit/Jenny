@@ -211,8 +211,6 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
 
             append(";\n")
             append("    }\n\n")
-            append('\n')
-
         }
     }
 
@@ -270,9 +268,21 @@ internal class DefaultJennyProxyHeaderDefinitionsProvider : JennyProxyHeaderDefi
                         JennyNameProvider.getClassState(
                             fieldId
                         )
-                    });"
+                    })"
                 )
-                append("\n}")
+                if (parametersProvider.returnTypeNeedCast(jniReturnType)) {
+                    append(")")
+                }
+                if (useJniHelper && field.type.needWrapLocalRef()) {
+                    append(")")
+                }
+                append(
+                    """;
+                        |
+                        |    }
+                        |
+                        |""".trimMargin()
+                )
             }
 
             if (hasGetterSetter.contains(FieldSetterGetterFinder.GetterSetter.SETTER)) {
