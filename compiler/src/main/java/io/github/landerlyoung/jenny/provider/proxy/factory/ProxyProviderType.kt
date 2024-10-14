@@ -16,10 +16,26 @@
 
 package io.github.landerlyoung.jenny.provider.proxy.factory
 
+import io.github.landerlyoung.jenny.processor.ProviderConfiguration
+
 internal sealed interface ProxyProviderType {
     data object Default : ProxyProviderType
     data class Template(
         val pathOfTemplate: String = System.getProperty("user.dir") + "/compiler/src/main/resources/jte",
         val pathOfTemplatesBuildFolder: String? = null
     ) : ProxyProviderType
+}
+
+internal object ProxyProviderTypeFactory {
+    fun createProviderType(configuration: ProviderConfiguration): ProxyProviderType {
+        return if (configuration.useTemplates) {
+            ProxyProviderType.Template(
+                pathOfTemplate = configuration.templateDirectory
+                    ?: (System.getProperty("user.dir") + "/compiler/src/main/resources/jte"),
+                pathOfTemplatesBuildFolder = configuration.templateBuildDirectory
+            )
+        } else {
+            ProxyProviderType.Default
+        }
+    }
 }

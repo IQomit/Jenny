@@ -60,12 +60,12 @@ android {
 import org.jetbrains.kotlin.gradle.internal.KaptTask
 
 tasks.withType(KaptTask) { task ->
-    def suffix = task.name.contains("kaptDebug") ? "_debug" : "_release"
+    def suffix = task.name.contains("kaptDebug") ? "debug" : "release"
 
     annotationProcessorOptionProviders.add([new CommandLineArgumentProvider() {
         @Override
         Iterable<String> asArguments() {
-            return ["jenny.templateBuildSuffix=" + suffix]
+            return ["jenny.templateBuildDirectory=" + project.file('templates')+"/" + suffix]
         }
     }])
 }

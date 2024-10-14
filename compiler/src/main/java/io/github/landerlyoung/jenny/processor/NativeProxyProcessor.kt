@@ -22,7 +22,7 @@ import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.generator.Configurator
 import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 import io.github.landerlyoung.jenny.generator.proxy.NativeProxyGenerator
-import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderType
+import io.github.landerlyoung.jenny.provider.proxy.factory.ProxyProviderTypeFactory
 import io.github.landerlyoung.jenny.utils.CppFileHelper
 import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
@@ -30,14 +30,13 @@ import kotlin.reflect.KClass
 
 internal class NativeProxyProcessor(
     outputDirectory: String,
-    useTemplates: Boolean,
+    providerConfiguration: ProviderConfiguration,
     private val cppFileHelper: CppFileHelper = CppFileHelper(),
     proxyConfiguration: JennyProxyConfiguration
 ) : Processor, Configurator<JennyProxyConfiguration> {
 
-    private val providerType = if (useTemplates) ProxyProviderType.Template() else ProxyProviderType.Default
     private val nativeProxyGenerator = NativeProxyGenerator(
-        providerType = providerType,
+        providerType = ProxyProviderTypeFactory.createProviderType(providerConfiguration),
         cppFileHelper = cppFileHelper,
         outputDirectory = outputDirectory,
         proxyConfiguration = proxyConfiguration

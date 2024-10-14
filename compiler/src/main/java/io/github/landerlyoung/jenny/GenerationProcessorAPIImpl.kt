@@ -28,7 +28,7 @@ class GenerationProcessorAPIImpl(
 
     private val nativeProxyProcessor = NativeProxyProcessor(
         outputDirectory = jennyProcessorConfiguration.outputDirectory,
-        useTemplates = jennyProcessorConfiguration.useTemplates,
+        providerConfiguration = jennyProcessorConfiguration.provideTemplateConfiguration(),
         proxyConfiguration = jennyProcessorConfiguration.provideProxyConfiguration()
     )
 
