@@ -57,10 +57,7 @@ class JennyAnnotationProcessor : AbstractProcessor() {
             generateNativeGlueCode(roundEnv)
             generateNativeProxy(roundEnv)
         } catch (e: Throwable) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Jenny failed to process ${e.javaClass.name} ${e.message}"
-            )
+            messager.printMessage(Diagnostic.Kind.ERROR, "Jenny failed to process ${e.javaClass.name} ${e.message}")
         }
 
         return true

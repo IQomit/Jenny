@@ -36,7 +36,7 @@ internal class NativeProxyGenerator(
     private var proxyConfiguration: JennyProxyConfiguration,
     private val cppFileHelper: CppFileHelper,
     private var outputDirectory: String,
-) : ConfigurableProxyGenerator<JennyClazzElement, Unit>,OutputTargetConfigurator {
+) : ConfigurableProxyGenerator<JennyClazzElement, Unit>, OutputTargetConfigurator {
 
     private val headerProvider = ProxyProviderFactory.createProvider<JennyProxyHeaderDefinitionsProvider>(providerType)
     private val sourceProvider = ProxyProviderFactory.createProvider<JennyProxySourceDefinitionsProvider>(providerType)
@@ -66,7 +66,11 @@ internal class NativeProxyGenerator(
         val headerContent = headerGenerator.generate(headerData)
         val headerFileName = cppFileHelper.provideHeaderFile(className = input.name)
         writeFileContent(headerContent, headerFileName)
-        return CppClass(headerData.classInfo.cppClassName, cppFileHelper.namespaceNotation, headerFileName)
+        return CppClass(
+            headerData.classInfo.cppClassName,
+            cppFileHelper.namespaceNotation,
+            headerFileName
+        )
     }
 
     private fun generateSourceFile(input: JennyClazzElement) {
@@ -78,11 +82,11 @@ internal class NativeProxyGenerator(
     }
 
     private fun buildHeaderData(input: JennyClazzElement): HeaderData {
-        return HeaderData.Builder()
-            .namespace(cppFileHelper.provideNamespace())
-            .defaultCppName("Proxy")
-            .jennyClazz(input)
-            .build()
+        return HeaderData.Builder().build {
+            namespace(cppFileHelper.provideNamespace())
+            defaultCppName("Proxy")
+            jennyClazz(input)
+        }
     }
 
     private fun writeFileContent(content: String, fileName: String) {

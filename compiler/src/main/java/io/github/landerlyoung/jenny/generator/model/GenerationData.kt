@@ -74,21 +74,24 @@ internal data class HeaderData(
         }
 
         fun jennyClazz(clazz: JennyClazzElement) = apply {
-            this.classInfo = extractClassInfo(clazz, defaultCppName)
-            this.constructors = clazz.constructors.toList()
-            this.methods = clazz.methods.toList()
-            this.fields = clazz.fields.filter { !it.isConstant() }
-            this.constants = clazz.fields.filter { it.isConstant() }
+            classInfo = extractClassInfo(clazz, defaultCppName)
+            constructors = clazz.constructors.toList()
+            methods = clazz.methods.toList()
+            fields = clazz.fields.filter { !it.isConstant() || it.call() == null }
+            constants = clazz.fields.filter { it.isConstant() && it.call() != null }
         }
 
-        fun build() = HeaderData(
-            classInfo = classInfo,
-            namespace = namespace,
-            constructors = constructors,
-            methods = methods,
-            constants = constants,
-            fields = fields
-        )
+        fun build(block: Builder.() -> Unit = {}): HeaderData {
+            this.apply(block)
+            return HeaderData(
+                classInfo = classInfo,
+                namespace = namespace,
+                constructors = constructors,
+                methods = methods,
+                constants = constants,
+                fields = fields
+            )
+        }
 
         private fun extractClassInfo(
             input: JennyClazzElement,

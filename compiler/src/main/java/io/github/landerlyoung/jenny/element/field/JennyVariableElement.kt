@@ -18,7 +18,6 @@ package io.github.landerlyoung.jenny.element.field
 
 import io.github.landerlyoung.jenny.element.JennyElement
 import io.github.landerlyoung.jenny.element.clazz.JennyClassTypeElement
-import io.github.landerlyoung.jenny.element.clazz.JennyClazzElement
 import io.github.landerlyoung.jenny.element.model.JennyModifier
 import io.github.landerlyoung.jenny.element.model.type.JennyMirrorType
 import io.github.landerlyoung.jenny.element.model.type.JennyType
@@ -46,22 +45,6 @@ internal class JennyVariableElement(private val variableElement: VariableElement
         get() = JennyClassTypeElement(variableElement.enclosingElement as TypeElement)
 
     override fun call(instance: Any?, vararg args: Any?): Any? {
-        val constantValue = variableElement.constantValue
-        if (constantValue != null)
-            return constantValue
-        return try {
-            val clazz = Class.forName((declaringClass as JennyClazzElement).fullClassName)
-            val field = clazz.getDeclaredField(name).apply {
-                isAccessible = true
-            }
-            if (JennyModifier.STATIC in modifiers) {
-                field.get(null)
-            } else {
-                requireNotNull(instance) { "Instance must not be null for non-static field $name." }
-                field.get(instance)
-            }
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Failed to access field '$name' in class '${declaringClass.name}'.", e)
-        }
+       return variableElement.constantValue
     }
 }

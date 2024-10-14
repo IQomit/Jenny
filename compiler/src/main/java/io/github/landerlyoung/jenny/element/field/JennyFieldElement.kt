@@ -54,7 +54,8 @@ internal class JennyFieldElement(private val reflectField: Field) : JennyVarElem
                 reflectField.get(instance)
             }
         } catch (e: Exception) {
-            throw IllegalArgumentException("Failed to access field '$name' in class '${declaringClass.name}'.", e)
+            println("Failed to access field '$name' in class '${declaringClass.name}'.")
+            null
         }
     }
 }
