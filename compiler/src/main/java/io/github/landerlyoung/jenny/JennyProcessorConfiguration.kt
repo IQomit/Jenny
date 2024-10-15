@@ -72,19 +72,15 @@ data class JennyProcessorConfiguration(
          * external error log function
          * void (function_type)(JNIEnv* env, const char* error);
          */
-        private val ERROR_LOGGER_FUNCTION =
-            PREFIX + JennyProcessorConfiguration::errorLoggerFunction.name
+        private val ERROR_LOGGER_FUNCTION = PREFIX + JennyProcessorConfiguration::errorLoggerFunction.name
 
         private val OUTPUT_DIRECTORY = PREFIX + JennyProcessorConfiguration::outputDirectory.name
 
-        private val FUSION_PROXY_HEADER_NAME =
-            PREFIX + JennyProcessorConfiguration::fusionProxyHeaderName.name
+        private val FUSION_PROXY_HEADER_NAME = PREFIX + JennyProcessorConfiguration::fusionProxyHeaderName.name
 
         private val USE_TEMPLATES = PREFIX + JennyProcessorConfiguration::useTemplates.name
-        private val TEMPLATE_DIRECTORY =
-            PREFIX + JennyProcessorConfiguration::templateDirectory.name
-        private val TEMPLATE_BUILD_DIRECTORY =
-            PREFIX + JennyProcessorConfiguration::templateBuildDirectory.name
+        private val TEMPLATE_DIRECTORY = PREFIX + JennyProcessorConfiguration::templateDirectory.name
+        private val TEMPLATE_BUILD_DIRECTORY = PREFIX + JennyProcessorConfiguration::templateBuildDirectory.name
 
         private val HEADER_ONLY_PROXY = PREFIX + JennyProcessorConfiguration::headerOnlyProxy.name
         private val USE_JNI_HELPER = PREFIX + JennyProcessorConfiguration::useJniHelper.name

@@ -11,17 +11,8 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 --%>
-@param useJniHelper:Boolean
-@param isStatic:Boolean
-@if (useJniHelper)
-    @if (isStatic)
-        ::jenny::Env env;
-                assertInited(env.get());
-    @else
-        ::jenny::Env env;
-                ::jenny::LocalRef<jobject> jennyLocalRef = getThis(false);
-                jobject thiz = jennyLocalRef.get();
-    @endif
-@else
-    assertInited(env);
-@endif
+@param endNamespace:String
+
+};
+${endNamespace}
+
