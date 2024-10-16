@@ -22,9 +22,48 @@ import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsPr
 class QTemplateJennyProxySourceDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxySourceDefinitionsProvider {
     override val autoGenerateNotice: String
-        get() {
-            val templateOutput = StringOutput()
-            templateEngine.render("auto_generate_notice.kte", emptyMap(), templateOutput)
-            return templateOutput.toString()
-        }
+        get() = getFromTemplate("auto_generate_notice.kte")
+
+    override fun generateSourcePreContent(
+        headerFileName: String,
+        startOfNamespace: String,
+        cppClassName: String,
+        errorLoggerFunction: String,
+        headerOnly: Boolean,
+        threadSafe: Boolean
+    ): String {
+        return getFromTemplate(
+            "qjni/qjni_class_init_preamble.kte",
+            mapOf(
+                "headerFileName" to headerFileName,
+                "errorLoggerFunction" to errorLoggerFunction,
+                "startOfNamespace" to startOfNamespace,
+                "cppClassName" to cppClassName,
+                "headerOnly" to headerOnly,
+            )
+        )
+    }
+
+    override fun generateSourcePostContent(
+        cppClassName: String,
+        endNamespace: String,
+        headerOnly: Boolean,
+        threadSafe: Boolean
+    ): String {
+        return getFromTemplate(
+            "qjni/qjni_class_init_postamble.kte",
+            mapOf(
+                "endNamespace" to endNamespace,
+            )
+        )
+    }
+
+    private fun getFromTemplate(
+        templateName: String,
+        mapOfVariables: Map<String, Any> = emptyMap()
+    ): String {
+        val templateOutput = StringOutput()
+        templateEngine.render(templateName, mapOfVariables, templateOutput)
+        return templateOutput.toString()
+    }
 }

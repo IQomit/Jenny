@@ -17,6 +17,7 @@ package io.github.landerlyoung.jenny.processor
 
 data class ProviderConfiguration(
     val useTemplates: Boolean = true,
+    val useQjniTemplates: Boolean = true,
     val templateDirectory: String? = null,
     val templateBuildDirectory: String? = null,
 )

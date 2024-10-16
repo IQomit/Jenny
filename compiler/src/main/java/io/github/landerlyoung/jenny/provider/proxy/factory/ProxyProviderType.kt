@@ -24,10 +24,20 @@ internal sealed interface ProxyProviderType {
         val pathOfTemplate: String = System.getProperty("user.dir") + "/compiler/src/main/resources/jte",
         val pathOfTemplatesBuildFolder: String? = null
     ) : ProxyProviderType
+    data class QTemplate(
+        val pathOfTemplate: String = System.getProperty("user.dir") + "/compiler/src/main/resources/jte",
+        val pathOfTemplatesBuildFolder: String? = null
+    ) : ProxyProviderType
 }
 
 internal object ProxyProviderTypeFactory {
     fun createProviderType(configuration: ProviderConfiguration): ProxyProviderType {
+        if(configuration.useQjniTemplates)
+            return ProxyProviderType.QTemplate(
+                pathOfTemplate = configuration.templateDirectory
+                    ?: (System.getProperty("user.dir") + "/compiler/src/main/resources/jte"),
+                pathOfTemplatesBuildFolder = configuration.templateBuildDirectory
+            )
         return if (configuration.useTemplates) {
             ProxyProviderType.Template(
                 pathOfTemplate = configuration.templateDirectory

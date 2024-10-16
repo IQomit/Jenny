@@ -24,7 +24,7 @@ import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsPr
 class TemplateJennyProxySourceDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxySourceDefinitionsProvider {
     override val autoGenerateNotice: String
-        get() = getFromTemplate("auto_generate_notice.kte", emptyMap())
+        get() = getFromTemplate("auto_generate_notice.kte")
 
     override fun generateSourcePreContent(
         headerFileName: String,
@@ -77,7 +77,7 @@ class TemplateJennyProxySourceDefinitionsProvider(private val templateEngine: Te
         return getFromTemplate("fields_ids_initialisations.kte", mapOf("fields" to fields))
     }
 
-    private fun getFromTemplate(templateName: String, mapOfVariables: Map<String, Any>): String {
+    private fun getFromTemplate(templateName: String, mapOfVariables: Map<String, Any> = emptyMap()): String {
         val templateOutput = StringOutput()
         templateEngine.render(templateName, mapOfVariables, templateOutput)
         return templateOutput.toString()

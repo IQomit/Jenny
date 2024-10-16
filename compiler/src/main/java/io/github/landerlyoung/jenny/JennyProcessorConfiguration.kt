@@ -38,13 +38,14 @@ data class JennyProcessorConfiguration(
     val outputDirectory: String,
     val glueNamespace: String = "",
     val useTemplates: Boolean = true,
+    val useQjniTemplates: Boolean = false,
     val templateDirectory: String? = null,
     val templateBuildDirectory: String? = null,
     val threadSafe: Boolean = true,
     val useJniHelper: Boolean = false,
     val headerOnlyProxy: Boolean = false,
     val errorLoggerFunction: String = "",
-    val fusionProxyHeaderName: String = "JennyFusionProxy.h",
+    val fusionProxyHeaderName: String = "",
 ) {
     fun provideProxyConfiguration(): JennyProxyConfiguration {
         return JennyProxyConfiguration(
@@ -61,7 +62,7 @@ data class JennyProcessorConfiguration(
     }
 
     fun provideTemplateConfiguration(): ProviderConfiguration {
-        return ProviderConfiguration(useTemplates, templateDirectory, templateBuildDirectory)
+        return ProviderConfiguration(useTemplates, useQjniTemplates, templateDirectory, templateBuildDirectory)
     }
 
     companion object {
@@ -79,6 +80,7 @@ data class JennyProcessorConfiguration(
         private val FUSION_PROXY_HEADER_NAME = PREFIX + JennyProcessorConfiguration::fusionProxyHeaderName.name
 
         private val USE_TEMPLATES = PREFIX + JennyProcessorConfiguration::useTemplates.name
+        private val USE_QJNI_TEMPLATES = PREFIX + JennyProcessorConfiguration::useQjniTemplates.name
         private val TEMPLATE_DIRECTORY = PREFIX + JennyProcessorConfiguration::templateDirectory.name
         private val TEMPLATE_BUILD_DIRECTORY = PREFIX + JennyProcessorConfiguration::templateBuildDirectory.name
 
@@ -91,6 +93,7 @@ data class JennyProcessorConfiguration(
                 THREAD_SAFE,
                 ERROR_LOGGER_FUNCTION,
                 USE_TEMPLATES,
+                USE_QJNI_TEMPLATES,
                 TEMPLATE_DIRECTORY,
                 TEMPLATE_BUILD_DIRECTORY,
                 OUTPUT_DIRECTORY,
@@ -102,6 +105,7 @@ data class JennyProcessorConfiguration(
         fun fromOptions(options: Map<String, String>) = JennyProcessorConfiguration(
             outputDirectory = options[OUTPUT_DIRECTORY] ?: "src/main/cpp/gen",
             useTemplates = options[USE_TEMPLATES] == true.toString(),
+            useQjniTemplates = options[USE_QJNI_TEMPLATES] == true.toString(),
             templateDirectory = options[TEMPLATE_DIRECTORY],
             templateBuildDirectory = options[TEMPLATE_BUILD_DIRECTORY],
             threadSafe = options[THREAD_SAFE] == true.toString(),

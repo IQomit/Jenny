@@ -11,9 +11,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 --%>
-
-@import io.github.landerlyoung.jenny.utils.Constants
-
 @param headerFileName: String
 @param startOfNamespace: String
 @param cppClassName: String

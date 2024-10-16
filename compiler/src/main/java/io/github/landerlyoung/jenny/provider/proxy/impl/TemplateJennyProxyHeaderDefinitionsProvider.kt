@@ -33,7 +33,7 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
     private val parametersProvider = ParametersProvider()
 
     override val autoGenerateNotice: String
-        get() = getFromTemplate("auto_generate_notice.kte", emptyMap())
+        get() = getFromTemplate("auto_generate_notice.kte")
 
     override fun getProxyHeaderInit(
         jennyProxyConfiguration: JennyProxyConfiguration,
@@ -59,7 +59,7 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
     }
 
     override fun getProxyHeaderClazzInit(): String {
-        return getFromTemplate("header_initfunctions.kte", emptyMap())
+        return getFromTemplate("header_initfunctions.kte")
     }
 
     override fun getConstructorsDefinitions(
@@ -82,7 +82,10 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
 
     }
 
-    override fun getMethodsDefinitions(methods: Map<JennyExecutableElement, Int>, useJniHelper: Boolean): String {
+    override fun getMethodsDefinitions(
+        methods: Map<JennyExecutableElement, Int>,
+        useJniHelper: Boolean
+    ): String {
         return getFromTemplate(
             "methods_definitions.kte",
             mapOf(
@@ -139,7 +142,10 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
     }
 
     override fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String {
-        return getFromTemplate("constructors_ids_declarations.kte", mapOf("constructors" to constructors))
+        return getFromTemplate(
+            "constructors_ids_declarations.kte",
+            mapOf("constructors" to constructors)
+        )
     }
 
     override fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String {
@@ -154,7 +160,10 @@ internal class TemplateJennyProxyHeaderDefinitionsProvider(private val templateE
         return getFromTemplate("header_postamble.kte", mapOf("endNamespace" to endNamespace))
     }
 
-    private fun getFromTemplate(templateName: String, mapOfVariables: Map<String, Any>): String {
+    private fun getFromTemplate(
+        templateName: String,
+        mapOfVariables: Map<String, Any> = emptyMap()
+    ): String {
         val templateOutput = StringOutput()
         templateEngine.render(templateName, mapOfVariables, templateOutput)
         return templateOutput.toString()
