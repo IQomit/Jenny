@@ -36,7 +36,7 @@ internal class JennyClassElement(private val clazz: Class<*>) : JennyClazzElemen
         get() = JennyReflectType(clazz)
 
     override val isNestedClass: Boolean
-        get() = clazz.enclosingClass != null && !clazz.isMemberClass
+        get() = clazz.enclosingClass != null
 
     override val annotations: List<String>
         get() = clazz.annotations.map { it.annotationClass.simpleName ?: "Unknown" }

@@ -22,6 +22,7 @@ interface JennyType {
 
     fun isPrimitive(): Boolean
     fun isArray(): Boolean
+    fun isNestedType(): Boolean
 
     val componentType: JennyType? // in case of an array
     fun getNonGenericType(): JennyType

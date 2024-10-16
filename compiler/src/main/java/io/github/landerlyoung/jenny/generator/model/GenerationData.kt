@@ -21,6 +21,7 @@ import io.github.landerlyoung.jenny.element.field.JennyVarElement
 import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.utils.isConstant
 import io.github.landerlyoung.jenny.utils.stripNonASCII
+import io.github.landerlyoung.jenny.utils.toJniClassName
 
 
 internal data class Namespace(
@@ -106,7 +107,7 @@ internal data class HeaderData(
                 simpleClassName = input.name,
                 cppClassName = input.name + defaultCppName,
                 className = className,
-                slashClassName = className.replace('.', '/'),
+                slashClassName = className.toJniClassName(input.isNestedClass),
                 jniClassName = jniClassName
             )
         }

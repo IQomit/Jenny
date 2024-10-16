@@ -39,6 +39,9 @@ internal class JennyReflectType(private val type: Type) : JennyType {
     }
 
     override fun isArray() = jennyKind == JennyKind.ARRAY
+    override fun isNestedType(): Boolean {
+        return (type as? Class<*>)?.enclosingClass != null
+    }
 
     override val componentType: JennyType?
         get() = when (type) {

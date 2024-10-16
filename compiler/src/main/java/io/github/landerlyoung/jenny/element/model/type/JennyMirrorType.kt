@@ -16,7 +16,9 @@
 
 package io.github.landerlyoung.jenny.element.model.type
 
+import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ArrayType
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.IntersectionType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
@@ -33,6 +35,11 @@ internal class JennyMirrorType(private val mirrorType: TypeMirror) : JennyType {
     override fun isPrimitive() = mirrorType.kind.isPrimitive
 
     override fun isArray() = mirrorType.kind == TypeKind.ARRAY
+    override fun isNestedType(): Boolean {
+        val declaredType = mirrorType as? DeclaredType ?: return false
+        val typeElement = declaredType.asElement() as? TypeElement ?: return false
+        return typeElement.nestingKind.isNested
+    }
 
     override val componentType: JennyType?
         get() = if (mirrorType is ArrayType) {

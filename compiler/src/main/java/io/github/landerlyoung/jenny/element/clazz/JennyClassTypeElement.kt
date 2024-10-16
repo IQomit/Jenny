@@ -41,7 +41,7 @@ internal class JennyClassTypeElement(private val clazz: TypeElement) : JennyClaz
         get() = JennyMirrorType(clazz.asType())
 
     override val isNestedClass: Boolean
-        get() = clazz.javaClass.enclosingClass != null && !clazz.javaClass.isMemberClass
+        get() = clazz.enclosingElement.kind == ElementKind.CLASS || clazz.enclosingElement.kind == ElementKind.INTERFACE
 
     override val annotations: List<String>
         get() = clazz.annotationMirrors.map { it.annotationType.toString() }
