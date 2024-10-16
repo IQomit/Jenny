@@ -34,12 +34,12 @@
     !{val classOrObj = if (isStatic) "QJniObject::" else "m_jniObject."}
     !{val static = if (isStatic) "Static" else ""}
     !{val classParam = if (isStatic) "FULL_CLASS_NAME," else ""}
-    !{val jniParam = parametersProvider.getJennyElementJniParams(element = method,useJniHelper=useJniHelper)}
+    !{val jniParam = parametersProvider.getJennyElementJniParams(element = method,useJniHelper=useJniHelper, isByPass = true)}
     !{val returnStatement = if (method.returnType.jennyKind != JennyKind.VOID) "return " else ""}
     !{val signature = Signature.getBinaryJennyElementSignature(method)}
         // method: ${method.modifiers.print()} ${method.returnType.typeName} ${method.name}(${parametersProvider.getJavaMethodParameters(method)})
         ${staticMod}auto ${method.name}(${jniParam}) ${constMod}{
-            ${returnStatement}${classOrObj}call${static}Method<${jniReturnType}>(${classParam}"${method.name}", "${signature}"${parametersProvider.getJniMethodParamVal(method, useJniHelper)});
+            ${returnStatement}${classOrObj}call${static}Method<${jniReturnType}>(${classParam}"${method.name}", "${signature}"${parametersProvider.getJniMethodParamVal(method, false)});
         }
 @endfor
 

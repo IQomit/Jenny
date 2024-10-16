@@ -29,7 +29,7 @@
         // construct: ${constructor.modifiers.print()} ${simpleClassName}(${javaParameters})
         static ${returnType} ${constructor.name}(${jniParameters}) {
             ${returnType} ret;
-            ret.m_jniObject = QJniObjectFULL_CLASS_NAME, "${Signature.getBinaryJennyElementSignature(constructor)}"${parametersProvider.getJniMethodParamVal(constructor, useJniHelper)});
+            ret.m_jniObject = QJniObject(FULL_CLASS_NAME, "${Signature.getBinaryJennyElementSignature(constructor)}"${parametersProvider.getJniMethodParamVal(constructor, useJniHelper)});
             return ret;
         }
 @endfor

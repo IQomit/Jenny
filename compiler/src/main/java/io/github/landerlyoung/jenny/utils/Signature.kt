@@ -44,11 +44,13 @@ class Signature(private val jennyElement: JennyElement) {
             JennyKind.FLOAT -> output.append('F')
             JennyKind.DOUBLE -> output.append('D')
             JennyKind.VOID -> output.append('V')
-            else -> output.append(
-                'L' + type.getNonGenericType().typeName
-                    .substringBefore("<")
-                    .replace('.', '/')
-            ).append(';')
+            else -> {
+                output.append(
+                    'L' + jennyType.getNonGenericType().typeName.toJniClassName(jennyType.isNestedType())
+                        .substringBefore("<")
+                        .replace('.', '/')
+                ).append(';')
+            }
         }
         return output.toString()
     }

@@ -65,7 +65,6 @@ class NativeDrawable : Drawable() {
     private val dummy = 0
 
     companion object {
-        const val syys = "Slythering"
         init {
             System.loadLibrary("hello-jenny")
         }

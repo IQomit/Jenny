@@ -17,40 +17,14 @@ package io.github.landerlyoung.jenny.provider.proxy.impl
 
 import gg.jte.TemplateEngine
 import gg.jte.output.StringOutput
-import io.github.landerlyoung.jenny.element.field.JennyVarElement
-import io.github.landerlyoung.jenny.element.method.JennyExecutableElement
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 
 class QTemplateJennyProxySourceDefinitionsProvider(private val templateEngine: TemplateEngine) :
     JennyProxySourceDefinitionsProvider {
     override val autoGenerateNotice: String
-        get() = getFromTemplate("auto_generate_notice.kte", emptyMap())
-
-    override fun generateSourcePreContent(
-        headerFileName: String,
-        startOfNamespace: String,
-        cppClassName: String,
-        errorLoggerFunction: String,
-        headerOnly: Boolean,
-        threadSafe: Boolean
-    ): String  = ""
-
-    override fun generateSourcePostContent(
-        cppClassName: String,
-        endNamespace: String,
-        headerOnly: Boolean,
-        threadSafe: Boolean
-    ): String  = ""
-
-    override fun getConstructorIdInit(constructors: Map<JennyExecutableElement, Int>): String  = ""
-
-    override fun getMethodIdInit(methods: Map<JennyExecutableElement, Int>): String  = ""
-
-    override fun getFieldIdInit(fields: Collection<JennyVarElement>): String  = ""
-
-    private fun getFromTemplate(templateName: String, mapOfVariables: Map<String, Any>): String {
-        val templateOutput = StringOutput()
-        templateEngine.render(templateName, mapOfVariables, templateOutput)
-        return templateOutput.toString()
-    }
+        get() {
+            val templateOutput = StringOutput()
+            templateEngine.render("auto_generate_notice.kte", emptyMap(), templateOutput)
+            return templateOutput.toString()
+        }
 }

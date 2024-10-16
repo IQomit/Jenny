@@ -28,16 +28,16 @@ internal interface JennyProxySourceDefinitionsProvider : Provider {
         errorLoggerFunction: String,
         headerOnly: Boolean,
         threadSafe: Boolean
-    ): String
+    ): String = ""
 
     fun generateSourcePostContent(
         cppClassName: String,
         endNamespace: String,
         headerOnly: Boolean,
         threadSafe: Boolean
-    ): String
+    ): String = ""
 
-    fun getConstructorIdInit(constructors: Map<JennyExecutableElement, Int>): String
-    fun getMethodIdInit(methods: Map<JennyExecutableElement, Int>): String
-    fun getFieldIdInit(fields: Collection<JennyVarElement>): String
+    fun getConstructorIdInit(constructors: Map<JennyExecutableElement, Int>): String = ""
+    fun getMethodIdInit(methods: Map<JennyExecutableElement, Int>): String = ""
+    fun getFieldIdInit(fields: Collection<JennyVarElement>): String = ""
 }

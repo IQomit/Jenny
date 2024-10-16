@@ -20,8 +20,8 @@ import io.github.landerlyoung.jenny.provider.proxy.JennyProxyHeaderDefinitionsPr
 import io.github.landerlyoung.jenny.provider.proxy.JennyProxySourceDefinitionsProvider
 import io.github.landerlyoung.jenny.provider.proxy.impl.DefaultJennyProxyHeaderDefinitionsProvider
 import io.github.landerlyoung.jenny.provider.proxy.impl.DefaultJennyProxySourceDefinitionsProvider
-import io.github.landerlyoung.jenny.provider.proxy.impl.TemplateJennyProxyHeaderDefinitionsProvider
-import io.github.landerlyoung.jenny.provider.proxy.impl.TemplateJennyProxySourceDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.impl.QTemplateJennyProxyHeaderDefinitionsProvider
+import io.github.landerlyoung.jenny.provider.proxy.impl.QTemplateJennyProxySourceDefinitionsProvider
 
 internal object ProxyProviderFactory {
      inline fun <reified T:Provider> createProvider(type: ProxyProviderType): T {
@@ -41,7 +41,7 @@ internal object ProxyHeaderProviderFactory : ProviderFactory<JennyProxyHeaderDef
     override fun createProvider(type: ProxyProviderType): JennyProxyHeaderDefinitionsProvider {
         return when (type) {
             ProxyProviderType.Default -> DefaultJennyProxyHeaderDefinitionsProvider()
-            is ProxyProviderType.Template -> TemplateJennyProxyHeaderDefinitionsProvider(JteTemplate.createEngine(type.pathOfTemplate, type.pathOfTemplatesBuildFolder))
+            is ProxyProviderType.Template -> QTemplateJennyProxyHeaderDefinitionsProvider(JteTemplate.createEngine(type.pathOfTemplate, type.pathOfTemplatesBuildFolder))
         }
     }
 }
@@ -50,7 +50,7 @@ internal object ProxySourceProviderFactory : ProviderFactory<JennyProxySourceDef
     override fun createProvider(type: ProxyProviderType): JennyProxySourceDefinitionsProvider {
         return when (type) {
             ProxyProviderType.Default -> DefaultJennyProxySourceDefinitionsProvider()
-            is ProxyProviderType.Template -> TemplateJennyProxySourceDefinitionsProvider(JteTemplate.createEngine(type.pathOfTemplate, type.pathOfTemplatesBuildFolder))
+            is ProxyProviderType.Template -> QTemplateJennyProxySourceDefinitionsProvider(JteTemplate.createEngine(type.pathOfTemplate, type.pathOfTemplatesBuildFolder))
         }
     }
 }

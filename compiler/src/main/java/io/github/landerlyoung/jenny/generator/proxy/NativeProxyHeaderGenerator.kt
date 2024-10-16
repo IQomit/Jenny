@@ -55,6 +55,7 @@ internal class NativeProxyHeaderGenerator(
         val constructors = input.constructors.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val methods = input.methods.visibility(jennyProxyConfiguration.onlyPublicMethod)
         val fields = input.fields.visibility(jennyProxyConfiguration.onlyPublicMethod)
+        val constants = input.constants.visibility(jennyProxyConfiguration.onlyPublicMethod)
 
         val resolvedConstructors = methodOverloadResolver.resolve(constructors)
         val resolvedMethods = methodOverloadResolver.resolve(methods.filter { generateForMethod(it) })
@@ -68,7 +69,7 @@ internal class NativeProxyHeaderGenerator(
                     classInfo
                 )
             )
-            append(headerProvider.getConstantsIdDeclare(input.constants))
+            append(headerProvider.getConstantsIdDeclare(constants))
             append(headerProvider.getProxyHeaderClazzInit())
             append(
                 headerProvider.getConstructorsDefinitions(

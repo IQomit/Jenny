@@ -51,9 +51,10 @@ fun JennyType.toJniReturnTypeString(): String {
         else -> "jobject"
     }
 }
-fun JennyType.toJniTypeString(useJniHelper:Boolean):String {
+
+fun JennyType.toJniTypeString(useJniHelper: Boolean, byPass: Boolean): String {
     val jniType = toJniReturnTypeString()
-    return if (useJniHelper && this.needWrapLocalRef()) {
+    return if (useJniHelper && this.needWrapLocalRef() && !byPass) {
         "const ::jenny::LocalRef<$jniType>&"
     } else {
         jniType
@@ -85,6 +86,27 @@ fun JennyType.needWrapLocalRef(): Boolean {
 fun String.toCamelCase() =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 
+internal fun String.toJniClassName(isNested: Boolean): String {
+
+    val replaced = this.replace('.', '/')
+    if (!isNested) return replaced
+
+    val lastDotIndex = this.lastIndexOf('.')
+    val dollarIndex = this.indexOf('$')
+
+    return if (dollarIndex > lastDotIndex) {
+        replaced
+    } else {
+        val outerClassEnd =
+            this.lastIndexOf(".") // Last dot separates the outer class and inner class
+        if (outerClassEnd != -1) {
+            replaced.substring(0, outerClassEnd) + "$" + replaced.substring(outerClassEnd + 1)
+        } else {
+            replaced
+        }
+    }
+}
+
 fun JennyElement.isStatic() = JennyModifier.STATIC in modifiers
 internal fun JennyElement.isConstant() = (isStatic() && JennyModifier.FINAL in modifiers)
 internal fun JennyElement.isNative() = JennyModifier.NATIVE in modifiers
@@ -103,6 +125,7 @@ internal inline fun File.use(action: (OutputStream) -> Unit) {
         action(outputStream)
     }
 }
+
 fun File.writeText(text: String, charset: Charset = Charsets.UTF_8) {
     this.use {
         it.write(text.toByteArray(charset))

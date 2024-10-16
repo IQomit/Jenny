@@ -32,7 +32,7 @@ internal interface JennyProxyHeaderDefinitionsProvider : Provider {
 
     fun getConstantsIdDeclare(constants: Collection<JennyVarElement>): String
 
-    fun getProxyHeaderClazzInit(): String
+    fun getProxyHeaderClazzInit(): String = ""
     fun getConstructorsDefinitions(
         simpleClassName: String,
         cppClassName:String,
@@ -54,10 +54,10 @@ internal interface JennyProxyHeaderDefinitionsProvider : Provider {
         generateSetterForField: (JennyVarElement) -> Boolean
     ): String
 
-    fun generateForJniHelper(cppClassName: String): String
-    fun initPreDefinition(isThreadSafe: Boolean): String
-    fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String
-    fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String
-    fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String
+    fun generateForJniHelper(cppClassName: String): String = ""
+    fun initPreDefinition(isThreadSafe: Boolean): String = ""
+    fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String = ""
+    fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String = ""
+    fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String = ""
     fun initPostDefinition(endNamespace: String): String
 }

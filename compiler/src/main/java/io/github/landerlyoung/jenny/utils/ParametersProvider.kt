@@ -44,6 +44,7 @@ class ParametersProvider {
     fun getJennyElementJniParams(
         element: JennyElement,
         useJniHelper: Boolean,
+        isByPass:Boolean = false
     ): String = buildString {
         val params = mutableListOf<String>()
 
@@ -60,7 +61,7 @@ class ParametersProvider {
         }
 
         if (element is JennyExecutableElement) {
-            val execParams = getJniParameters(element.parameters, useJniHelper)
+            val execParams = getJniParameters(element.parameters, useJniHelper, isByPass)
             if (execParams.isNotEmpty()) {
                 params.add(execParams)
             }
@@ -69,11 +70,11 @@ class ParametersProvider {
         append(params.joinToString(", "))
     }
 
-    private fun getJniParameters(parameters: List<JennyParameter>, useJniHelper: Boolean): String =
+    private fun getJniParameters(parameters: List<JennyParameter>, useJniHelper: Boolean ,isByPass:Boolean): String =
         buildString {
             parameters.forEach { param ->
                 if (isNotEmpty()) append(", ")
-                append(param.type.toJniTypeString(useJniHelper))
+                append(param.type.toJniTypeString(useJniHelper,isByPass))
                 append(' ')
                 append(param.name)
             }

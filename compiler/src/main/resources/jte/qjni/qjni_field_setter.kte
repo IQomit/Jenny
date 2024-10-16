@@ -32,7 +32,9 @@
 !{val static = if (isStatic) "Static" else "" }
 !{val staticMod = if (isStatic || !useJniHelper) "static " else ""}
 !{val constMod = if (isStatic || !useJniHelper) "" else " const"}
-!{val parameters = parametersProvider.makeParameter(field, useJniHelper)}
+!{val parameter = parametersProvider.makeParameter(field, useJniHelper)}
+!{val preparameters =  if(parameter.isEmpty()) parameter else "$parameter, "}
+!{val parameters =  preparameters + field.type.toJniReturnTypeString()+ " ${field.name}"}
 !{val passedParam = if (useJniHelper && field.type.needWrapLocalRef()) "${field.name}.get()" else field.name}
     ${comment}
     ${staticMod}void set${field.name.toCamelCase()}(${parameters}) ${constMod}{

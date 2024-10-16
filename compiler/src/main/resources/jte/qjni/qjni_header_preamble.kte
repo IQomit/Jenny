@@ -14,7 +14,6 @@
 @import io.github.landerlyoung.jenny.generator.proxy.JennyProxyConfiguration
 @import io.github.landerlyoung.jenny.generator.model.ClassInfo
 
-@param proxyConfiguration:JennyProxyConfiguration
 @param startOfNamespace: String
 @param cppClassName: String
 @param slashClassName: String

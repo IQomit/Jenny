@@ -41,7 +41,6 @@ internal class QTemplateJennyProxyHeaderDefinitionsProvider(private val template
         return getFromTemplate(
             "qjni/qjni_header_preamble.kte",
             mapOf(
-                "proxyConfiguration" to jennyProxyConfiguration,
                 "startOfNamespace" to startOfNamespace,
                 "cppClassName" to classInfo.cppClassName,
                 "slashClassName" to classInfo.slashClassName,
@@ -55,8 +54,6 @@ internal class QTemplateJennyProxyHeaderDefinitionsProvider(private val template
             mapOf("constants" to constants, "parametersProvider" to parametersProvider)
         )
     }
-
-    override fun getProxyHeaderClazzInit(): String = ""
 
     override fun getConstructorsDefinitions(
         simpleClassName: String,
@@ -127,15 +124,6 @@ internal class QTemplateJennyProxyHeaderDefinitionsProvider(private val template
         )
     }
 
-    override fun generateForJniHelper(cppClassName: String): String  = ""
-
-    override fun initPreDefinition(isThreadSafe: Boolean): String = ""
-
-    override fun getConstructorIdDeclare(constructors: Map<JennyExecutableElement, Int>): String = ""
-
-    override fun getMethodIdDeclare(methods: Map<JennyExecutableElement, Int>): String = ""
-
-    override fun getFieldIdDeclare(fields: Collection<JennyVarElement>): String = ""
 
     override fun initPostDefinition(endNamespace: String): String {
         return getFromTemplate("qjni/qjni_header_postamble.kte", mapOf("endNamespace" to endNamespace))
